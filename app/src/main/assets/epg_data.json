@@ -1262,7 +1262,7 @@
       "name": "求索生活",
       "status": "1",
       "note": "华数求索生活",
-      "logo": ""
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/求索生活.png"
     },
     {
       "tvid": "159",
@@ -4107,7 +4107,7 @@
     {
       "tvid": "514",
       "epgid": "CatchPlay电影",
-      "name": "CatchPlay电影台",
+      "name": "CatchPlay电影台,CATCHPLAY,CATCHPLAY电影台",
       "status": "1",
       "note": "CatchPlay电影台",
       "logo": "http://epg.51zmt.top:8000/tb1/gt/catchplay.png"
@@ -4259,7 +4259,7 @@
     {
       "tvid": "533",
       "epgid": "NHKWorld",
-      "name": "NHK World TV",
+      "name": "NHK World TV,日本NHK World,NHK World",
       "status": "1",
       "note": "NHK World TV",
       "logo": "http://epg.51zmt.top:8000/tb1/gt/NHKWorld.png"
@@ -4619,7 +4619,7 @@
     {
       "tvid": "578",
       "epgid": "ArirangTV",
-      "name": "韩国阿里郎",
+      "name": "韩国阿里郎,韩国Arirang",
       "status": "1",
       "note": "韩国阿里郎",
       "logo": "http://epg.51zmt.top:8000/tb1/gt/ArirangTV.png"
@@ -4659,7 +4659,7 @@
     {
       "tvid": "583",
       "epgid": "HBOHits",
-      "name": "HBO 强档钜献",
+      "name": "HBO 强档钜献,HBO强档钜献",
       "status": "1",
       "note": "HBO 强档钜献",
       "logo": "http://epg.51zmt.top:8000/tb1/gt/HBOHits.png"
@@ -4667,7 +4667,7 @@
     {
       "tvid": "584",
       "epgid": "HBOSignature",
-      "name": "HBO 原创钜献",
+      "name": "HBO 原创钜献,HBO原创钜献",
       "status": "1",
       "note": "HBO 原创钜献",
       "logo": "http://epg.51zmt.top:8000/tb1/gt/HBOSignature.png"
@@ -4675,7 +4675,7 @@
     {
       "tvid": "585",
       "epgid": "HBOFamily",
-      "name": "HBO 温馨家庭",
+      "name": "HBO 温馨家庭,HBO家庭,HBO Family,HBO family",
       "status": "1",
       "note": "HBO 温馨家庭",
       "logo": "http://epg.51zmt.top:8000/tb1/gt/HBOFamily.png"
