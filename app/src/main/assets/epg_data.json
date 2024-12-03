@@ -2062,7 +2062,7 @@
       "name": "上海ICS,上海ICS外语",
       "status": "1",
       "note": "上视外语频道",
-      "logo": "http://epg.51zmt.top:8000/tb1/qt/shanghaiwaiyu.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/上海外语.png"
     },
     {
       "tvid": "259",
@@ -2382,7 +2382,7 @@
       "name": "湖北综合频道,湖北综合",
       "status": "1",
       "note": "湖北综合频道",
-      "logo": "http://epg.51zmt.top:8000/tb1/qt/HUBEI2.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/湖北综合.png"
     },
     {
       "tvid": "299",
@@ -2390,7 +2390,7 @@
       "name": "湖北影视频道,湖北影视",
       "status": "1",
       "note": "湖北影视频道",
-      "logo": "http://epg.51zmt.top:8000/tb1/qt/HUBEI3.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/湖北影视.png"
     },
     {
       "tvid": "300",
@@ -2398,7 +2398,7 @@
       "name": "湖北教育频道,湖北教育",
       "status": "1",
       "note": "湖北教育频道",
-      "logo": "http://epg.51zmt.top:8000/tb1/qt/HUBEI4.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/湖北教育.png"
     },
     {
       "tvid": "301",
@@ -2406,7 +2406,7 @@
       "name": "湖北生活频道,湖北生活",
       "status": "1",
       "note": "湖北生活频道",
-      "logo": "http://epg.51zmt.top:8000/tb1/qt/HUBEI5.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/湖北生活.png"
     },
     {
       "tvid": "302",
@@ -2414,7 +2414,7 @@
       "name": "湖北公共·新闻,湖北公共新闻",
       "status": "1",
       "note": "湖北公共·新闻",
-      "logo": "http://epg.51zmt.top:8000/tb1/qt/HUBEI7.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/湖北公共新闻.png"
     },
     {
       "tvid": "303",
@@ -2430,12 +2430,12 @@
       "name": "湖北垄上频道,湖北垄上",
       "status": "1",
       "note": "湖北垄上频道",
-      "logo": "http://epg.51zmt.top:8000/tb1/qt/HBLS.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/湖北垄上.png"
     },
     {
       "tvid": "305",
       "epgid": "武汉新闻综合频道",
-      "name": "武汉新闻综合频道",
+      "name": "武汉新闻综合频道,武汉新闻",
       "status": "1",
       "note": "武汉新闻综合频道",
       "logo": "http://epg.51zmt.top:8000/tb1/qt/WHTV1.png"
@@ -2451,7 +2451,7 @@
     {
       "tvid": "307",
       "epgid": "武汉科技生活频道",
-      "name": "武汉科技生活频道",
+      "name": "武汉科技生活频道,武汉科技生活",
       "status": "1",
       "note": "武汉科技生活频道",
       "logo": "http://epg.51zmt.top:8000/tb1/qt/WHTV3.png"
@@ -2467,7 +2467,7 @@
     {
       "tvid": "309",
       "epgid": "武汉文体频道",
-      "name": "武汉文体频道",
+      "name": "武汉文体频道,武汉文体",
       "status": "1",
       "note": "武汉文体频道",
       "logo": "http://epg.51zmt.top:8000/tb1/qt/WHTV5.png"
@@ -2590,7 +2590,7 @@
       "name": "无线新闻台,无线新闻",
       "status": "1",
       "note": "无线新闻台",
-      "logo": "http://epg.51zmt.top:8000/tb1/gt/wxxw.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/无线新闻.png"
     },
     {
       "tvid": "325",
@@ -2875,7 +2875,7 @@
     {
       "tvid": "360",
       "epgid": "华视",
-      "name": "华视",
+      "name": "华视,华视新闻",
       "status": "1",
       "note": "华视",
       "logo": "http://epg.51zmt.top:8000/tb1/gt/CTS.png"
@@ -3102,7 +3102,7 @@
       "name": "中天新闻台,中天新闻",
       "status": "1",
       "note": "中天新闻台",
-      "logo": ""
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/中天新闻.png"
     },
     {
       "tvid": "389",
@@ -3266,11 +3266,11 @@
     },
     {
       "tvid": "409",
-      "epgid": "华艺台湾台",
-      "name": "华艺台湾台",
+      "epgid": "POPC",
+      "name": "POPC,Popc,popc,",
       "status": "1",
-      "note": "华艺台湾台",
-      "logo": ""
+      "note": "POPC",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/POPC.png"
     },
     {
       "tvid": "410",
@@ -3715,7 +3715,7 @@
     {
       "tvid": "465",
       "epgid": "龙华电影",
-      "name": "龙华电影",
+      "name": "龙华电影,龙华电影台",
       "status": "1",
       "note": "龙华电影",
       "logo": "http://epg.51zmt.top:8000/tb1/gt/龙华电影.png"
@@ -4526,7 +4526,7 @@
       "name": "HBO",
       "status": "1",
       "note": "HBO",
-      "logo": "http://epg.51zmt.top:8000/tb1/gt/HBO.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/HBO.png"
     },
     {
       "tvid": "567",
@@ -4562,11 +4562,11 @@
     },
     {
       "tvid": "571",
-      "epgid": "FOXSports2",
-      "name": "FOX Sports 2",
+      "epgid": "精彩影视",
+      "name": "精彩影视",
       "status": "1",
-      "note": "FOX Sports 2",
-      "logo": ""
+      "note": "精彩影视",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/精彩影视.png"
     },
     {
       "tvid": "572",
@@ -4659,26 +4659,26 @@
     {
       "tvid": "583",
       "epgid": "HBOHits",
-      "name": "HBO 强档钜献,HBO强档钜献",
+      "name": "HBO 强档钜献,HBO强档钜献,HBOHits,HBO强档巨献",
       "status": "1",
       "note": "HBO 强档钜献",
-      "logo": "http://epg.51zmt.top:8000/tb1/gt/HBOHits.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/HBO强档巨献.png"
     },
     {
       "tvid": "584",
       "epgid": "HBOSignature",
-      "name": "HBO 原创钜献,HBO原创钜献",
+      "name": "HBO 原创钜献,HBO原创钜献,HBOSignature,HBO原创巨献",
       "status": "1",
       "note": "HBO 原创钜献",
-      "logo": "http://epg.51zmt.top:8000/tb1/gt/HBOSignature.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/HBO原创巨献.png"
     },
     {
       "tvid": "585",
       "epgid": "HBOFamily",
-      "name": "HBO 温馨家庭,HBO家庭,HBO Family,HBO family",
+      "name": "HBO 温馨家庭,HBO家庭,HBO Family,HBO family,HBOFamily",
       "status": "1",
       "note": "HBO 温馨家庭",
-      "logo": "http://epg.51zmt.top:8000/tb1/gt/HBOFamily.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/HBO温馨家庭.png"
     },
     {
       "tvid": "586",
@@ -4959,6 +4959,231 @@
       "status": "1",
       "note": "魅力足球",
       "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/魅力足球.png"
+    },
+    {
+      "tvid": "622",
+      "epgid": "纯享4K",
+      "name": "纯享4K",
+      "status": "1",
+      "note": "纯享4K",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/纯享4K.png"
+    },
+    {
+      "tvid": "623",
+      "epgid": "RTHK33",
+      "name": "RTHK33,香港RTHK33",
+      "status": "1",
+      "note": "RTHK33",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/RTHK33.png"
+    },
+    {
+      "tvid": "624",
+      "epgid": "RTHK34",
+      "name": "RTHK34,香港RTHK34",
+      "status": "1",
+      "note": "RTHK34",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/RTHK34.png"
+    },
+    {
+      "tvid": "625",
+      "epgid": "RTHK35",
+      "name": "RTHK35,香港RTHK35",
+      "status": "1",
+      "note": "RTHK35",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/RTHK35.png"
+    },
+    {
+      "tvid": "626",
+      "epgid": "环球电视",
+      "name": "环球电视,环球电视台",
+      "status": "1",
+      "note": "环球电视",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/环球.png"
+    },
+    {
+      "tvid": "627",
+      "epgid": "TVB星河",
+      "name": "TVB星河,无线星河",
+      "status": "1",
+      "note": "TVB星河",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/TVB星河.png"
+    },
+    {
+      "tvid": "628",
+      "epgid": "TVBPLUS",
+      "name": "TVBPLUS,TVB Plus",
+      "status": "1",
+      "note": "TVBPLUS",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/TVBPLUS.png"
+    },
+    {
+      "tvid": "629",
+      "epgid": "湖南电视剧",
+      "name": "湖南电视剧",
+      "status": "1",
+      "note": "湖南电视剧",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/湖南电视剧.png"
+    },
+    {
+      "tvid": "630",
+      "epgid": "湖南国际",
+      "name": "湖南国际",
+      "status": "1",
+      "note": "湖南国际",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/湖南国际.png"
+    },
+    {
+      "tvid": "631",
+      "epgid": "湖南经视",
+      "name": "湖南经视",
+      "status": "1",
+      "note": "湖南经视",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/湖南经视.png"
+    },
+    {
+      "tvid": "632",
+      "epgid": "湖南都市",
+      "name": "湖南都市",
+      "status": "1",
+      "note": "湖南都市",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/湖南都市.png"
+    },
+    {
+      "tvid": "633",
+      "epgid": "湖南电影",
+      "name": "湖南电影",
+      "status": "1",
+      "note": "湖南电影",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/湖南电影.png"
+    },
+    {
+      "tvid": "634",
+      "epgid": "黑龙江影视",
+      "name": "黑龙江影视",
+      "status": "1",
+      "note": "黑龙江影视",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/黑龙江影视.png"
+    },
+    {
+      "tvid": "635",
+      "epgid": "黑龙江文体",
+      "name": "黑龙江文体",
+      "status": "1",
+      "note": "黑龙江文体",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/黑龙江文体.png"
+    },
+    {
+      "tvid": "636",
+      "epgid": "黑龙江新闻",
+      "name": "黑龙江新闻,黑龙江新闻法治",
+      "status": "1",
+      "note": "黑龙江新闻",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/黑龙江新闻法治.png"
+    },
+    {
+      "tvid": "637",
+      "epgid": "湖北经视",
+      "name": "湖北经视",
+      "status": "1",
+      "note": "湖北经视",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/湖北经视.png"
+    },
+    {
+      "tvid": "638",
+      "epgid": "吉林都市",
+      "name": "吉林都市",
+      "status": "1",
+      "note": "吉林都市",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/吉林都市.png"
+    },
+    {
+      "tvid": "639",
+      "epgid": "广州综合台",
+      "name": "广州综合台,广州综合",
+      "status": "1",
+      "note": "广州综合台",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/广州综合.png"
+    },
+    {
+      "tvid": "640",
+      "epgid": "广州竞赛",
+      "name": "广州竞赛",
+      "status": "1",
+      "note": "广州竞赛",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/广州竞赛.png"
+    },
+    {
+      "tvid": "641",
+      "epgid": "广州影视",
+      "name": "广州影视",
+      "status": "1",
+      "note": "广州影视",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/广州影视.png"
+    },
+    {
+      "tvid": "642",
+      "epgid": "广州法治",
+      "name": "广州法治",
+      "status": "1",
+      "note": "广州法治",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/广州法治.png"
+    },
+    {
+      "tvid": "643",
+      "epgid": "广州新闻",
+      "name": "广州新闻",
+      "status": "1",
+      "note": "广州新闻",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/广州新闻.png"
+    },
+    {
+      "tvid": "644",
+      "epgid": "广东珠江",
+      "name": "广东珠江",
+      "status": "1",
+      "note": "广东珠江",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/广东珠江.png"
+    },
+    {
+      "tvid": "645",
+      "epgid": "陕西影视",
+      "name": "陕西影视",
+      "status": "1",
+      "note": "陕西影视",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/陕西影视.png"
+    },
+    {
+      "tvid": "646",
+      "epgid": "陕西体育休闲",
+      "name": "陕西体育休闲",
+      "status": "1",
+      "note": "陕西体育休闲",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/陕西体育休闲.png"
+    },
+    {
+      "tvid": "647",
+      "epgid": "陕西公共",
+      "name": "陕西公共",
+      "status": "1",
+      "note": "陕西公共",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/陕西公共.png"
+    },
+    {
+      "tvid": "648",
+      "epgid": "陕西新闻资讯",
+      "name": "陕西新闻资讯",
+      "status": "1",
+      "note": "陕西新闻资讯",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/陕西新闻资讯.png"
+    },
+    {
+      "tvid": "649",
+      "epgid": "陕西都市青春",
+      "name": "陕西都市青春",
+      "status": "1",
+      "note": "陕西都市青春",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/陕西都市青春.png"
     }
+
   ]
 }
