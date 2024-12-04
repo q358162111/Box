@@ -5183,6 +5183,22 @@
       "status": "1",
       "note": "陕西都市青春",
       "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/陕西都市青春.png"
+    },
+    {
+      "tvid": "650",
+      "epgid": "AMC电影台",
+      "name": "AMC电影台",
+      "status": "1",
+      "note": "AMC电影台",
+      "logo": "https://raw.gitcode.com/cai_hj/tvshow/raw/main/logo/AMC电影台.png"
+    },
+    {
+      "tvid": "651",
+      "epgid": "面包台",
+      "name": "香港面包台,面包台",
+      "status": "1",
+      "note": "香港面包台",
+      "logo": "https://raw.gitcode.com/cai_hj/tvshow/raw/main/logo/香港面包台.png"
     }
 
   ]
