@@ -1234,11 +1234,11 @@
     },
     {
       "tvid": "155",
-      "epgid": "DOX映画",
-      "name": "DOX映画",
+      "epgid": "澳视澳门",
+      "name": "澳视澳门",
       "status": "1",
-      "note": "DOX映画",
-      "logo": ""
+      "note": "澳视澳门",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/澳视澳门.png"
     },
     {
       "tvid": "156",
@@ -1738,11 +1738,11 @@
     },
     {
       "tvid": "218",
-      "epgid": "IPTV3+",
-      "name": "IPTV3⁺",
+      "epgid": "半岛新闻",
+      "name": "半岛英语,半岛新闻",
       "status": "1",
-      "note": "IPTV3⁺",
-      "logo": ""
+      "note": "半岛新闻",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/半岛.png"
     },
     {
       "tvid": "219",
@@ -1842,35 +1842,35 @@
     },
     {
       "tvid": "231",
-      "epgid": "DOX怡家",
-      "name": "DOX怡家",
+      "epgid": "北京影视",
+      "name": "北京影视",
       "status": "1",
-      "note": "DOX怡家",
-      "logo": ""
+      "note": "北京影视",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/北京影视.png"
     },
     {
       "tvid": "232",
-      "epgid": "DOX院线",
-      "name": "DOX院线",
+      "epgid": "北京文艺",
+      "name": "北京文艺",
       "status": "1",
-      "note": "DOX院线",
-      "logo": ""
+      "note": "北京文艺",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/北京文艺.png"
     },
     {
       "tvid": "233",
-      "epgid": "DOX新知",
-      "name": "DOX新知",
+      "epgid": "北京新闻",
+      "name": "北京新闻",
       "status": "1",
-      "note": "DOX新知",
-      "logo": ""
+      "note": "北京新闻",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/北京新闻.png"
     },
     {
       "tvid": "234",
-      "epgid": "DOX新艺",
-      "name": "DOX新艺",
+      "epgid": "北京生活",
+      "name": "北京生活",
       "status": "1",
-      "note": "DOX新艺",
-      "logo": ""
+      "note": "北京生活",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/北京生活.png"
     },
     {
       "tvid": "235",
@@ -1898,11 +1898,11 @@
     },
     {
       "tvid": "238",
-      "epgid": "魅力音乐",
-      "name": "魅力音乐",
+      "epgid": "北京财经",
+      "name": "北京财经",
       "status": "1",
-      "note": "魅力音乐",
-      "logo": ""
+      "note": "北京财经",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/北京财经.png"
     },
     {
       "tvid": "239",
@@ -2099,7 +2099,7 @@
     {
       "tvid": "263",
       "epgid": "SCTV5",
-      "name": "四川影视文艺频道",
+      "name": "四川影视文艺频道,四川影视文艺",
       "status": "1",
       "note": "四川影视文艺频道",
       "logo": "http://epg.51zmt.top:8000/tb1/sheng/sctv5.png"
@@ -2107,7 +2107,7 @@
     {
       "tvid": "264",
       "epgid": "SCTV7",
-      "name": "四川妇女儿童频道",
+      "name": "四川妇女儿童频道,四川妇女儿童",
       "status": "1",
       "note": "四川妇女儿童频道",
       "logo": "http://epg.51zmt.top:8000/tb1/sheng/sctv7.png"
@@ -2123,7 +2123,7 @@
     {
       "tvid": "266",
       "epgid": "SCTV9",
-      "name": "四川公共频道",
+      "name": "四川公共频道,四川公共",
       "status": "1",
       "note": "四川公共频道",
       "logo": "http://epg.51zmt.top:8000/tb1/sheng/sctv9.png"
@@ -2131,7 +2131,7 @@
     {
       "tvid": "267",
       "epgid": "SCTV8",
-      "name": "四川科教频道",
+      "name": "四川科教频道,四川科教",
       "status": "1",
       "note": "四川科教频道",
       "logo": "http://epg.51zmt.top:8000/tb1/sheng/sctv8.png"
@@ -2139,7 +2139,7 @@
     {
       "tvid": "268",
       "epgid": "CDTV1",
-      "name": "成都新闻综合频道",
+      "name": "成都新闻综合频道,成都新闻综合",
       "status": "1",
       "note": "成都新闻综合频道",
       "logo": "http://epg.51zmt.top:8000/tb1/sheng/cdtv1.png"
@@ -2147,7 +2147,7 @@
     {
       "tvid": "269",
       "epgid": "CDTV2",
-      "name": "成都经济资讯频道",
+      "name": "成都经济资讯频道,成都经济资讯",
       "status": "1",
       "note": "成都经济资讯频道",
       "logo": "http://epg.51zmt.top:8000/tb1/sheng/cdtv2.png"
@@ -2155,7 +2155,7 @@
     {
       "tvid": "270",
       "epgid": "CDTV3",
-      "name": "成都都市生活频道",
+      "name": "成都都市生活频道,成都都市生活",
       "status": "1",
       "note": "成都都市生活频道",
       "logo": "http://epg.51zmt.top:8000/tb1/sheng/cdtv3.png"
@@ -2163,7 +2163,7 @@
     {
       "tvid": "271",
       "epgid": "CDTV4",
-      "name": "成都影视文艺频道",
+      "name": "成都影视文艺频道,成都影视文艺",
       "status": "1",
       "note": "成都影视文艺频道",
       "logo": "http://epg.51zmt.top:8000/tb1/sheng/cdtv4.png"
@@ -2171,7 +2171,7 @@
     {
       "tvid": "272",
       "epgid": "CDTV5",
-      "name": "成都公共频道",
+      "name": "成都公共频道,成都公共",
       "status": "1",
       "note": "成都公共频道",
       "logo": "http://epg.51zmt.top:8000/tb1/sheng/cdtv5.png"
@@ -2179,18 +2179,18 @@
     {
       "tvid": "273",
       "epgid": "CDTV6",
-      "name": "成都少儿频道",
+      "name": "成都少儿频道,成都少儿",
       "status": "1",
       "note": "成都少儿频道",
       "logo": "http://epg.51zmt.top:8000/tb1/sheng/cdtv6.png"
     },
     {
       "tvid": "274",
-      "epgid": "CDTV7",
-      "name": "成都美食天府",
+      "epgid": "山西经济与科技",
+      "name": "山西经济与科技,山西经济科技",
       "status": "1",
-      "note": "成都美食天府",
-      "logo": ""
+      "note": "山西经济与科技",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/山西经济与科技.png"
     },
     {
       "tvid": "275",
@@ -2498,11 +2498,11 @@
     },
     {
       "tvid": "313",
-      "epgid": "靓妆频道",
-      "name": "江苏靓妆频道,靓妆频道",
+      "epgid": "山西社会与法治",
+      "name": "山西社会与法治,山西社会法治",
       "status": "1",
-      "note": "江苏靓妆频道",
-      "logo": ""
+      "note": "山西社会与法治",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/山西社会与法治.png"
     },
     {
       "tvid": "314",
@@ -2514,27 +2514,27 @@
     },
     {
       "tvid": "315",
-      "epgid": "DV生活频道",
-      "name": "DV生活频道",
+      "epgid": "山西公共",
+      "name": "山西公共",
       "status": "1",
-      "note": "DV生活频道",
-      "logo": ""
+      "note": "山西公共",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/山西公共.png"
     },
     {
       "tvid": "316",
-      "epgid": "高尔夫频道",
-      "name": "高尔夫频道",
+      "epgid": "山西影视",
+      "name": "山西影视",
       "status": "1",
-      "note": "高尔夫频道",
-      "logo": ""
+      "note": "山西影视",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/山西影视.png"
     },
     {
       "tvid": "317",
-      "epgid": "英语辅导频道",
-      "name": "英语辅导频道",
+      "epgid": "山西文体生活",
+      "name": "山西文体生活",
       "status": "1",
-      "note": "英语辅导频道",
-      "logo": ""
+      "note": "山西文体生活",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/山西文体生活.png"
     },
     {
       "tvid": "318",
@@ -2642,27 +2642,27 @@
     },
     {
       "tvid": "331",
-      "epgid": "HMC",
-      "name": "香港有线Hollywood Movie Channel",
+      "epgid": "安徽科教",
+      "name": "安徽科教",
       "status": "1",
-      "note": "香港有线Hollywood Movie Channel",
-      "logo": ""
+      "note": "安徽科教",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/安徽科教.png"
     },
     {
       "tvid": "332",
-      "epgid": "国家地理悠人频道",
-      "name": "国家地理悠人频道",
+      "epgid": "安徽经济生活",
+      "name": "安徽经济生活",
       "status": "1",
-      "note": "国家地理悠人频道",
-      "logo": ""
+      "note": "安徽经济生活",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/安徽经济生活.png"
     },
     {
       "tvid": "333",
-      "epgid": "FOXLIFE",
-      "name": "FOX LIFE",
+      "epgid": "安徽综艺体育",
+      "name": "安徽综艺体育",
       "status": "1",
-      "note": "FOX LIFE",
-      "logo": ""
+      "note": "安徽综艺体育",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/安徽综艺体育.png"
     },
     {
       "tvid": "334",
@@ -3147,7 +3147,7 @@
     {
       "tvid": "394",
       "epgid": "非凡新闻台",
-      "name": "非凡新闻台",
+      "name": "非凡新闻台,非凡新闻",
       "status": "1",
       "note": "非凡新闻台",
       "logo": "http://epg.51zmt.top:8000/tb1/gt/UniqueNews.png"
@@ -3179,7 +3179,7 @@
     {
       "tvid": "398",
       "epgid": "LSTime电影台",
-      "name": "LS Time龙祥時代电影台",
+      "name": "LS Time龙祥時代电影台,龙祥时代",
       "status": "1",
       "note": "LS Time龙祥時代电影台",
       "logo": "http://epg.51zmt.top:8000/tb1/gt/LSTIME.png"
@@ -3267,7 +3267,7 @@
     {
       "tvid": "409",
       "epgid": "POPC",
-      "name": "POPC,Popc,popc,",
+      "name": "POPC,Popc,popc,PopC",
       "status": "1",
       "note": "POPC",
       "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/POPC.png"
@@ -3595,7 +3595,7 @@
     {
       "tvid": "450",
       "epgid": "博斯运动二台",
-      "name": "博斯运动二台",
+      "name": "博斯运动二台,博斯运动1台,博斯运动1,博斯运动I",
       "status": "1",
       "note": "博斯运动二台",
       "logo": "http://epg.51zmt.top:8000/tb1/gt/sports_net_2.png"
@@ -3603,7 +3603,7 @@
     {
       "tvid": "451",
       "epgid": "博斯网球台",
-      "name": "博斯网球台",
+      "name": "博斯网球台,博斯网球",
       "status": "1",
       "note": "博斯网球台",
       "logo": "http://epg.51zmt.top:8000/tb1/gt/sport_tennis.png"
@@ -3611,7 +3611,7 @@
     {
       "tvid": "452",
       "epgid": "博斯无限台",
-      "name": "博斯无限台",
+      "name": "博斯无限台,博斯无限",
       "status": "1",
       "note": "博斯无限台",
       "logo": "http://epg.51zmt.top:8000/tb1/gt/sport_unlimited.png"
@@ -3619,7 +3619,7 @@
     {
       "tvid": "453",
       "epgid": "博斯高球1台",
-      "name": "博斯高球1台",
+      "name": "博斯高球1台,博斯高球一台,博斯高球1,博斯高球I",
       "status": "1",
       "note": "博斯高球1台",
       "logo": "http://epg.51zmt.top:8000/tb1/gt/sports-golfch.png"
@@ -3627,7 +3627,7 @@
     {
       "tvid": "454",
       "epgid": "博斯高球2台",
-      "name": "博斯高球2台",
+      "name": "博斯高球2台,博斯高球二台,博斯高球2,博斯高球II",
       "status": "1",
       "note": "博斯高球2台",
       "logo": "http://epg.51zmt.top:8000/tb1/gt/sport-golfplus.png"
@@ -3635,7 +3635,7 @@
     {
       "tvid": "455",
       "epgid": "博斯魅力网",
-      "name": "博斯魅力网",
+      "name": "博斯魅力网,博斯魅力",
       "status": "1",
       "note": "博斯魅力网",
       "logo": "http://epg.51zmt.top:8000/tb1/gt/sport-trendsport.png"
@@ -3643,7 +3643,7 @@
     {
       "tvid": "456",
       "epgid": "博斯运动一台",
-      "name": "博斯运动一台",
+      "name": "博斯运动一台,博斯运动1台,博斯运动1,博斯运动I",
       "status": "1",
       "note": "博斯运动一台",
       "logo": "http://epg.51zmt.top:8000/tb1/gt/sport-sports_net.png"
@@ -3651,7 +3651,7 @@
     {
       "tvid": "457",
       "epgid": "博斯无限二台",
-      "name": "博斯无限二台",
+      "name": "博斯无限二台,博斯无限2台,博斯无限2,博斯无限II",
       "status": "1",
       "note": "博斯无限二台",
       "logo": "http://epg.51zmt.top:8000/tb1/gt/sport_unlimited2.png"
@@ -3882,18 +3882,18 @@
     },
     {
       "tvid": "486",
-      "epgid": "iFun2",
-      "name": "i-Fun动漫2台",
+      "epgid": "星空卫视",
+      "name": "星空卫视",
       "status": "1",
-      "note": "i-Fun动漫2台",
-      "logo": ""
+      "note": "星空卫视",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/星空卫视.png"
     },
     {
       "tvid": "487",
       "epgid": "iFun3",
-      "name": "i-Fun动漫2台",
+      "name": "i-Fun动漫3台,iFun3",
       "status": "1",
-      "note": "i-Fun动漫2台",
+      "note": "i-Fun动漫3台",
       "logo": "http://epg.51zmt.top:8000/tb1/gt/ifun3.png"
     },
     {
@@ -3931,7 +3931,7 @@
     {
       "tvid": "492",
       "epgid": "采昌影剧",
-      "name": "采昌影剧台",
+      "name": "采昌影剧台,采昌影剧",
       "status": "1",
       "note": "采昌影剧台",
       "logo": "http://epg.51zmt.top:8000/tb1/gt/采昌影剧.png"
@@ -3939,7 +3939,7 @@
     {
       "tvid": "493",
       "epgid": "智林体育",
-      "name": "智林体育台",
+      "name": "智林体育台,智林体育",
       "status": "1",
       "note": "智林体育台",
       "logo": "http://epg.51zmt.top:8000/tb1/gt/智林体育台.png"
@@ -3955,7 +3955,7 @@
     {
       "tvid": "495",
       "epgid": "影迷数位电影",
-      "name": "影迷数位电影台",
+      "name": "影迷数位电影台,影迷数位电影",
       "status": "1",
       "note": "影迷数位电影台",
       "logo": "http://epg.51zmt.top:8000/tb1/gt/影迷电影.png"
@@ -4067,7 +4067,7 @@
     {
       "tvid": "509",
       "epgid": "台湾戏剧",
-      "name": "台湾戏剧台",
+      "name": "台湾戏剧台,台湾戏剧",
       "status": "1",
       "note": "台湾戏剧台",
       "logo": "http://epg.51zmt.top:8000/tb1/gt/taiwanxiju.png"
@@ -4075,7 +4075,7 @@
     {
       "tvid": "510",
       "epgid": "爱尔达影剧",
-      "name": "爱尔达影剧台",
+      "name": "爱尔达影剧台,爱尔达影剧",
       "status": "1",
       "note": "爱尔达影剧台",
       "logo": "http://epg.51zmt.top:8000/tb1/gt/elta_yingju.png"
@@ -4163,7 +4163,7 @@
     {
       "tvid": "521",
       "epgid": "美食星球",
-      "name": "美食星球频道",
+      "name": "美食星球频道,美食星球",
       "status": "1",
       "note": "美食星球频道",
       "logo": "http://epg.51zmt.top:8000/tb1/gt/fooldplanet.png"
@@ -4179,7 +4179,7 @@
     {
       "tvid": "523",
       "epgid": "爱尔达综合",
-      "name": "爱尔达综合台",
+      "name": "爱尔达综合台,爱尔达综合",
       "status": "1",
       "note": "爱尔达综合台",
       "logo": "http://epg.51zmt.top:8000/tb1/gt/elta_zonghehd.png"
@@ -5199,6 +5199,446 @@
       "status": "1",
       "note": "香港面包台",
       "logo": "https://raw.gitcode.com/cai_hj/tvshow/raw/main/logo/香港面包台.png"
+    },
+    {
+      "tvid": "652",
+      "epgid": "江苏城市",
+      "name": "江苏城市",
+      "status": "1",
+      "note": "江苏城市",
+      "logo": "https://live.fanmingming.com/tv/江苏城市.png"
+    },
+    {
+      "tvid": "653",
+      "epgid": "江苏综艺",
+      "name": "江苏综艺",
+      "status": "1",
+      "note": "江苏综艺",
+      "logo": "https://live.fanmingming.com/tv/江苏综艺.png"
+    },
+    {
+      "tvid": "654",
+      "epgid": "重庆汽摩",
+      "name": "重庆汽摩",
+      "status": "1",
+      "note": "重庆汽摩",
+      "logo": "https://live.fanmingming.com/tv/%E9%87%8D%E5%BA%86%E6%B1%BD%E6%91%A9.png"
+    },
+    {
+      "tvid": "655",
+      "epgid": "江苏影视",
+      "name": "江苏影视",
+      "status": "1",
+      "note": "江苏影视",
+      "logo": "https://live.fanmingming.com/tv/江苏影视.png"
+    },
+    {
+      "tvid": "656",
+      "epgid": "安徽影视",
+      "name": "安徽影视",
+      "status": "1",
+      "note": "安徽影视",
+      "logo": "https://live.fanmingming.com/tv/安徽影视.png"
+    },
+    {
+      "tvid": "657",
+      "epgid": "安徽经济生活",
+      "name": "安徽经济生活",
+      "status": "1",
+      "note": "安徽经济生活",
+      "logo": "https://live.fanmingming.com/tv/安徽经济生活.png"
+    },
+    {
+      "tvid": "658",
+      "epgid": "安徽综艺体育",
+      "name": "安徽综艺体育",
+      "status": "1",
+      "note": "安徽综艺体育",
+      "logo": "https://live.fanmingming.com/tv/安徽综艺体育.png"
+    },
+    {
+      "tvid": "659",
+      "epgid": "河南都市",
+      "name": "河南都市",
+      "status": "1",
+      "note": "河南都市",
+      "logo": "https://live.fanmingming.com/tv/河南都市.png"
+    },
+    {
+      "tvid": "660",
+      "epgid": "河南民生",
+      "name": "河南民生",
+      "status": "1",
+      "note": "河南民生",
+      "logo": "https://live.fanmingming.com/tv/河南民生.png"
+    },
+    {
+      "tvid": "661",
+      "epgid": "江苏新闻",
+      "name": "江苏新闻",
+      "status": "1",
+      "note": "江苏新闻",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/江苏新闻.png"
+    },
+    {
+      "tvid": "662",
+      "epgid": "江苏教育",
+      "name": "江苏教育",
+      "status": "1",
+      "note": "江苏教育",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/江苏教育.png"
+    },
+    {
+      "tvid": "663",
+      "epgid": "河南乡村",
+      "name": "河南乡村",
+      "status": "1",
+      "note": "河南乡村",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/河南乡村.png"
+    },
+    {
+      "tvid": "664",
+      "epgid": "河南公共",
+      "name": "河南公共",
+      "status": "1",
+      "note": "河南公共",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/河南公共.png"
+    },
+    {
+      "tvid": "665",
+      "epgid": "河南新闻",
+      "name": "河南新闻",
+      "status": "1",
+      "note": "河南新闻",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/河南新闻.png"
+    },
+    {
+      "tvid": "666",
+      "epgid": "河南法治",
+      "name": "河南法治",
+      "status": "1",
+      "note": "河南法治",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/河南法治.png"
+    },
+    {
+      "tvid": "667",
+      "epgid": "河南电视剧",
+      "name": "河南电视剧",
+      "status": "1",
+      "note": "河南电视剧",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/河南电视剧.png"
+    },
+    {
+      "tvid": "668",
+      "epgid": "河北公共",
+      "name": "河北公共",
+      "status": "1",
+      "note": "河北公共",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/河北公共.png"
+    },
+    {
+      "tvid": "669",
+      "epgid": "河北农民",
+      "name": "河北农民",
+      "status": "1",
+      "note": "河北农民",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/河北农民.png"
+    },
+    {
+      "tvid": "670",
+      "epgid": "河北影视",
+      "name": "河北影视,河北影视剧",
+      "status": "1",
+      "note": "河北影视",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/河北影视.png"
+    },
+    {
+      "tvid": "671",
+      "epgid": "河北经济",
+      "name": "河北经济",
+      "status": "1",
+      "note": "河北经济",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/河北经济.png"
+    },
+    {
+      "tvid": "672",
+      "epgid": "河北都市",
+      "name": "河北都市",
+      "status": "1",
+      "note": "河北都市",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/河北都市.png"
+    },
+    {
+      "tvid": "673",
+      "epgid": "广东体育",
+      "name": "广东体育",
+      "status": "1",
+      "note": "广东体育",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/广东体育.png"
+    },
+    {
+      "tvid": "674",
+      "epgid": "广东公共",
+      "name": "广东公共",
+      "status": "1",
+      "note": "广东公共",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/广东公共.png"
+    },
+    {
+      "tvid": "675",
+      "epgid": "广东国际",
+      "name": "广东国际",
+      "status": "1",
+      "note": "广东国际",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/广东国际.png"
+    },
+    {
+      "tvid": "676",
+      "epgid": "广东少儿",
+      "name": "广东少儿",
+      "status": "1",
+      "note": "广东少儿",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/广东少儿.png"
+    },
+    {
+      "tvid": "677",
+      "epgid": "广东影视",
+      "name": "广东影视",
+      "status": "1",
+      "note": "广东影视",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/广东影视.png"
+    },
+    {
+      "tvid": "678",
+      "epgid": "广东新闻",
+      "name": "广东新闻",
+      "status": "1",
+      "note": "广东新闻",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/广东新闻.png"
+    },
+    {
+      "tvid": "679",
+      "epgid": "广东民生",
+      "name": "广东民生",
+      "status": "1",
+      "note": "广东民生",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/广东民生.png"
+    },
+    {
+      "tvid": "680",
+      "epgid": "广东现代教育",
+      "name": "广东现代教育",
+      "status": "1",
+      "note": "广东现代教育",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/广东现代教育.png"
+    },
+    {
+      "tvid": "681",
+      "epgid": "广东经济科教",
+      "name": "广东经济科教",
+      "status": "1",
+      "note": "广东经济科教",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/广东经济科教.png"
+    },
+    {
+      "tvid": "682",
+      "epgid": "广东综艺",
+      "name": "广东综艺",
+      "status": "1",
+      "note": "广东综艺",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/广东综艺.png"
+    },
+    {
+      "tvid": "683",
+      "epgid": "江西公共农业",
+      "name": "江西公共农业",
+      "status": "1",
+      "note": "江西公共农业",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/江西公共农业.png"
+    },
+    {
+      "tvid": "684",
+      "epgid": "江西少儿",
+      "name": "江西少儿",
+      "status": "1",
+      "note": "江西少儿",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/江西少儿.png"
+    },
+    {
+      "tvid": "685",
+      "epgid": "江西影视旅游",
+      "name": "江西影视旅游",
+      "status": "1",
+      "note": "江西影视旅游",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/江西影视旅游.png"
+    },
+    {
+      "tvid": "686",
+      "epgid": "江西新闻",
+      "name": "江西新闻",
+      "status": "1",
+      "note": "江西新闻",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/江西新闻.png"
+    },
+    {
+      "tvid": "687",
+      "epgid": "江西经济生活",
+      "name": "江西经济生活",
+      "status": "1",
+      "note": "江西经济生活",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/江西经济生活.png"
+    },
+    {
+      "tvid": "688",
+      "epgid": "江西都市",
+      "name": "江西都市",
+      "status": "1",
+      "note": "江西都市",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/江西都市.png"
+    },
+    {
+      "tvid": "689",
+      "epgid": "福建体育",
+      "name": "福建体育",
+      "status": "1",
+      "note": "福建体育",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/福建体育.png"
+    },
+    {
+      "tvid": "690",
+      "epgid": "福建公共",
+      "name": "福建公共",
+      "status": "1",
+      "note": "福建公共",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/福建公共.png"
+    },
+    {
+      "tvid": "691",
+      "epgid": "福建少儿",
+      "name": "福建少儿",
+      "status": "1",
+      "note": "福建少儿",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/福建少儿.png"
+    },
+    {
+      "tvid": "692",
+      "epgid": "福建教育",
+      "name": "福建教育",
+      "status": "1",
+      "note": "福建教育",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/福建教育.png"
+    },
+    {
+      "tvid": "693",
+      "epgid": "福建文体",
+      "name": "福建文体",
+      "status": "1",
+      "note": "福建文体",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/福建文体.png"
+    },
+    {
+      "tvid": "694",
+      "epgid": "福建新闻",
+      "name": "福建新闻",
+      "status": "1",
+      "note": "福建新闻",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/福建新闻.png"
+    },
+    {
+      "tvid": "695",
+      "epgid": "福建旅游",
+      "name": "福建旅游",
+      "status": "1",
+      "note": "福建旅游",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/福建旅游.png"
+    },
+    {
+      "tvid": "696",
+      "epgid": "福建电视剧",
+      "name": "福建电视剧",
+      "status": "1",
+      "note": "福建电视剧",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/福建电视剧.png"
+    },
+    {
+      "tvid": "697",
+      "epgid": "福建经济",
+      "name": "福建经济",
+      "status": "1",
+      "note": "福建经济",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/福建经济.png"
+    },
+    {
+      "tvid": "698",
+      "epgid": "福建综合",
+      "name": "福建综合",
+      "status": "1",
+      "note": "福建综合",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/福建综合.png"
+    },
+    {
+      "tvid": "699",
+      "epgid": "云南影视",
+      "name": "云南影视",
+      "status": "1",
+      "note": "云南影视",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/云南影视.png"
+    },
+    {
+      "tvid": "700",
+      "epgid": "广西国际",
+      "name": "广西国际",
+      "status": "1",
+      "note": "广西国际",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/广西国际.png"
+    },
+    {
+      "tvid": "701",
+      "epgid": "广西影视",
+      "name": "广西影视",
+      "status": "1",
+      "note": "广西影视",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/广西影视.png"
+    },
+    {
+      "tvid": "702",
+      "epgid": "广西新闻",
+      "name": "广西新闻",
+      "status": "1",
+      "note": "广西新闻",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/广西新闻.png"
+    },
+    {
+      "tvid": "703",
+      "epgid": "广西综艺旅游",
+      "name": "广西综艺旅游",
+      "status": "1",
+      "note": "广西综艺旅游",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/广西综艺旅游.png"
+    },
+    {
+      "tvid": "704",
+      "epgid": "广西都市",
+      "name": "广西都市",
+      "status": "1",
+      "note": "广西都市",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/广西都市.png"
+    },
+    {
+      "tvid": "705",
+      "epgid": "重庆科教",
+      "name": "重庆科教",
+      "status": "1",
+      "note": "重庆科教",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/重庆科教.png"
+    },
+    {
+      "tvid": "706",
+      "epgid": "重庆社会与法",
+      "name": "重庆社会与法",
+      "status": "1",
+      "note": "重庆社会与法",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/重庆社会与法.png"
     }
 
   ]
