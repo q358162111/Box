@@ -1,0 +1,20 @@
+{
+  "version": 3,
+  "artifactType": {
+    "type": "APK",
+    "kind": "Directory"
+  },
+  "applicationId": "com.github.tvbox.osc.tk",
+  "variantName": "arm64GenericRelease",
+  "elements": [
+    {
+      "type": "SINGLE",
+      "filters": [],
+      "attributes": [],
+      "versionCode": 1,
+      "versionName": "1.0.20241205_2028",
+      "outputFile": "TVBox_release-arm64-generic.apk"
+    }
+  ],
+  "elementType": "File"
+}
