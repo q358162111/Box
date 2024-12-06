@@ -1602,11 +1602,11 @@
     },
     {
       "tvid": "201",
-      "epgid": "休闲指南",
-      "name": "休闲指南",
+      "epgid": "八大精彩台",
+      "name": "八大精彩台,八大精彩",
       "status": "1",
-      "note": "北广休闲指南",
-      "logo": ""
+      "note": "八大精彩台",
+      "logo": "https://www.lysvc.cc/TVlogo/img/GTV5.png"
     },
     {
       "tvid": "202",
@@ -2443,7 +2443,7 @@
     {
       "tvid": "306",
       "epgid": "武汉电视剧频道",
-      "name": "武汉电视剧频道",
+      "name": "武汉电视剧频道,武汉电视剧",
       "status": "1",
       "note": "武汉电视剧频道",
       "logo": "http://epg.51zmt.top:8000/tb1/qt/WHTV2.png"
@@ -2459,7 +2459,7 @@
     {
       "tvid": "308",
       "epgid": "武汉经济频道",
-      "name": "武汉经济频道",
+      "name": "武汉经济频道,武汉经济",
       "status": "1",
       "note": "武汉经济频道",
       "logo": "http://epg.51zmt.top:8000/tb1/qt/WHTV4.png"
@@ -2475,7 +2475,7 @@
     {
       "tvid": "310",
       "epgid": "武汉外语频道",
-      "name": "武汉外语频道",
+      "name": "武汉外语频道,武汉外语",
       "status": "1",
       "note": "武汉外语频道",
       "logo": "http://epg.51zmt.top:8000/tb1/qt/WHTV6.png"
@@ -2491,7 +2491,7 @@
     {
       "tvid": "312",
       "epgid": "武汉教育电视台",
-      "name": "武汉教育电视台",
+      "name": "武汉教育电视台,武汉教育",
       "status": "1",
       "note": "武汉教育电视台",
       "logo": "http://epg.51zmt.top:8000/tb1/qt/WETV.png"
@@ -2739,7 +2739,7 @@
     {
       "tvid": "343",
       "epgid": "星卫HD电影",
-      "name": "星卫HD电影台",
+      "name": "星卫HD电影台,星卫电影",
       "status": "1",
       "note": "星卫HD电影台",
       "logo": "http://epg.51zmt.top:8000/tb1/gt/starmov.png"
@@ -2758,7 +2758,7 @@
       "name": "CHANNEL [V]国际频道,CHANNEL [V]",
       "status": "1",
       "note": "CHANNEL [V]国际频道",
-      "logo": ""
+      "logo": "https://www.lysvc.cc/TVlogo/img/ChannelV.png"
     },
     {
       "tvid": "346",
@@ -2794,11 +2794,11 @@
     },
     {
       "tvid": "350",
-      "epgid": "创世电视",
-      "name": "创世电视",
+      "epgid": "重温经典",
+      "name": "重温经典",
       "status": "1",
-      "note": "创世电视",
-      "logo": ""
+      "note": "重温经典",
+      "logo": "https://live.fanmingming.com/tv/重温经典.png"
     },
     {
       "tvid": "351",
@@ -4550,7 +4550,7 @@
       "name": "CINEMAX",
       "status": "1",
       "note": "CINEMAX",
-      "logo": "http://epg.51zmt.top:8000/tb1/gt/CinemaxHD.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/CINEMAX.png"
     },
     {
       "tvid": "570",
