@@ -1522,11 +1522,11 @@
     },
     {
       "tvid": "191",
-      "epgid": "考试在线",
-      "name": "考试在线",
+      "epgid": "中天亚洲台",
+      "name": "中天亚洲台,中天亚洲",
       "status": "1",
-      "note": "北广考试在线",
-      "logo": ""
+      "note": "中天亚洲台",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/中天亚洲.png"
     },
     {
       "tvid": "192",
@@ -3259,7 +3259,7 @@
     {
       "tvid": "408",
       "epgid": "靖洋戏剧台",
-      "name": "靖洋戏剧台",
+      "name": "靖洋戏剧台,靖洋戏剧",
       "status": "1",
       "note": "靖洋戏剧台",
       "logo": "http://epg.51zmt.top:8000/tb1/gt/靖洋戏剧.png"
@@ -3779,7 +3779,7 @@
     {
       "tvid": "473",
       "epgid": "中视菁采台",
-      "name": "中视菁采台",
+      "name": "中视菁采台,中视菁采",
       "status": "1",
       "note": "中视菁采台",
       "logo": "http://epg.51zmt.top:8000/tb1/gt/中视菁采.png"
@@ -3787,7 +3787,7 @@
     {
       "tvid": "474",
       "epgid": "TVBS精采台",
-      "name": "TVBS精采台",
+      "name": "TVBS精采台,TVBS精采",
       "status": "1",
       "note": "TVBS精采台",
       "logo": "http://epg.51zmt.top:8000/tb1/gt/TVBS精采.png"
@@ -3931,7 +3931,7 @@
     {
       "tvid": "492",
       "epgid": "采昌影剧",
-      "name": "采昌影剧台,采昌影剧",
+      "name": "采昌影剧台,采昌影剧,采昌",
       "status": "1",
       "note": "采昌影剧台",
       "logo": "http://epg.51zmt.top:8000/tb1/gt/采昌影剧.png"
