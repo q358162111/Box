@@ -6,7 +6,7 @@
       "name": "CCTV-1综合,CCTV-1,CCTV1,CCTV1综合",
       "status": "1",
       "note": "CCTV-1综合",
-      "logo": "https://live.fanmingming.com/tv/CCTV1.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/CCTV1.png"
     },
     {
       "tvid": "2",
@@ -14,7 +14,7 @@
       "name": "CCTV-2财经,CCTV-2,CCTV2,CCTV2财经",
       "status": "1",
       "note": "CCTV-2财经",
-      "logo": "https://live.fanmingming.com/tv/CCTV2.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/CCTV2.png"
     },
     {
       "tvid": "3",
@@ -22,7 +22,7 @@
       "name": "CCTV-3综艺,CCTV-3,CCTV3,CCTV3综艺",
       "status": "1",
       "note": "CCTV-3综艺",
-      "logo": "https://live.fanmingming.com/tv/CCTV3.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/CCTV3.png"
     },
     {
       "tvid": "4",
@@ -30,7 +30,7 @@
       "name": "CCTV-4中文国际,CCTV-4,CCTV4,CCTV4中文国际,",
       "status": "1",
       "note": "CCTV-4中文国际",
-      "logo": "https://live.fanmingming.com/tv/CCTV4.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/CCTV4.png"
     },
     {
       "tvid": "5",
@@ -38,7 +38,7 @@
       "name": "CCTV-4中文国际欧洲,CCTV-4欧洲,CCTV4欧洲,CCTV4中文国际欧洲,CCTV-4中文国际 欧洲",
       "status": "1",
       "note": "CCTV-4中文国际欧洲",
-      "logo": "https://live.fanmingming.com/tv/CCTV4欧洲.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/CCTV4欧洲.png"
     },
     {
       "tvid": "6",
@@ -46,7 +46,7 @@
       "name": "CCTV-4中文国际美洲,CCTV-4美洲,CCTV4美洲,CCTV4中文国际美洲,CCTV-4中文国际 美洲",
       "status": "1",
       "note": "CCTV-4中文国际美洲",
-      "logo": "https://live.fanmingming.com/tv/CCTV4美洲.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/CCTV4美洲.png"
     },
     {
       "tvid": "7",
@@ -54,7 +54,7 @@
       "name": "CCTV-5体育,CCTV-5,CCTV5,CCTV5体育",
       "status": "1",
       "note": "CCTV-5体育",
-      "logo": "https://live.fanmingming.com/tv/CCTV5.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/CCTV5.png"
     },
     {
       "tvid": "8",
@@ -62,7 +62,7 @@
       "name": "CCTV-5+体育赛事,CCTV-5+,CCTV5+,CCTV5+体育赛事",
       "status": "1",
       "note": "CCTV-5+体育赛事",
-      "logo": "https://live.fanmingming.com/tv/CCTV5+.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/CCTV5+.png"
     },
     {
       "tvid": "9",
@@ -70,7 +70,7 @@
       "name": "CCTV-6电影,CCTV-6,CCTV6,CCTV6电影",
       "status": "1",
       "note": "CCTV-6电影",
-      "logo": "https://live.fanmingming.com/tv/CCTV6.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/CCTV6.png"
     },
     {
       "tvid": "10",
@@ -78,7 +78,7 @@
       "name": "CCTV-7国防军事,CCTV-7,CCTV7,CCTV7国防军事",
       "status": "1",
       "note": "CCTV-7国防军事",
-      "logo": "https://live.fanmingming.com/tv/CCTV7.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/CCTV7.png"
     },
     {
       "tvid": "11",
@@ -86,7 +86,7 @@
       "name": "CCTV-8电视剧,CCTV-8,CCTV8,CCTV8电视剧",
       "status": "1",
       "note": "CCTV-8电视剧",
-      "logo": "https://live.fanmingming.com/tv/CCTV8.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/CCTV8.png"
     },
     {
       "tvid": "12",
@@ -94,7 +94,7 @@
       "name": "CCTV-9纪录,CCTV-9,CCTV9,CCTV9纪录",
       "status": "1",
       "note": "CCTV-9纪录",
-      "logo": "https://live.fanmingming.com/tv/CCTV9.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/CCTV9.png"
     },
     {
       "tvid": "13",
@@ -102,7 +102,7 @@
       "name": "CCTV-10科教,CCTV-10,CCTV10,CCTV10科教",
       "status": "1",
       "note": "CCTV-10科教",
-      "logo": "https://live.fanmingming.com/tv/CCTV10.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/CCTV10.png"
     },
     {
       "tvid": "14",
@@ -110,7 +110,7 @@
       "name": "CCTV-11戏曲,CCTV-11,CCTV11,CCTV11戏曲",
       "status": "1",
       "note": "CCTV-11戏曲",
-      "logo": "https://live.fanmingming.com/tv/CCTV11.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/CCTV11.png"
     },
     {
       "tvid": "15",
@@ -118,7 +118,7 @@
       "name": "CCTV-12社会与法,CCTV-12,CCTV12,CCTV12社会与法",
       "status": "1",
       "note": "CCTV-12社会与法",
-      "logo": "https://live.fanmingming.com/tv/CCTV12.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/CCTV12.png"
     },
     {
       "tvid": "16",
@@ -126,7 +126,7 @@
       "name": "CCTV-13新闻,CCTV-13,CCTV13,CCTV13新闻",
       "status": "1",
       "note": "CCTV-13新闻",
-      "logo": "https://live.fanmingming.com/tv/CCTV13.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/CCTV13.png"
     },
     {
       "tvid": "17",
@@ -134,7 +134,7 @@
       "name": "CCTV-14少儿,CCTV-14,CCTV14,CCTV14少儿",
       "status": "1",
       "note": "CCTV-14少儿",
-      "logo": "https://live.fanmingming.com/tv/CCTV14.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/CCTV14.png"
     },
     {
       "tvid": "18",
@@ -142,7 +142,7 @@
       "name": "CCTV-15音乐,CCTV-15,CCTV15,CCTV15音乐",
       "status": "1",
       "note": "CCTV-15音乐",
-      "logo": "https://live.fanmingming.com/tv/CCTV15.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/CCTV15.png"
     },
     {
       "tvid": "19",
@@ -150,7 +150,7 @@
       "name": "CCTV-16奥林匹克,CCTV-16,CCTV16,CCTV16奥林匹克",
       "status": "1",
       "note": "CCTV-16奥林匹克",
-      "logo": "https://live.fanmingming.com/tv/CCTV16.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/CCTV16.png"
     },
     {
       "tvid": "20",
@@ -158,7 +158,7 @@
       "name": "CCTV-17农业农村,CCTV-17,CCTV17,CCTV17农业农村",
       "status": "1",
       "note": "CCTV-17农业农村",
-      "logo": "https://live.fanmingming.com/tv/CCTV17.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/CCTV17.png"
     },
     {
       "tvid": "21",
@@ -166,7 +166,7 @@
       "name": "CCTV4K,CCTV4K超高清,CCTV-4K,CCTV-4K超高清",
       "status": "1",
       "note": "CCTV-4K超高清",
-      "logo": "https://live.fanmingming.com/tv/CCTV4K.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/CCTV4K.png"
     },
     {
       "tvid": "22",
@@ -174,7 +174,7 @@
       "name": "CCTV8K,CCTV8K超高清,CCTV-8K,CCTV-8K超高清",
       "status": "1",
       "note": "CCTV-8K超高清",
-      "logo": "https://live.fanmingming.com/tv/CCTV8K.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/CCTV8K.png"
     },
     {
       "tvid": "23",
@@ -182,7 +182,7 @@
       "name": "CGTN,CGTN英语",
       "status": "1",
       "note": "CGTN",
-      "logo": "https://live.fanmingming.com/tv/CGTN.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/CGTN.png"
     },
     {
       "tvid": "24",
@@ -190,7 +190,7 @@
       "name": "CGTNRussian,CGTN俄语",
       "status": "1",
       "note": "CGTN俄语",
-      "logo": "https://live.fanmingming.com/tv/CGTN俄语.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/CGTN俄语.png"
     },
     {
       "tvid": "25",
@@ -198,7 +198,7 @@
       "name": "CGTNFrench,CGTN法语",
       "status": "1",
       "note": "CGTN法语",
-      "logo": "https://live.fanmingming.com/tv/CGTN法语.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/CGTN法语.png"
     },
     {
       "tvid": "26",
@@ -206,7 +206,7 @@
       "name": "CGTNDocumentary,CGTN纪录",
       "status": "1",
       "note": "CGTN纪录",
-      "logo": "https://live.fanmingming.com/tv/CGTN纪录.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/CGTN纪录.png"
     },
     {
       "tvid": "27",
@@ -214,7 +214,7 @@
       "name": "CGTNSpanish,CGTN西语,CGTN西班牙语",
       "status": "1",
       "note": "CGTN西语",
-      "logo": "https://live.fanmingming.com/tv/CGTN西语.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/CGTN西语.png"
     },
     {
       "tvid": "28",
@@ -222,7 +222,7 @@
       "name": "CGTNArabic,CGTN阿语,CGTN阿拉伯语",
       "status": "1",
       "note": "CGTN阿语",
-      "logo": "https://live.fanmingming.com/tv/CGTN阿语.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/CGTN阿语.png"
     },
     {
       "tvid": "29",
@@ -230,7 +230,7 @@
       "name": "电视指南,CCTV电视指南",
       "status": "1",
       "note": "电视指南",
-      "logo": "https://live.fanmingming.com/tv/电视指南.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/电视指南.png"
     },
     {
       "tvid": "30",
@@ -238,7 +238,7 @@
       "name": "风云剧场,CCTV风云剧场",
       "status": "1",
       "note": "风云剧场",
-      "logo": "https://live.fanmingming.com/tv/风云剧场.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/风云剧场.png"
     },
     {
       "tvid": "31",
@@ -246,7 +246,7 @@
       "name": "风云足球,CCTV风云足球",
       "status": "1",
       "note": "风云足球",
-      "logo": "https://live.fanmingming.com/tv/风云足球.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/风云足球.png"
     },
     {
       "tvid": "32",
@@ -254,7 +254,7 @@
       "name": "风云音乐,CCTV风云音乐",
       "status": "1",
       "note": "风云音乐",
-      "logo": "https://live.fanmingming.com/tv/风云音乐.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/风云音乐.png"
     },
     {
       "tvid": "33",
@@ -262,7 +262,7 @@
       "name": "第一剧场,CCTV第一剧场",
       "status": "1",
       "note": "第一剧场",
-      "logo": "https://live.fanmingming.com/tv/第一剧场.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/第一剧场.png"
     },
     {
       "tvid": "34",
@@ -270,7 +270,7 @@
       "name": "世界地理,CCTV世界地理",
       "status": "1",
       "note": "世界地理",
-      "logo": "https://live.fanmingming.com/tv/世界地理.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/世界地理.png"
     },
     {
       "tvid": "35",
@@ -278,7 +278,7 @@
       "name": "怀旧剧场,CCTV怀旧剧场",
       "status": "1",
       "note": "怀旧剧场",
-      "logo": "https://live.fanmingming.com/tv/怀旧剧场.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/怀旧剧场.png"
     },
     {
       "tvid": "36",
@@ -286,7 +286,7 @@
       "name": "兵器科技,CCTV兵器科技",
       "status": "1",
       "note": "兵器科技",
-      "logo": "https://live.fanmingming.com/tv/兵器科技.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/兵器科技.png"
     },
     {
       "tvid": "37",
@@ -294,7 +294,7 @@
       "name": "女性时尚,CCTV女性时尚",
       "status": "1",
       "note": "女性时尚",
-      "logo": "https://live.fanmingming.com/tv/女性时尚.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/女性时尚.png"
     },
     {
       "tvid": "38",
@@ -302,7 +302,7 @@
       "name": "高尔夫网球,CCTV高尔夫网球,高尔夫•网球,CCTV高尔夫•网球",
       "status": "1",
       "note": "高尔夫网球",
-      "logo": "https://live.fanmingming.com/tv/高尔夫网球.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/高尔夫网球.png"
     },
     {
       "tvid": "39",
@@ -310,7 +310,7 @@
       "name": "文化精品,CCTV文化精品,央视文化精品,CCTV央视文化精品",
       "status": "1",
       "note": "文化精品",
-      "logo": "https://live.fanmingming.com/tv/文化精品.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/央视文化精品.png"
     },
     {
       "tvid": "40",
@@ -318,7 +318,7 @@
       "name": "央视台球,CCTV央视台球",
       "status": "1",
       "note": "央视台球",
-      "logo": "https://live.fanmingming.com/tv/央视台球.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/央视台球.png"
     },
     {
       "tvid": "41",
@@ -326,7 +326,7 @@
       "name": "卫生健康,CCTV卫生健康",
       "status": "1",
       "note": "卫生健康",
-      "logo": "https://live.fanmingming.com/tv/卫生健康.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/卫生健康.png"
     },
     {
       "tvid": "42",
@@ -334,7 +334,7 @@
       "name": "中学生,中央新影中学生,CCTV中学生",
       "status": "1",
       "note": "中学生",
-      "logo": "https://live.fanmingming.com/tv/中学生.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/中学生.png"
     },
     {
       "tvid": "43",
@@ -342,7 +342,7 @@
       "name": "老故事,中央新影老故事,CCTV老故事",
       "status": "1",
       "note": "老故事",
-      "logo": "https://live.fanmingming.com/tv/老故事.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/老故事.png"
     },
     {
       "tvid": "44",
@@ -350,7 +350,7 @@
       "name": "发现之旅,中央新影发现之旅,CCTV发现之旅",
       "status": "1",
       "note": "发现之旅",
-      "logo": "https://live.fanmingming.com/tv/发现之旅.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/发现之旅.png"
     },
     {
       "tvid": "45",
@@ -358,7 +358,7 @@
       "name": "三沙卫视",
       "status": "1",
       "note": "三沙卫视",
-      "logo": "https://live.fanmingming.com/tv/三沙卫视.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/三沙卫视.png"
     },
     {
       "tvid": "46",
@@ -366,7 +366,7 @@
       "name": "东南卫视",
       "status": "1",
       "note": "东南卫视",
-      "logo": "https://live.fanmingming.com/tv/东南卫视.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/东南卫视.png"
     },
     {
       "tvid": "47",
@@ -374,7 +374,7 @@
       "name": "东方卫视",
       "status": "1",
       "note": "东方卫视",
-      "logo": "https://live.fanmingming.com/tv/东方卫视.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/东方卫视.png"
     },
     {
       "tvid": "48",
@@ -382,7 +382,7 @@
       "name": "云南卫视",
       "status": "1",
       "note": "云南卫视",
-      "logo": "https://live.fanmingming.com/tv/云南卫视.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/云南卫视.png"
     },
     {
       "tvid": "49",
@@ -390,7 +390,7 @@
       "name": "兵团卫视",
       "status": "1",
       "note": "兵团卫视",
-      "logo": "https://live.fanmingming.com/tv/兵团卫视.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/兵团卫视.png"
     },
     {
       "tvid": "50",
@@ -398,7 +398,7 @@
       "name": "内蒙古卫视",
       "status": "1",
       "note": "内蒙古卫视",
-      "logo": "https://live.fanmingming.com/tv/内蒙古卫视.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/内蒙古卫视.png"
     },
     {
       "tvid": "51",
@@ -406,7 +406,7 @@
       "name": "农林卫视",
       "status": "1",
       "note": "农林卫视",
-      "logo": "https://live.fanmingming.com/tv/农林卫视.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/农林卫视.png"
     },
     {
       "tvid": "52",
@@ -414,7 +414,7 @@
       "name": "北京卫视",
       "status": "1",
       "note": "北京卫视",
-      "logo": "https://live.fanmingming.com/tv/北京卫视.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/北京卫视.png"
     },
     {
       "tvid": "53",
@@ -422,7 +422,7 @@
       "name": "南方卫视",
       "status": "1",
       "note": "南方卫视",
-      "logo": "https://live.fanmingming.com/tv/南方卫视.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/南方卫视.png"
     },
     {
       "tvid": "54",
@@ -430,7 +430,7 @@
       "name": "厦门卫视",
       "status": "1",
       "note": "厦门卫视",
-      "logo": "https://live.fanmingming.com/tv/厦门卫视.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/厦门卫视.png"
     },
     {
       "tvid": "55",
@@ -438,7 +438,7 @@
       "name": "四川卫视",
       "status": "1",
       "note": "四川卫视",
-      "logo": "https://live.fanmingming.com/tv/四川卫视.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/四川卫视.png"
     },
     {
       "tvid": "56",
@@ -446,7 +446,7 @@
       "name": "天津卫视",
       "status": "1",
       "note": "天津卫视",
-      "logo": "https://live.fanmingming.com/tv/天津卫视.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/天津卫视.png"
     },
     {
       "tvid": "57",
@@ -454,7 +454,7 @@
       "name": "大湾区卫视",
       "status": "1",
       "note": "大湾区卫视",
-      "logo": "https://live.fanmingming.com/tv/大湾区卫视.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/大湾区卫视.png"
     },
     {
       "tvid": "58",
@@ -462,7 +462,7 @@
       "name": "安徽卫视",
       "status": "1",
       "note": "安徽卫视",
-      "logo": "https://live.fanmingming.com/tv/安徽卫视.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/安徽卫视.png"
     },
     {
       "tvid": "59",
@@ -470,7 +470,7 @@
       "name": "广东卫视",
       "status": "1",
       "note": "广东卫视",
-      "logo": "https://live.fanmingming.com/tv/广东卫视.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/广东卫视.png"
     },
     {
       "tvid": "60",
@@ -478,7 +478,7 @@
       "name": "广西卫视",
       "status": "1",
       "note": "广西卫视",
-      "logo": "https://live.fanmingming.com/tv/广西卫视.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/广西卫视.png"
     },
     {
       "tvid": "61",
@@ -486,7 +486,7 @@
       "name": "吉林卫视",
       "status": "1",
       "note": "吉林卫视",
-      "logo": "https://live.fanmingming.com/tv/吉林卫视.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/吉林卫视.png"
     },
     {
       "tvid": "62",
@@ -494,7 +494,7 @@
       "name": "康巴卫视",
       "status": "1",
       "note": "康巴卫视",
-      "logo": "https://live.fanmingming.com/tv/康巴卫视.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/康巴卫视.png"
     },
     {
       "tvid": "63",
@@ -502,7 +502,7 @@
       "name": "延边卫视",
       "status": "1",
       "note": "延边卫视",
-      "logo": "https://live.fanmingming.com/tv/延边卫视.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/延边卫视.png"
     },
     {
       "tvid": "64",
@@ -510,7 +510,7 @@
       "name": "宁夏卫视",
       "status": "1",
       "note": "宁夏卫视",
-      "logo": "https://live.fanmingming.com/tv/宁夏卫视.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/宁夏卫视.png"
     },
     {
       "tvid": "65",
@@ -518,7 +518,7 @@
       "name": "安多卫视",
       "status": "1",
       "note": "安多卫视",
-      "logo": "https://live.fanmingming.com/tv/安多卫视.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/安多卫视.png"
     },
     {
       "tvid": "66",
@@ -526,7 +526,7 @@
       "name": "山东卫视",
       "status": "1",
       "note": "山东卫视",
-      "logo": "https://live.fanmingming.com/tv/山东卫视.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/山东卫视.png"
     },
     {
       "tvid": "67",
@@ -534,7 +534,7 @@
       "name": "山西卫视",
       "status": "1",
       "note": "山西卫视",
-      "logo": "https://live.fanmingming.com/tv/山西卫视.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/山西卫视.png"
     },
     {
       "tvid": "68",
@@ -542,7 +542,7 @@
       "name": "新疆卫视",
       "status": "1",
       "note": "新疆卫视",
-      "logo": "https://live.fanmingming.com/tv/新疆卫视.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/新疆卫视.png"
     },
     {
       "tvid": "69",
@@ -550,7 +550,7 @@
       "name": "江苏卫视",
       "status": "1",
       "note": "江苏卫视",
-      "logo": "https://live.fanmingming.com/tv/江苏卫视.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/江苏卫视.png"
     },
     {
       "tvid": "70",
@@ -558,7 +558,7 @@
       "name": "江西卫视",
       "status": "1",
       "note": "江西卫视",
-      "logo": "https://live.fanmingming.com/tv/江西卫视.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/江西卫视.png"
     },
     {
       "tvid": "71",
@@ -566,7 +566,7 @@
       "name": "河北卫视",
       "status": "1",
       "note": "河北卫视",
-      "logo": "https://live.fanmingming.com/tv/河北卫视.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/河北卫视.png"
     },
     {
       "tvid": "72",
@@ -574,7 +574,7 @@
       "name": "河南卫视",
       "status": "1",
       "note": "河南卫视",
-      "logo": "https://live.fanmingming.com/tv/河南卫视.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/河南卫视.png"
     },
     {
       "tvid": "73",
@@ -582,7 +582,7 @@
       "name": "浙江卫视",
       "status": "1",
       "note": "浙江卫视",
-      "logo": "https://live.fanmingming.com/tv/浙江卫视.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/浙江卫视.png"
     },
     {
       "tvid": "74",
@@ -590,7 +590,7 @@
       "name": "海南卫视",
       "status": "1",
       "note": "海南卫视",
-      "logo": "https://live.fanmingming.com/tv/海南卫视.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/海南卫视.png"
     },
     {
       "tvid": "75",
@@ -598,7 +598,7 @@
       "name": "海峡卫视",
       "status": "1",
       "note": "海峡卫视",
-      "logo": "https://live.fanmingming.com/tv/海峡卫视.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/海峡卫视.png"
     },
     {
       "tvid": "76",
@@ -606,7 +606,7 @@
       "name": "深圳卫视",
       "status": "1",
       "note": "深圳卫视",
-      "logo": "https://live.fanmingming.com/tv/深圳卫视.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/深圳卫视.png"
     },
     {
       "tvid": "77",
@@ -614,7 +614,7 @@
       "name": "湖北卫视",
       "status": "1",
       "note": "湖北卫视",
-      "logo": "https://live.fanmingming.com/tv/湖北卫视.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/湖北卫视.png"
     },
     {
       "tvid": "78",
@@ -622,7 +622,7 @@
       "name": "湖南卫视",
       "status": "1",
       "note": "湖南卫视",
-      "logo": "https://live.fanmingming.com/tv/湖南卫视.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/湖南卫视.png"
     },
     {
       "tvid": "79",
@@ -630,7 +630,7 @@
       "name": "澳亚卫视",
       "status": "1",
       "note": "澳亚卫视",
-      "logo": "https://live.fanmingming.com/tv/澳亚卫视.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/澳亚卫视.png"
     },
     {
       "tvid": "80",
@@ -638,7 +638,7 @@
       "name": "甘肃卫视",
       "status": "1",
       "note": "甘肃卫视",
-      "logo": "https://live.fanmingming.com/tv/甘肃卫视.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/甘肃卫视.png"
     },
     {
       "tvid": "81",
@@ -646,7 +646,7 @@
       "name": "莲花卫视",
       "status": "1",
       "note": "莲花卫视",
-      "logo": "https://live.fanmingming.com/tv/莲花卫视.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/莲花卫视.png"
     },
     {
       "tvid": "82",
@@ -654,7 +654,7 @@
       "name": "辽宁卫视",
       "status": "1",
       "note": "辽宁卫视",
-      "logo": "https://live.fanmingming.com/tv/辽宁卫视.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/辽宁卫视.png"
     },
     {
       "tvid": "83",
@@ -662,7 +662,7 @@
       "name": "西藏卫视",
       "status": "1",
       "note": "西藏卫视",
-      "logo": "https://live.fanmingming.com/tv/西藏卫视.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/西藏卫视.png"
     },
     {
       "tvid": "84",
@@ -670,7 +670,7 @@
       "name": "贵州卫视",
       "status": "1",
       "note": "贵州卫视",
-      "logo": "https://live.fanmingming.com/tv/贵州卫视.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/贵州卫视.png"
     },
     {
       "tvid": "85",
@@ -678,7 +678,7 @@
       "name": "重庆卫视",
       "status": "1",
       "note": "重庆卫视",
-      "logo": "https://live.fanmingming.com/tv/重庆卫视.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/重庆卫视.png"
     },
     {
       "tvid": "86",
@@ -686,7 +686,7 @@
       "name": "陕西卫视",
       "status": "1",
       "note": "陕西卫视",
-      "logo": "https://live.fanmingming.com/tv/陕西卫视.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/陕西卫视.png"
     },
     {
       "tvid": "87",
@@ -694,7 +694,7 @@
       "name": "黑龙江卫视",
       "status": "1",
       "note": "黑龙江卫视",
-      "logo": "https://live.fanmingming.com/tv/黑龙江卫视.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/黑龙江卫视.png"
     },
     {
       "tvid": "88",
@@ -702,7 +702,7 @@
       "name": "香港卫视",
       "status": "1",
       "note": "香港卫视",
-      "logo": "https://live.fanmingming.com/tv/香港卫视.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/香港卫视.png"
     },
     {
       "tvid": "89",
@@ -710,7 +710,7 @@
       "name": "CHC动作电影,动作电影",
       "status": "1",
       "note": "CHC动作电影",
-      "logo": "https://live.fanmingming.com/tv/CHC动作电影.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/CHC动作电影.png"
     },
     {
       "tvid": "90",
@@ -718,7 +718,7 @@
       "name": "CHC家庭影院,家庭影院",
       "status": "1",
       "note": "CHC家庭影院",
-      "logo": "https://live.fanmingming.com/tv/CHC家庭影院.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/CHC家庭影院.png"
     },
     {
       "tvid": "91",
@@ -726,7 +726,7 @@
       "name": "CHC高清电影,高清电影",
       "status": "1",
       "note": "CHC高清电影",
-      "logo": "https://live.fanmingming.com/tv/CHC影迷电影.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/CHC影迷电影.png"
     },
     {
       "tvid": "92",
@@ -734,7 +734,7 @@
       "name": "IHOT爱世界,爱世界",
       "status": "1",
       "note": "IHOT爱世界",
-      "logo": "https://live.fanmingming.com/tv/IHOT爱世界.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/IHOT爱世界.png"
     },
     {
       "tvid": "93",
@@ -742,7 +742,7 @@
       "name": "IHOT爱体育,爱体育",
       "status": "1",
       "note": "IHOT爱体育",
-      "logo": "https://live.fanmingming.com/tv/IHOT爱体育.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/IHOT爱体育.png"
     },
     {
       "tvid": "94",
@@ -750,7 +750,7 @@
       "name": "IHOT爱动漫,爱动漫",
       "status": "1",
       "note": "IHOT爱动漫",
-      "logo": "https://live.fanmingming.com/tv/IHOT爱动漫.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/IHOT爱动漫.png"
     },
     {
       "tvid": "95",
@@ -758,7 +758,7 @@
       "name": "IHOT爱历史,爱历史",
       "status": "1",
       "note": "IHOT爱历史",
-      "logo": "https://live.fanmingming.com/tv/IHOT爱历史.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/IHOT爱历史.png"
     },
     {
       "tvid": "96",
@@ -766,7 +766,7 @@
       "name": "IHOT爱喜剧,爱喜剧",
       "status": "1",
       "note": "IHOT爱喜剧",
-      "logo": "https://live.fanmingming.com/tv/IHOT爱喜剧.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/IHOT爱喜剧.png"
     },
     {
       "tvid": "97",
@@ -774,7 +774,7 @@
       "name": "IHOT爱奇谈,爱奇谈",
       "status": "1",
       "note": "IHOT爱奇谈",
-      "logo": "https://live.fanmingming.com/tv/IHOT爱奇谈.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/IHOT爱奇谈.png"
     },
     {
       "tvid": "98",
@@ -782,7 +782,7 @@
       "name": "IHOT爱娱乐,爱娱乐",
       "status": "1",
       "note": "IHOT爱娱乐",
-      "logo": "https://live.fanmingming.com/tv/IHOT爱娱乐.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/IHOT爱娱乐.png"
     },
     {
       "tvid": "99",
@@ -790,7 +790,7 @@
       "name": "IHOT爱家庭,爱家庭",
       "status": "1",
       "note": "IHOT爱家庭",
-      "logo": "https://live.fanmingming.com/tv/IHOT爱家庭.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/IHOT爱家庭.png"
     },
     {
       "tvid": "100",
@@ -798,7 +798,7 @@
       "name": "IHOT爱幼教,爱幼教",
       "status": "1",
       "note": "IHOT爱幼教",
-      "logo": "https://live.fanmingming.com/tv/IHOT爱幼教.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/IHOT爱幼教.png"
     },
     {
       "tvid": "101",
@@ -806,7 +806,7 @@
       "name": "IHOT爱怀旧,爱怀旧",
       "status": "1",
       "note": "IHOT爱怀旧",
-      "logo": "https://live.fanmingming.com/tv/IHOT爱怀旧.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/IHOT爱怀旧.png"
     },
     {
       "tvid": "102",
@@ -814,7 +814,7 @@
       "name": "IHOT爱悬疑,爱悬疑",
       "status": "1",
       "note": "IHOT爱悬疑",
-      "logo": "https://live.fanmingming.com/tv/IHOT爱悬疑.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/IHOT爱悬疑.png"
     },
     {
       "tvid": "103",
@@ -822,7 +822,7 @@
       "name": "IHOT爱探索,爱探索",
       "status": "1",
       "note": "IHOT爱探索",
-      "logo": "https://live.fanmingming.com/tv/IHOT爱探索.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/IHOT爱探索.png"
     },
     {
       "tvid": "104",
@@ -830,7 +830,7 @@
       "name": "IHOT爱旅行,爱旅行",
       "status": "1",
       "note": "IHOT爱旅行",
-      "logo": "https://live.fanmingming.com/tv/IHOT爱旅行.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/IHOT爱旅行.png"
     },
     {
       "tvid": "105",
@@ -838,7 +838,7 @@
       "name": "IHOT爱时尚,爱时尚",
       "status": "1",
       "note": "IHOT爱时尚",
-      "logo": "https://live.fanmingming.com/tv/IHOT爱时尚.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/IHOT爱时尚.png"
     },
     {
       "tvid": "106",
@@ -846,7 +846,7 @@
       "name": "IHOT爱极限,爱极限",
       "status": "1",
       "note": "IHOT爱极限",
-      "logo": "https://live.fanmingming.com/tv/IHOT爱极限.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/IHOT爱极限.png"
     },
     {
       "tvid": "107",
@@ -854,7 +854,7 @@
       "name": "IHOT爱江湖,爱江湖",
       "status": "1",
       "note": "IHOT爱江湖",
-      "logo": "https://live.fanmingming.com/tv/IHOT爱江湖.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/IHOT爱江湖.png"
     },
     {
       "tvid": "108",
@@ -862,7 +862,7 @@
       "name": "IHOT爱浪漫,爱浪漫",
       "status": "1",
       "note": "IHOT爱浪漫",
-      "logo": "https://live.fanmingming.com/tv/IHOT爱浪漫.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/IHOT爱浪漫.png"
     },
     {
       "tvid": "109",
@@ -870,7 +870,7 @@
       "name": "IHOT爱猎奇,爱猎奇",
       "status": "1",
       "note": "IHOT爱猎奇",
-      "logo": "https://live.fanmingming.com/tv/IHOT爱猎奇.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/IHOT爱猎奇.png"
     },
     {
       "tvid": "110",
@@ -878,7 +878,7 @@
       "name": "IHOT爱玩具,爱玩具",
       "status": "1",
       "note": "IHOT爱玩具",
-      "logo": "https://live.fanmingming.com/tv/IHOT爱玩具.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/IHOT爱玩具.png"
     },
     {
       "tvid": "111",
@@ -886,7 +886,7 @@
       "name": "IHOT爱电竞,爱电竞",
       "status": "1",
       "note": "IHOT爱电竞",
-      "logo": "https://live.fanmingming.com/tv/IHOT爱电竞.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/IHOT爱电竞.png"
     },
     {
       "tvid": "112",
@@ -894,7 +894,7 @@
       "name": "IHOT爱科学,爱科学",
       "status": "1",
       "note": "IHOT爱科学",
-      "logo": "https://live.fanmingming.com/tv/IHOT爱科学.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/IHOT爱科学.png"
     },
     {
       "tvid": "113",
@@ -902,7 +902,7 @@
       "name": "IHOT爱科幻,爱科幻",
       "status": "1",
       "note": "IHOT爱科幻",
-      "logo": "https://live.fanmingming.com/tv/IHOT爱科幻.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/IHOT爱科幻.png"
     },
     {
       "tvid": "114",
@@ -910,7 +910,7 @@
       "name": "IHOT爱经典,爱经典",
       "status": "1",
       "note": "IHOT爱经典",
-      "logo": "https://live.fanmingming.com/tv/IHOT爱经典.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/IHOT爱经典.png"
     },
     {
       "tvid": "115",
@@ -918,7 +918,7 @@
       "name": "IHOT爱美食,爱美食",
       "status": "1",
       "note": "IHOT爱美食",
-      "logo": "https://live.fanmingming.com/tv/IHOT爱美食.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/IHOT爱美食.png"
     },
     {
       "tvid": "116",
@@ -926,7 +926,7 @@
       "name": "IHOT爱解密,爱解密",
       "status": "1",
       "note": "IHOT爱解密",
-      "logo": "https://live.fanmingming.com/tv/IHOT爱解密.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/IHOT爱解密.png"
     },
     {
       "tvid": "117",
@@ -934,7 +934,7 @@
       "name": "IHOT爱谍战,爱谍战",
       "status": "1",
       "note": "IHOT爱谍战",
-      "logo": "https://live.fanmingming.com/tv/IHOT爱谍战.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/IHOT爱谍战.png"
     },
     {
       "tvid": "118",
@@ -942,7 +942,7 @@
       "name": "IHOT爱赛车,爱赛车",
       "status": "1",
       "note": "IHOT爱赛车",
-      "logo": "https://live.fanmingming.com/tv/IHOT爱赛车.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/IHOT爱赛车.png"
     },
     {
       "tvid": "119",
@@ -950,7 +950,7 @@
       "name": "IHOT爱都市,爱都市",
       "status": "1",
       "note": "IHOT爱都市",
-      "logo": "https://live.fanmingming.com/tv/IHOT爱都市.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/IHOT爱都市.png"
     },
     {
       "tvid": "120",
@@ -958,7 +958,7 @@
       "name": "IHOT爱院线,爱院线",
       "status": "1",
       "note": "IHOT爱院线",
-      "logo": "https://live.fanmingming.com/tv/IHOT爱院线.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/IHOT爱院线.png"
     },
     {
       "tvid": "121",
@@ -966,7 +966,7 @@
       "name": "IHOT爱青春,爱青春",
       "status": "1",
       "note": "IHOT爱青春",
-      "logo": "https://live.fanmingming.com/tv/IHOT爱青春.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/IHOT爱青春.png"
     },
     {
       "tvid": "122",
@@ -1454,7 +1454,7 @@
       "name": "中华特产,中华特产频道",
       "status": "1",
       "note": "中华特产",
-      "logo": "https://live.fanmingming.com/tv/中华特产.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/中华特产.png"
     },
     {
       "tvid": "183",
@@ -1462,7 +1462,7 @@
       "name": "中华美食,中华美食频道",
       "status": "1",
       "note": "中华美食",
-      "logo": "https://live.fanmingming.com/tv/中华美食.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/中华美食.png"
     },
     {
       "tvid": "184",
@@ -1470,7 +1470,7 @@
       "name": "中国交通,中国交通频道",
       "status": "1",
       "note": "中国交通",
-      "logo": "https://live.fanmingming.com/tv/中国交通.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/中国交通.png"
     },
     {
       "tvid": "185",
@@ -1478,7 +1478,7 @@
       "name": "中国天气,中国天气频道",
       "status": "1",
       "note": "中国天气",
-      "logo": "https://live.fanmingming.com/tv/中国天气.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/中国天气.png"
     },
     {
       "tvid": "186",
@@ -1502,7 +1502,7 @@
       "name": "金鹰卡通,湖南金鹰卡通",
       "status": "1",
       "note": "金鹰卡通",
-      "logo": "https://live.fanmingming.com/tv/金鹰卡通.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/金鹰卡通.png"
     },
     {
       "tvid": "189",
@@ -1510,7 +1510,7 @@
       "name": "湖南快乐垂钓,快乐垂钓",
       "status": "1",
       "note": "快乐垂钓",
-      "logo": "https://live.fanmingming.com/tv/快乐垂钓.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/快乐垂钓.png"
     },
     {
       "tvid": "190",
@@ -1590,7 +1590,7 @@
       "name": "置业频道",
       "status": "1",
       "note": "北广置业频道",
-      "logo": "https://live.fanmingming.com/tv/置业频道.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/置业频道.png"
     },
     {
       "tvid": "200",
@@ -1710,7 +1710,7 @@
       "name": "哒啵电竞",
       "status": "1",
       "note": "哒啵电竞",
-      "logo": "https://live.fanmingming.com/tv/哒啵电竞.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/哒啵电竞.png"
     },
     {
       "tvid": "215",
@@ -1718,7 +1718,7 @@
       "name": "哒啵赛事",
       "status": "1",
       "note": "哒啵赛事",
-      "logo": "https://live.fanmingming.com/tv/哒啵赛事.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/哒啵赛事.png"
     },
     {
       "tvid": "216",
@@ -1726,7 +1726,7 @@
       "name": "黑莓动画",
       "status": "1",
       "note": "黑莓动画",
-      "logo": "https://live.fanmingming.com/tv/黑莓动画.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/黑莓动画.png"
     },
     {
       "tvid": "217",
@@ -1734,7 +1734,7 @@
       "name": "黑莓电影",
       "status": "1",
       "note": "黑莓电影",
-      "logo": "https://live.fanmingming.com/tv/黑莓电影.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/黑莓电影.png"
     },
     {
       "tvid": "218",
@@ -1814,7 +1814,7 @@
       "name": "北京纪实科教,纪实科教",
       "status": "1",
       "note": "北京纪实科教",
-      "logo": "https://live.fanmingming.com/tv/北京纪实科教.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/北京纪实科教.png"
     },
     {
       "tvid": "228",
@@ -1918,7 +1918,7 @@
       "name": "游戏风云,SITV游戏风云",
       "status": "1",
       "note": "游戏风云",
-      "logo": "https://live.fanmingming.com/tv/游戏风云.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/游戏风云.png"
     },
     {
       "tvid": "241",
@@ -1926,7 +1926,7 @@
       "name": "金色学堂,SITV金色学堂",
       "status": "1",
       "note": "金色学堂",
-      "logo": "https://live.fanmingming.com/tv/金色学堂.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/金色学堂.png"
     },
     {
       "tvid": "242",
@@ -1934,7 +1934,7 @@
       "name": "欢笑剧场,SITV欢笑剧场,欢笑剧场4K,SITV欢笑剧场4K",
       "status": "1",
       "note": "欢笑剧场",
-      "logo": "https://live.fanmingming.com/tv/欢笑剧场.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/欢笑剧场.png"
     },
     {
       "tvid": "243",
@@ -1942,7 +1942,7 @@
       "name": "乐游,SITV乐游",
       "status": "1",
       "note": "乐游",
-      "logo": "https://live.fanmingming.com/tv/乐游.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/乐游.png"
     },
     {
       "tvid": "244",
@@ -1950,7 +1950,7 @@
       "name": "都市剧场,SITV都市剧场",
       "status": "1",
       "note": "都市剧场",
-      "logo": "https://live.fanmingming.com/tv/都市剧场.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/都市剧场.png"
     },
     {
       "tvid": "245",
@@ -1958,7 +1958,7 @@
       "name": "动漫秀场,SITV动漫秀场",
       "status": "1",
       "note": "动漫秀场",
-      "logo": "https://live.fanmingming.com/tv/动漫秀场.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/动漫秀场.png"
     },
     {
       "tvid": "246",
@@ -1966,7 +1966,7 @@
       "name": "劲爆体育,SITV劲爆体育",
       "status": "1",
       "note": "劲爆体育",
-      "logo": "https://live.fanmingming.com/tv/劲爆体育.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/劲爆体育.png"
     },
     {
       "tvid": "247",
@@ -1974,7 +1974,7 @@
       "name": "法治天地,SITV法治天地",
       "status": "1",
       "note": "法治天地",
-      "logo": "https://live.fanmingming.com/tv/法治天地.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/法治天地.png"
     },
     {
       "tvid": "248",
@@ -1982,7 +1982,7 @@
       "name": "上海第一财经,SITV第一财经,第一财经",
       "status": "1",
       "note": "上海第一财经",
-      "logo": "https://live.fanmingming.com/tv/上海第一财经.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/上海第一财经.png"
     },
     {
       "tvid": "249",
@@ -1990,7 +1990,7 @@
       "name": "生活时尚,SITV生活时尚",
       "status": "1",
       "note": "生活时尚",
-      "logo": "https://live.fanmingming.com/tv/生活时尚.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/生活时尚.png"
     },
     {
       "tvid": "250",
@@ -1998,7 +1998,7 @@
       "name": "七彩戏剧,SITV七彩戏剧",
       "status": "1",
       "note": "七彩戏剧",
-      "logo": "https://live.fanmingming.com/tv/七彩戏剧.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/七彩戏剧.png"
     },
     {
       "tvid": "251",
@@ -2006,7 +2006,7 @@
       "name": "东方财经,SITV东方财经",
       "status": "1",
       "note": "东方财经",
-      "logo": "https://live.fanmingming.com/tv/东方财经.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/东方财经.png"
     },
     {
       "tvid": "252",
@@ -2014,7 +2014,7 @@
       "name": "新视觉,SITV新视觉",
       "status": "1",
       "note": "新视觉",
-      "logo": "https://live.fanmingming.com/tv/新视觉.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/新视觉.png"
     },
     {
       "tvid": "253",
@@ -2114,8 +2114,8 @@
     },
     {
       "tvid": "265",
-      "epgid": "峨嵋电影",
-      "name": "峨嵋电影频道",
+      "epgid": "峨眉电影",
+      "name": "峨眉电影频道,四川峨眉电影,峨眉电影",
       "status": "1",
       "note": "峨嵋电影频道",
       "logo": "http://epg.51zmt.top:8000/tb1/qt/emeidianying.png"
@@ -2198,7 +2198,7 @@
       "name": "山东齐鲁",
       "status": "1",
       "note": "山东齐鲁",
-      "logo": "https://live.fanmingming.com/tv/山东齐鲁.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/山东齐鲁.png"
     },
     {
       "tvid": "276",
@@ -2206,7 +2206,7 @@
       "name": "山东体育,山东体育休闲",
       "status": "1",
       "note": "山东体育",
-      "logo": "https://live.fanmingming.com/tv/山东体育.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/山东体育.png"
     },
     {
       "tvid": "277",
@@ -2214,7 +2214,7 @@
       "name": "山东农科",
       "status": "1",
       "note": "山东农科",
-      "logo": "https://live.fanmingming.com/tv/山东农科.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/山东农科.png"
     },
     {
       "tvid": "278",
@@ -2222,7 +2222,7 @@
       "name": "山东公共",
       "status": "1",
       "note": "山东公共",
-      "logo": "https://live.fanmingming.com/tv/山东公共.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/山东公共.png"
     },
     {
       "tvid": "279",
@@ -2230,7 +2230,7 @@
       "name": "山东少儿",
       "status": "1",
       "note": "山东少儿",
-      "logo": "https://live.fanmingming.com/tv/山东少儿.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/山东少儿.png"
     },
     {
       "tvid": "280",
@@ -2238,7 +2238,7 @@
       "name": "山东新闻",
       "status": "1",
       "note": "山东新闻",
-      "logo": "https://live.fanmingming.com/tv/山东新闻.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/山东新闻.png"
     },
     {
       "tvid": "281",
@@ -2246,7 +2246,7 @@
       "name": "山东综艺",
       "status": "1",
       "note": "山东综艺",
-      "logo": "https://live.fanmingming.com/tv/山东综艺.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/山东综艺.png"
     },
     {
       "tvid": "282",
@@ -2254,7 +2254,7 @@
       "name": "山东文旅",
       "status": "1",
       "note": "山东文旅",
-      "logo": "https://live.fanmingming.com/tv/山东文旅.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/山东文旅.png"
     },
     {
       "tvid": "283",
@@ -2262,7 +2262,7 @@
       "name": "山东教育卫视,山东教育",
       "status": "1",
       "note": "山东教育卫视",
-      "logo": "https://live.fanmingming.com/tv/山东教育.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/山东教育.png"
     },
     {
       "tvid": "284",
@@ -2270,7 +2270,7 @@
       "name": "山东生活",
       "status": "1",
       "note": "山东生活",
-      "logo": "https://live.fanmingming.com/tv/山东生活.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/山东生活.png"
     },
     {
       "tvid": "285",
@@ -2494,7 +2494,7 @@
       "name": "武汉教育电视台,武汉教育",
       "status": "1",
       "note": "武汉教育电视台",
-      "logo": "http://epg.51zmt.top:8000/tb1/qt/WETV.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/武汉教育.png"
     },
     {
       "tvid": "313",
@@ -2542,7 +2542,7 @@
       "name": "嘉佳卡通,广东嘉佳卡通",
       "status": "1",
       "note": "嘉佳卡通",
-      "logo": "https://live.fanmingming.com/tv/嘉佳卡通.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/嘉佳卡通.png"
     },
     {
       "tvid": "319",
@@ -2642,11 +2642,11 @@
     },
     {
       "tvid": "331",
-      "epgid": "安徽科教",
-      "name": "安徽科教",
+      "epgid": "安徽农业科教",
+      "name": "安徽农业科教",
       "status": "1",
-      "note": "安徽科教",
-      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/安徽科教.png"
+      "note": "安徽农业科教",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/安徽农业科教.png"
     },
     {
       "tvid": "332",
@@ -2654,7 +2654,7 @@
       "name": "安徽经济生活",
       "status": "1",
       "note": "安徽经济生活",
-      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/安徽经济生活.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/安徽经济生活.png"
     },
     {
       "tvid": "333",
@@ -2662,7 +2662,7 @@
       "name": "安徽综艺体育",
       "status": "1",
       "note": "安徽综艺体育",
-      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/安徽综艺体育.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/安徽综艺体育.png"
     },
     {
       "tvid": "334",
@@ -2798,7 +2798,7 @@
       "name": "重温经典",
       "status": "1",
       "note": "重温经典",
-      "logo": "https://live.fanmingming.com/tv/重温经典.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/重温经典.png"
     },
     {
       "tvid": "351",
@@ -3278,7 +3278,7 @@
       "name": "内蒙古新闻综合",
       "status": "1",
       "note": "内蒙古新闻综合",
-      "logo": "https://live.fanmingming.com/tv/内蒙古新闻综合.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/内蒙古新闻综合.png"
     },
     {
       "tvid": "411",
@@ -3326,7 +3326,7 @@
       "name": "内蒙古经济生活",
       "status": "1",
       "note": "内蒙古经济生活",
-      "logo": "https://live.fanmingming.com/tv/内蒙古经济生活.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/内蒙古经济生活.png"
     },
     {
       "tvid": "417",
@@ -3670,7 +3670,7 @@
       "name": "内蒙古文体娱乐",
       "status": "1",
       "note": "内蒙古文体娱乐",
-      "logo": "https://live.fanmingming.com/tv/内蒙古文体娱乐.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/内蒙古文体娱乐.png"
     },
     {
       "tvid": "460",
@@ -3726,7 +3726,7 @@
       "name": "内蒙农牧,内蒙古农牧",
       "status": "1",
       "note": "内蒙农牧",
-      "logo": "https://live.fanmingming.com/tv/内蒙古农牧.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/内蒙古农牧.png"
     },
     {
       "tvid": "467",
@@ -3862,7 +3862,7 @@
       "name": "乌兰察布新闻",
       "status": "1",
       "note": "乌兰察布新闻",
-      "logo": "https://live.fanmingming.com/tv/乌兰察布.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/乌兰察布.png"
     },
     {
       "tvid": "484",
@@ -3878,7 +3878,7 @@
       "name": "赤峰新闻综合",
       "status": "1",
       "note": "赤峰新闻综合",
-      "logo": "https://live.fanmingming.com/tv/赤峰新闻综合.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/赤峰新闻综合.png"
     },
     {
       "tvid": "486",
@@ -3910,7 +3910,7 @@
       "name": "巴彦淖尔新闻",
       "status": "1",
       "note": "巴彦淖尔新闻",
-      "logo": "https://live.fanmingming.com/tv/巴彦淖尔新闻综合.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/巴彦淖尔新闻综合.png"
     },
     {
       "tvid": "490",
@@ -3998,7 +3998,7 @@
       "name": "鄂尔多斯新闻",
       "status": "1",
       "note": "鄂尔多斯新闻",
-      "logo": "https://live.fanmingming.com/tv/鄂尔多斯新闻综合.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/鄂尔多斯新闻综合.png"
     },
     {
       "tvid": "501",
@@ -4254,7 +4254,7 @@
       "name": "包头新闻综合",
       "status": "1",
       "note": "包头新闻综合",
-      "logo": "https://live.fanmingming.com/tv/包头新闻综合.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/包头新闻综合.png"
     },
     {
       "tvid": "533",
@@ -4270,7 +4270,7 @@
       "name": "浙江教科",
       "status": "1",
       "note": "浙江教科",
-      "logo": "https://live.fanmingming.com/tv/浙江教科影视.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/浙江教科影视.png"
     },
     {
       "tvid": "535",
@@ -4294,7 +4294,7 @@
       "name": "呼市新闻综合",
       "status": "1",
       "note": "呼市新闻综合",
-      "logo": "https://live.fanmingming.com/tv/呼和浩特新闻综合.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/呼和浩特新闻综合.png"
     },
     {
       "tvid": "538",
@@ -4326,7 +4326,7 @@
       "name": "浙江经济",
       "status": "1",
       "note": "浙江经济生活",
-      "logo": "https://live.fanmingming.com/tv/浙江经济生活.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/浙江经济生活.png"
     },
     {
       "tvid": "542",
@@ -4414,7 +4414,7 @@
       "name": "浙江钱江",
       "status": "1",
       "note": "钱江都市",
-      "logo": "https://live.fanmingming.com/tv/钱江都市.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/钱江都市.png"
     },
     {
       "tvid": "553",
@@ -4422,7 +4422,7 @@
       "name": "之江纪录",
       "status": "1",
       "note": "之江纪录",
-      "logo": "https://live.fanmingming.com/tv/之江纪录.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/之江纪录.png"
     },
     {
       "tvid": "554",
@@ -4438,7 +4438,7 @@
       "name": "浙江民生",
       "status": "1",
       "note": "浙江民生",
-      "logo": "https://live.fanmingming.com/tv/浙江民生休闲.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/浙江民生休闲.png"
     },
     {
       "tvid": "556",
@@ -4491,7 +4491,7 @@
     {
       "tvid": "562",
       "epgid": "Discovery",
-      "name": "探索发现频道,探索发现",
+      "name": "探索发现频道,探索发现,Discovery",
       "status": "1",
       "note": "探索发现频道",
       "logo": "http://epg.51zmt.top:8000/tb1/gt/DiscoveryHD.png"
@@ -4702,7 +4702,7 @@
       "name": "浙江新闻",
       "status": "1",
       "note": "浙江新闻",
-      "logo": "https://live.fanmingming.com/tv/浙江新闻.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/浙江新闻.png"
     },
     {
       "tvid": "589",
@@ -4870,7 +4870,7 @@
       "name": "浙江国际",
       "status": "1",
       "note": "浙江国际",
-      "logo": "https://live.fanmingming.com/tv/浙江国际.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/浙江国际.png"
     },
     {
       "tvid": "610",
@@ -4926,7 +4926,7 @@
       "name": "青海卫视",
       "status": "1",
       "note": "青海卫视",
-      "logo": "https://live.fanmingming.com/tv/青海卫视.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/青海卫视.png"
     },
     {
       "tvid": "617",
@@ -5190,7 +5190,7 @@
       "name": "AMC电影台",
       "status": "1",
       "note": "AMC电影台",
-      "logo": "https://raw.gitcode.com/cai_hj/tvshow/raw/main/logo/AMC电影台.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/AMC%E7%94%B5%E5%BD%B1%E5%8F%B0.png"
     },
     {
       "tvid": "651",
@@ -5198,7 +5198,7 @@
       "name": "香港面包台,面包台",
       "status": "1",
       "note": "香港面包台",
-      "logo": "https://raw.gitcode.com/cai_hj/tvshow/raw/main/logo/香港面包台.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/%E9%A6%99%E6%B8%AF%E9%9D%A2%E5%8C%85%E5%8F%B0.png"
     },
     {
       "tvid": "652",
@@ -5206,7 +5206,7 @@
       "name": "江苏城市",
       "status": "1",
       "note": "江苏城市",
-      "logo": "https://live.fanmingming.com/tv/江苏城市.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/江苏城市.png"
     },
     {
       "tvid": "653",
@@ -5214,7 +5214,7 @@
       "name": "江苏综艺",
       "status": "1",
       "note": "江苏综艺",
-      "logo": "https://live.fanmingming.com/tv/江苏综艺.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/江苏综艺.png"
     },
     {
       "tvid": "654",
@@ -5222,7 +5222,7 @@
       "name": "重庆汽摩",
       "status": "1",
       "note": "重庆汽摩",
-      "logo": "https://live.fanmingming.com/tv/%E9%87%8D%E5%BA%86%E6%B1%BD%E6%91%A9.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/%E9%87%8D%E5%BA%86%E6%B1%BD%E6%91%A9.png"
     },
     {
       "tvid": "655",
@@ -5230,7 +5230,7 @@
       "name": "江苏影视",
       "status": "1",
       "note": "江苏影视",
-      "logo": "https://live.fanmingming.com/tv/江苏影视.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/江苏影视.png"
     },
     {
       "tvid": "656",
@@ -5238,7 +5238,7 @@
       "name": "安徽影视",
       "status": "1",
       "note": "安徽影视",
-      "logo": "https://live.fanmingming.com/tv/安徽影视.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/安徽影视.png"
     },
     {
       "tvid": "657",
@@ -5246,7 +5246,7 @@
       "name": "安徽经济生活",
       "status": "1",
       "note": "安徽经济生活",
-      "logo": "https://live.fanmingming.com/tv/安徽经济生活.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/安徽经济生活.png"
     },
     {
       "tvid": "658",
@@ -5254,7 +5254,7 @@
       "name": "安徽综艺体育",
       "status": "1",
       "note": "安徽综艺体育",
-      "logo": "https://live.fanmingming.com/tv/安徽综艺体育.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/安徽综艺体育.png"
     },
     {
       "tvid": "659",
@@ -5262,7 +5262,7 @@
       "name": "河南都市",
       "status": "1",
       "note": "河南都市",
-      "logo": "https://live.fanmingming.com/tv/河南都市.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/河南都市.png"
     },
     {
       "tvid": "660",
@@ -5270,7 +5270,7 @@
       "name": "河南民生",
       "status": "1",
       "note": "河南民生",
-      "logo": "https://live.fanmingming.com/tv/河南民生.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/河南民生.png"
     },
     {
       "tvid": "661",
@@ -5702,7 +5702,7 @@
       "name": "4K电影,4K影院",
       "status": "1",
       "note": "4K电影",
-      "logo": "https://live.fanmingming.com/tv/4K电影.png"
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/4K电影.png"
     },
     {
       "tvid": "715",
@@ -5831,8 +5831,110 @@
       "status": "1",
       "note": "沈阳新闻综合",
       "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/沈阳新闻综合.png"
+    },
+    {
+      "tvid": "731",
+      "epgid": "哈尔滨生活",
+      "name": "哈尔滨生活",
+      "status": "1",
+      "note": "哈尔滨生活",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/哈尔滨生活.png"
+    },
+    {
+      "tvid": "732",
+      "epgid": "陕西生活",
+      "name": "陕西生活",
+      "status": "1",
+      "note": "陕西生活",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/陕西生活.png"
+    },
+    {
+      "tvid": "733",
+      "epgid": "大连新闻综合",
+      "name": "大连新闻综合",
+      "status": "1",
+      "note": "陕西生活",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/大连新闻综合.png"
+    },
+    {
+      "tvid": "734",
+      "epgid": "鞍山新闻综合",
+      "name": "鞍山新闻综合",
+      "status": "1",
+      "note": "鞍山新闻综合",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/鞍山新闻综合.png"
+    },
+    {
+      "tvid": "735",
+      "epgid": "岭南戏曲",
+      "name": "岭南戏曲",
+      "status": "1",
+      "note": "岭南戏曲",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/岭南戏曲.png"
+    },
+    {
+      "tvid": "736",
+      "epgid": "四川乡村",
+      "name": "四川乡村",
+      "status": "1",
+      "note": "四川乡村",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/四川乡村.png"
+    },
+    {
+      "tvid": "737",
+      "epgid": "南宁影视娱乐",
+      "name": "南宁影视娱乐",
+      "status": "1",
+      "note": "南宁影视娱乐",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/南宁影视娱乐.png"
+    },
+    {
+      "tvid": "738",
+      "epgid": "南宁公共",
+      "name": "南宁公共",
+      "status": "1",
+      "note": "南宁公共",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/南宁公共.png"
+    },
+    {
+      "tvid": "739",
+      "epgid": "南宁文旅生活",
+      "name": "南宁文旅生活",
+      "status": "1",
+      "note": "南宁文旅生活",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/南宁文旅生活.png"
+    },
+    {
+      "tvid": "740",
+      "epgid": "南京少儿",
+      "name": "南京少儿",
+      "status": "1",
+      "note": "南京少儿",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/南京少儿.png"
+    },
+    {
+      "tvid": "741",
+      "epgid": "南京教科",
+      "name": "南京教科",
+      "status": "1",
+      "note": "南京教科",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/南京教科.png"
+    },
+    {
+      "tvid": "742",
+      "epgid": "江苏国际",
+      "name": "江苏国际",
+      "status": "1",
+      "note": "江苏国际",
+      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/江苏国际.png"
+    },
+    {
+      "tvid": "742",
+      "epgid": "安徽公共",
+      "name": "安徽公共",
+      "status": "1",
+      "note": "安徽公共",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/安徽公共.png"
     }
-
-
   ]
 }
