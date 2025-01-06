@@ -62,7 +62,7 @@
       "name": "CCTV-5+体育赛事,CCTV-5+,CCTV5+,CCTV5+体育赛事",
       "status": "1",
       "note": "CCTV-5+体育赛事",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/CCTV5+.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/CCTV5 .png"
     },
     {
       "tvid": "9",
@@ -203,7 +203,7 @@
     {
       "tvid": "26",
       "epgid": "CGTN纪录",
-      "name": "CGTNDocumentary,CGTN纪录",
+      "name": "CGTNDocumentary,CGTN 纪录(英),CGTN纪录(英),CGTN 纪录,CGTN纪录",
       "status": "1",
       "note": "CGTN纪录",
       "logo": "https://gitee.com/hong-j/logo/raw/master/CGTN纪录.png"
@@ -1042,11 +1042,11 @@
     },
     {
       "tvid": "131",
-      "epgid": "NEWTV武博世界",
+      "epgid": "NEWTV武搏世界",
       "name": "NEWTV武搏世界,NewTV武搏世界,武搏世界",
       "status": "1",
-      "note": "NEWTV武博世界",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/NEWTV武博世界.png"
+      "note": "NEWTV武搏世界",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/NEWTV武搏世界.png"
     },
     {
       "tvid": "132",
@@ -1182,7 +1182,7 @@
       "name": "电竞天堂",
       "status": "1",
       "note": "电竞天堂",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/dianjingtiantang.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/电竞天堂.png"
     },
     {
       "tvid": "149",
@@ -1190,7 +1190,7 @@
       "name": "IPTV5⁺",
       "status": "1",
       "note": "IPTV5⁺",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/IPTV5+.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/IPTV5 .png"
     },
     {
       "tvid": "150",
@@ -1198,7 +1198,7 @@
       "name": "IPTV6⁺",
       "status": "1",
       "note": "IPTV6⁺",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/IPTV6+.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/IPTV6 .png"
     },
     {
       "tvid": "151",
@@ -1278,7 +1278,7 @@
       "name": "梨园,河南梨园,梨园频道",
       "status": "1",
       "note": "中数梨园",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/梨园.jpg"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/梨园.png"
     },
     {
       "tvid": "161",
@@ -1366,7 +1366,7 @@
       "name": "现代女性",
       "status": "1",
       "note": "中数现代女性",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/CCTVPAYFEE29.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/现代女性.png"
     },
     {
       "tvid": "172",
@@ -1374,7 +1374,7 @@
       "name": "早期教育",
       "status": "1",
       "note": "中数早期教育",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/CCTVPAYFEE33.jpg"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/早期教育.png"
     },
     {
       "tvid": "173",
@@ -1382,7 +1382,7 @@
       "name": "茶频道,茶,湖南茶频道",
       "status": "1",
       "note": "中数茶频道",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/茶.jpg"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/茶.png"
     },
     {
       "tvid": "174",
@@ -1390,15 +1390,15 @@
       "name": "武术世界,河南武术世界",
       "status": "1",
       "note": "中数武术世界",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/武术世界.jpg"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/武术世界.png"
     },
     {
       "tvid": "175",
-      "epgid": "发现之旅",
-      "name": "发现之旅",
+      "epgid": "孝感新闻",
+      "name": "孝感新闻",
       "status": "1",
-      "note": "中数发现之旅",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/发现之旅.png"
+      "note": "孝感新闻",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/孝感新闻.png"
     },
     {
       "tvid": "176",
@@ -2066,11 +2066,11 @@
     },
     {
       "tvid": "259",
-      "epgid": "中国交通频道",
-      "name": "中国交通频道,中国交通",
+      "epgid": "孝感生活",
+      "name": "孝感生活",
       "status": "1",
-      "note": "中国交通频道",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/中国交通.png"
+      "note": "孝感生活",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/孝感生活.png"
     },
     {
       "tvid": "260",
@@ -2278,7 +2278,7 @@
       "name": "环宇电影",
       "status": "1",
       "note": "环宇电影",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/sd_huanyudianying.jpg"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/环宇电影.png"
     },
     {
       "tvid": "286",
@@ -2373,8 +2373,8 @@
       "epgid": "辽阳新闻",
       "name": "辽阳新闻",
       "status": "1",
-      "note": "沈阳新闻",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/1.png"
+      "note": "辽阳新闻",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/辽阳新闻.png"
     },
     {
       "tvid": "298",
@@ -2674,11 +2674,11 @@
     },
     {
       "tvid": "335",
-      "epgid": "HKS",
-      "name": "香港卫视",
+      "epgid": "长沙新闻",
+      "name": "长沙新闻,长沙新闻综合",
       "status": "1",
-      "note": "香港卫视",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/hks.png"
+      "note": "长沙新闻",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/长沙新闻.png"
     },
     {
       "tvid": "336",
@@ -3119,7 +3119,7 @@
       "name": "三立新闻台,三立新闻",
       "status": "1",
       "note": "三立新闻台",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/SETNews.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/三立新闻.png"
     },
     {
       "tvid": "391",
@@ -3319,7 +3319,7 @@
       "name": "三立财经新闻台inews,三立财经新闻",
       "status": "1",
       "note": "三立财经新闻台inews",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/SETInews.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/三立财经新闻.png"
     },
     {
       "tvid": "416",
@@ -3583,7 +3583,7 @@
       "name": "寰宇新闻",
       "status": "1",
       "note": "寰宇新闻",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/GlobalNews.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/寰宇新闻.png"
     },
     {
       "tvid": "449",
@@ -3596,10 +3596,10 @@
     {
       "tvid": "450",
       "epgid": "博斯运动二台",
-      "name": "博斯运动二台,博斯运动1台,博斯运动1,博斯运动I",
+      "name": "博斯运动二台,博斯运动2台,博斯运动2,博斯运动II",
       "status": "1",
       "note": "博斯运动二台",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/sports_net_2.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/博斯运动2.png"
     },
     {
       "tvid": "451",
@@ -3607,7 +3607,7 @@
       "name": "博斯网球台,博斯网球",
       "status": "1",
       "note": "博斯网球台",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/sport_tennis.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/博斯网球.png"
     },
     {
       "tvid": "452",
@@ -3615,7 +3615,7 @@
       "name": "博斯无限台,博斯无限",
       "status": "1",
       "note": "博斯无限台",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/sport_unlimited.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/博斯无限.png"
     },
     {
       "tvid": "453",
@@ -3623,7 +3623,7 @@
       "name": "博斯高球1台,博斯高球一台,博斯高球1,博斯高球I",
       "status": "1",
       "note": "博斯高球1台",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/sports-golfch.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/博斯高球.png"
     },
     {
       "tvid": "454",
@@ -3631,7 +3631,7 @@
       "name": "博斯高球2台,博斯高球二台,博斯高球2,博斯高球II",
       "status": "1",
       "note": "博斯高球2台",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/sport-golfplus.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/博斯高球2.png.png"
     },
     {
       "tvid": "455",
@@ -3639,7 +3639,7 @@
       "name": "博斯魅力网,博斯魅力",
       "status": "1",
       "note": "博斯魅力网",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/sport-trendsport.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/博斯魅力.png"
     },
     {
       "tvid": "456",
@@ -3647,7 +3647,7 @@
       "name": "博斯运动一台,博斯运动1台,博斯运动1,博斯运动I",
       "status": "1",
       "note": "博斯运动一台",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/sport-sports_net.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/博斯运动1.png"
     },
     {
       "tvid": "457",
@@ -3655,7 +3655,7 @@
       "name": "博斯无限二台,博斯无限2台,博斯无限2,博斯无限II",
       "status": "1",
       "note": "博斯无限二台",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/sport_unlimited2.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/博斯无限2.png"
     },
     {
       "tvid": "458",
@@ -3695,7 +3695,7 @@
       "name": "三立综合台,三立综合",
       "status": "1",
       "note": "三立综合台",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/SETZonghe.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/三立综合.png"
     },
     {
       "tvid": "463",
@@ -4443,11 +4443,11 @@
     },
     {
       "tvid": "556",
-      "epgid": "CGTNDocumentary",
-      "name": "CGTN 纪录(英),CGTN纪录(英),CGTN 纪录,CGTN纪录",
+      "epgid": "长沙政法",
+      "name": "长沙政法,长沙政法频道",
       "status": "1",
-      "note": "CGTN 纪录(英)",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/CGTNDoc.png"
+      "note": "长沙政法",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/长沙政法.png"
     },
     {
       "tvid": "557",
@@ -4495,7 +4495,7 @@
       "name": "探索发现频道,探索发现,Discovery",
       "status": "1",
       "note": "探索发现频道",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/DiscoveryHD.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/discovery.png"
     },
     {
       "tvid": "563",
@@ -4607,7 +4607,7 @@
       "name": "亚洲新闻台,亚洲新闻",
       "status": "1",
       "note": "亚洲新闻台",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/channelnewsasia.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/亚洲新闻.png"
     },
     {
       "tvid": "577",
@@ -4999,7 +4999,7 @@
       "name": "环球电视,环球电视台",
       "status": "1",
       "note": "环球电视",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/环球.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/环球电视台.png"
     },
     {
       "tvid": "627",
@@ -5015,7 +5015,7 @@
       "name": "TVBPLUS,TVB Plus",
       "status": "1",
       "note": "TVBPLUS",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/TVBPLUS.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/TVBPlus.png"
     },
     {
       "tvid": "629",
@@ -5671,7 +5671,7 @@
       "name": "RTNEWS,RT News",
       "status": "1",
       "note": "RTNEWS",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/RTNEWS.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/RTNews.png"
     },
     {
       "tvid": "711",
@@ -5679,7 +5679,7 @@
       "name": "Taiwan Plus,TAIWANPLUS",
       "status": "1",
       "note": "TAIWANPLUS",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/TAIWANPLUS.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/TaiwanPlus.png"
     },
     {
       "tvid": "712",
