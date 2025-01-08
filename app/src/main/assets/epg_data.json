@@ -1086,7 +1086,7 @@
       "name": "NEWTV农业致富,NewTV农业致富,农业致富",
       "status": "1",
       "note": "NEWTV农业致富",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/NEWTV农业致富.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/NEWTV农业致富 .png"
     },
     {
       "tvid": "137",
@@ -1395,7 +1395,7 @@
     {
       "tvid": "175",
       "epgid": "孝感新闻",
-      "name": "孝感新闻",
+      "name": "孝感新闻,孝感新闻综合",
       "status": "1",
       "note": "孝感新闻",
       "logo": "https://gitee.com/hong-j/logo/raw/master/孝感新闻.png"
@@ -2370,11 +2370,11 @@
     },
     {
       "tvid": "297",
-      "epgid": "辽阳新闻",
-      "name": "辽阳新闻",
+      "epgid": "咪咕",
+      "name": "咪咕视频,PPTV1,PPTV2,PPTV3,PPTV4,PPTV5,PPTV6,PPTV7,PPTV8,PPTV9,PPTV10,PPTV",
       "status": "1",
-      "note": "辽阳新闻",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/辽阳新闻.png"
+      "note": "咪咕视频",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/咪咕视频.png"
     },
     {
       "tvid": "298",
@@ -2780,7 +2780,7 @@
     {
       "tvid": "348",
       "epgid": "公视2",
-      "name": "公视台语台(公视2)",
+      "name": "公视台语台(公视2),公视2,公视二台",
       "status": "1",
       "note": "公视台语台(公视2)",
       "logo": "https://gitee.com/hong-j/logo/raw/master/PublicTV2.png"
@@ -2788,7 +2788,7 @@
     {
       "tvid": "349",
       "epgid": "GoodTV2",
-      "name": "好消息二台",
+      "name": "好消息二台,GoodTV2",
       "status": "1",
       "note": "好消息二台",
       "logo": "https://gitee.com/hong-j/logo/raw/master/GoodTV2.png"
@@ -2820,7 +2820,7 @@
     {
       "tvid": "353",
       "epgid": "BabyTV",
-      "name": "Baby TV(台湾)",
+      "name": "Baby TV(台湾),BabyTV,Baby TV",
       "status": "1",
       "note": "Baby TV(台湾)",
       "logo": "https://gitee.com/hong-j/logo/raw/master/BabyTV.png"
@@ -2828,7 +2828,7 @@
     {
       "tvid": "354",
       "epgid": "公视三台",
-      "name": "公视三台",
+      "name": "公视三台,公视3",
       "status": "1",
       "note": "公视三台",
       "logo": "https://gitee.com/hong-j/logo/raw/master/PublicTV3HD.png"
@@ -2852,7 +2852,7 @@
     {
       "tvid": "357",
       "epgid": "大爱一台",
-      "name": "大爱电视台",
+      "name": "大爱电视台,大爱一台",
       "status": "1",
       "note": "大爱电视台",
       "logo": "https://gitee.com/hong-j/logo/raw/master/大爱一台.png"
@@ -2892,7 +2892,7 @@
     {
       "tvid": "362",
       "epgid": "GoodTV",
-      "name": "好消息频道",
+      "name": "好消息频道,GoodTV",
       "status": "1",
       "note": "好消息频道",
       "logo": "https://gitee.com/hong-j/logo/raw/master/GoodTV.png"
@@ -2900,7 +2900,7 @@
     {
       "tvid": "363",
       "epgid": "原住民频道",
-      "name": "原住民频道",
+      "name": "原住民频道,原住民",
       "status": "1",
       "note": "原住民频道",
       "logo": "https://gitee.com/hong-j/logo/raw/master/yuanzhumin.png"
@@ -2908,7 +2908,7 @@
     {
       "tvid": "364",
       "epgid": "客家电视台",
-      "name": "客家电视台",
+      "name": "客家电视台,客家电视",
       "status": "1",
       "note": "客家电视台",
       "logo": "https://gitee.com/hong-j/logo/raw/master/HakkaTV.png"
@@ -2916,7 +2916,7 @@
     {
       "tvid": "365",
       "epgid": "MOMO亲子台",
-      "name": "MOMO亲子台",
+      "name": "MOMO亲子台,MOMO亲子",
       "status": "1",
       "note": "MOMO亲子台",
       "logo": "https://gitee.com/hong-j/logo/raw/master/MOMOkids.png"
@@ -3012,7 +3012,7 @@
     {
       "tvid": "377",
       "epgid": "年代MUCH",
-      "name": "年代MUCH TV",
+      "name": "年代MUCH TV,年代MUCH",
       "status": "1",
       "note": "年代MUCH TV",
       "logo": "https://gitee.com/hong-j/logo/raw/master/年代MUCH.png"
@@ -3020,7 +3020,7 @@
     {
       "tvid": "378",
       "epgid": "中天娱乐台",
-      "name": "中天娱乐台",
+      "name": "中天娱乐台,中天娱乐",
       "status": "1",
       "note": "中天娱乐台",
       "logo": "https://gitee.com/hong-j/logo/raw/master/CtiEntertainment.png"
@@ -3060,7 +3060,7 @@
     {
       "tvid": "383",
       "epgid": "高点综合台",
-      "name": "高点电视台",
+      "name": "高点电视台,高点综合",
       "status": "1",
       "note": "高点电视台",
       "logo": "https://gitee.com/hong-j/logo/raw/master/TOPTVHD.png"
@@ -3068,7 +3068,7 @@
     {
       "tvid": "384",
       "epgid": "JET综合台",
-      "name": "JET综合台",
+      "name": "JET综合台,JET综合",
       "status": "1",
       "note": "JET综合台",
       "logo": "https://gitee.com/hong-j/logo/raw/master/JETVariety.png"
@@ -3076,7 +3076,7 @@
     {
       "tvid": "385",
       "epgid": "壹电视新闻台",
-      "name": "壹电视新闻台",
+      "name": "壹电视新闻台,壹电视新闻",
       "status": "1",
       "note": "壹电视新闻台",
       "logo": "https://gitee.com/hong-j/logo/raw/master/NextTVNews.png"
@@ -3156,7 +3156,7 @@
     {
       "tvid": "395",
       "epgid": "卫视电影台",
-      "name": "卫视电影台",
+      "name": "卫视电影台,卫视电影",
       "status": "1",
       "note": "卫视电影台",
       "logo": "https://gitee.com/hong-j/logo/raw/master/StarChineseMovies.png"
@@ -3180,7 +3180,7 @@
     {
       "tvid": "398",
       "epgid": "LSTime电影台",
-      "name": "LS Time龙祥時代电影台,龙祥时代",
+      "name": "LS Time龙祥時代电影台,龙祥时代,LSTime电影,LSTime电影台",
       "status": "1",
       "note": "LS Time龙祥時代电影台",
       "logo": "https://gitee.com/hong-j/logo/raw/master/LSTIME.png"
@@ -3252,7 +3252,7 @@
     {
       "tvid": "407",
       "epgid": "信吉电视台",
-      "name": "信吉电视台",
+      "name": "信吉电视台,信吉电视,信吉",
       "status": "1",
       "note": "信吉电视台",
       "logo": "https://gitee.com/hong-j/logo/raw/master/SinJiTVHD.png"
@@ -3284,7 +3284,7 @@
     {
       "tvid": "411",
       "epgid": "冠军电视台",
-      "name": "冠军电视台",
+      "name": "冠军电视台,冠军",
       "status": "1",
       "note": "冠军电视台",
       "logo": "https://gitee.com/hong-j/logo/raw/master/ChampionTV1.png"
@@ -3300,7 +3300,7 @@
     {
       "tvid": "413",
       "epgid": "全大电视台",
-      "name": "全大电视台",
+      "name": "全大电视台,全大",
       "status": "1",
       "note": "全大电视台",
       "logo": "https://gitee.com/hong-j/logo/raw/master/CostarTV.png"
@@ -3348,7 +3348,7 @@
     {
       "tvid": "419",
       "epgid": "诚心电视台",
-      "name": "诚心电视台",
+      "name": "诚心电视台,诚心",
       "status": "1",
       "note": "诚心电视台",
       "logo": "https://gitee.com/hong-j/logo/raw/master/ChengSinTV.png"
@@ -3356,7 +3356,7 @@
     {
       "tvid": "420",
       "epgid": "MTV",
-      "name": "MTV Live HD 音乐频道",
+      "name": "MTV Live HD 音乐频道,MTV",
       "status": "1",
       "note": "MTV Live HD 音乐频道",
       "logo": "https://gitee.com/hong-j/logo/raw/master/mtvlivehd.png"
@@ -3372,7 +3372,7 @@
     {
       "tvid": "422",
       "epgid": "海豚综合台",
-      "name": "海豚综合台",
+      "name": "海豚综合台,海豚综合",
       "status": "1",
       "note": "海豚综合台",
       "logo": "https://gitee.com/hong-j/logo/raw/master/海豚综合.png"
@@ -3380,7 +3380,7 @@
     {
       "tvid": "423",
       "epgid": "霹雳台湾台",
-      "name": "霹雳台湾台",
+      "name": "霹雳台湾台,霹雳台湾",
       "status": "1",
       "note": "霹雳台湾台",
       "logo": "https://gitee.com/hong-j/logo/raw/master/PiliPuppet.png"
@@ -3396,7 +3396,7 @@
     {
       "tvid": "425",
       "epgid": "信大频道",
-      "name": "信大频道",
+      "name": "信大频道,信大",
       "status": "1",
       "note": "信大频道",
       "logo": "https://gitee.com/hong-j/logo/raw/master/SinDaTV.png"
@@ -3412,7 +3412,7 @@
     {
       "tvid": "427",
       "epgid": "Z频道",
-      "name": "Z频道",
+      "name": "Z频道,Z",
       "status": "1",
       "note": "Z频道",
       "logo": "https://gitee.com/hong-j/logo/raw/master/ZChannel.png"
@@ -3428,7 +3428,7 @@
     {
       "tvid": "429",
       "epgid": "生命频道",
-      "name": "生命频道",
+      "name": "生命频道,生命,生命电视",
       "status": "1",
       "note": "生命频道",
       "logo": "https://gitee.com/hong-j/logo/raw/master/shengming.png"
@@ -3436,7 +3436,7 @@
     {
       "tvid": "430",
       "epgid": "天良综合台",
-      "name": "天良综合台",
+      "name": "天良综合台,天良综合",
       "status": "1",
       "note": "天良综合台",
       "logo": "https://gitee.com/hong-j/logo/raw/master/TienLiangTVHD.png"
@@ -3444,7 +3444,7 @@
     {
       "tvid": "431",
       "epgid": "正德电视台",
-      "name": "正德电视台",
+      "name": "正德电视台,正德,正德电视",
       "status": "1",
       "note": "正德电视台",
       "logo": "https://gitee.com/hong-j/logo/raw/master/ChengTeTV.png"
@@ -3452,7 +3452,7 @@
     {
       "tvid": "432",
       "epgid": "高点育乐台",
-      "name": "高点育乐台",
+      "name": "高点育乐台,高点育乐",
       "status": "1",
       "note": "高点育乐台",
       "logo": "https://gitee.com/hong-j/logo/raw/master/TOPTV2.png"
@@ -3460,7 +3460,7 @@
     {
       "tvid": "433",
       "epgid": "冠军梦想台",
-      "name": "冠军梦想台",
+      "name": "冠军梦想台,冠军梦想",
       "status": "1",
       "note": "冠军梦想台",
       "logo": "https://gitee.com/hong-j/logo/raw/master/ChampionTV2.png"
@@ -3476,7 +3476,7 @@
     {
       "tvid": "435",
       "epgid": "大立电视台",
-      "name": "大立电视台,大立电视",
+      "name": "大立电视台,大立电视,大立",
       "status": "1",
       "note": "大立电视台",
       "logo": "https://gitee.com/hong-j/logo/raw/master/DaliTV.png"
@@ -3484,7 +3484,7 @@
     {
       "tvid": "436",
       "epgid": "幸福空间居家台",
-      "name": "幸福空间居家台",
+      "name": "幸福空间居家台,幸福空间居家",
       "status": "1",
       "note": "幸福空间居家台",
       "logo": "https://gitee.com/hong-j/logo/raw/master/gstv.png"
@@ -3548,7 +3548,7 @@
     {
       "tvid": "444",
       "epgid": "FoodNetwork美食台",
-      "name": "Food Network美食台",
+      "name": "Food Network美食台,FoodNetwork,FoodNetwork美食",
       "status": "1",
       "note": "Food Network美食台",
       "logo": "https://gitee.com/hong-j/logo/raw/master/FoodNetwork.png"
@@ -3572,7 +3572,7 @@
     {
       "tvid": "447",
       "epgid": "亚洲美食频道",
-      "name": "亚洲美食频道",
+      "name": "亚洲美食频道,亚洲美食",
       "status": "1",
       "note": "亚洲美食频道",
       "logo": "https://gitee.com/hong-j/logo/raw/master/afc.png"
@@ -3588,7 +3588,7 @@
     {
       "tvid": "449",
       "epgid": "亚洲旅游台",
-      "name": "亚洲旅游台",
+      "name": "亚洲旅游台,亚洲旅游",
       "status": "1",
       "note": "亚洲旅游台",
       "logo": "https://gitee.com/hong-j/logo/raw/master/asiatravel.png"
@@ -3631,7 +3631,7 @@
       "name": "博斯高球2台,博斯高球二台,博斯高球2,博斯高球II",
       "status": "1",
       "note": "博斯高球2台",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/博斯高球2.png.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/博斯高球2.png"
     },
     {
       "tvid": "455",
@@ -3660,7 +3660,7 @@
     {
       "tvid": "458",
       "epgid": "达文西频道",
-      "name": "达文西频道",
+      "name": "达文西频道,达文西",
       "status": "1",
       "note": "达文西频道",
       "logo": "https://gitee.com/hong-j/logo/raw/master/davinci.png"
@@ -3700,7 +3700,7 @@
     {
       "tvid": "463",
       "epgid": "龙华偶像",
-      "name": "龙华偶像",
+      "name": "龙华偶像,龙华偶像台",
       "status": "1",
       "note": "龙华偶像",
       "logo": "https://gitee.com/hong-j/logo/raw/master/龙华偶像.png"
@@ -3708,7 +3708,7 @@
     {
       "tvid": "464",
       "epgid": "龙华戏剧",
-      "name": "龙华戏剧",
+      "name": "龙华戏剧,龙华戏剧台",
       "status": "1",
       "note": "龙华戏剧",
       "logo": "https://gitee.com/hong-j/logo/raw/master/龙华戏剧.png"
@@ -3732,7 +3732,7 @@
     {
       "tvid": "467",
       "epgid": "龙华经典",
-      "name": "龙华经典,经典台",
+      "name": "龙华经典,龙华经典台",
       "status": "1",
       "note": "龙华经典",
       "logo": "https://gitee.com/hong-j/logo/raw/master/龙华经典.png"
@@ -3740,7 +3740,7 @@
     {
       "tvid": "468",
       "epgid": "龙华影剧",
-      "name": "龙华影剧",
+      "name": "龙华影剧,龙华影剧台",
       "status": "1",
       "note": "龙华影剧",
       "logo": "https://gitee.com/hong-j/logo/raw/master/龙华影剧.png"
@@ -3748,7 +3748,7 @@
     {
       "tvid": "469",
       "epgid": "龙华洋片",
-      "name": "龙华洋片",
+      "name": "龙华洋片,龙华洋片台",
       "status": "1",
       "note": "龙华洋片",
       "logo": "https://gitee.com/hong-j/logo/raw/master/龙华洋片.png"
@@ -3796,7 +3796,7 @@
     {
       "tvid": "475",
       "epgid": "BabyFirst",
-      "name": "Baby First宝宝世界",
+      "name": "Baby First宝宝世界,BabyFirst",
       "status": "1",
       "note": "Baby First宝宝世界",
       "logo": "https://gitee.com/hong-j/logo/raw/master/BabyFirst.png"
@@ -3812,7 +3812,7 @@
     {
       "tvid": "477",
       "epgid": "华艺MBC",
-      "name": "华艺MBC综合台",
+      "name": "华艺MBC综合台,华艺MBC综合",
       "status": "1",
       "note": "华艺MBC综合台",
       "logo": "https://gitee.com/hong-j/logo/raw/master/huayimbc.png"
@@ -3828,7 +3828,7 @@
     {
       "tvid": "479",
       "epgid": "FashionOne",
-      "name": "Fashion One",
+      "name": "Fashion One,FashionOne",
       "status": "1",
       "note": "Fashion One",
       "logo": "https://gitee.com/hong-j/logo/raw/master/fashionone.png"
@@ -3916,7 +3916,7 @@
     {
       "tvid": "490",
       "epgid": "CI",
-      "name": "CI 罪案侦查频道",
+      "name": "CI 罪案侦查频道,CI",
       "status": "1",
       "note": "CI 罪案侦查频道",
       "logo": "https://gitee.com/hong-j/logo/raw/master/CrimeInvestigation.png"
@@ -3924,7 +3924,7 @@
     {
       "tvid": "491",
       "epgid": "cnex",
-      "name": "视纳华仁纪实频道",
+      "name": "视纳华仁纪实频道,视纳华仁纪实,cnex",
       "status": "1",
       "note": "视纳华仁纪实频道",
       "logo": "https://gitee.com/hong-j/logo/raw/master/cnex.png"
@@ -3948,7 +3948,7 @@
     {
       "tvid": "494",
       "epgid": "影迷数位纪实",
-      "name": "影迷数位纪实台",
+      "name": "影迷数位纪实台,影迷数位纪实,影迷纪实",
       "status": "1",
       "note": "影迷数位纪实台",
       "logo": "https://gitee.com/hong-j/logo/raw/master/影迷纪实.png"
@@ -3964,7 +3964,7 @@
     {
       "tvid": "496",
       "epgid": "ELTV",
-      "name": "ELTV生活英语台",
+      "name": "ELTV生活英语台,ELTV生活英语",
       "status": "1",
       "note": "ELTV生活英语台",
       "logo": "https://gitee.com/hong-j/logo/raw/master/eltv.png"
@@ -3980,7 +3980,7 @@
     {
       "tvid": "498",
       "epgid": "龙华动画",
-      "name": "龙华动画",
+      "name": "龙华动画,龙华动画台",
       "status": "1",
       "note": "龙华动画",
       "logo": "https://gitee.com/hong-j/logo/raw/master/longhuadonghua.png"
@@ -3988,7 +3988,7 @@
     {
       "tvid": "499",
       "epgid": "MTV综合",
-      "name": "MTV综合电视台",
+      "name": "MTV综合电视台,MTV综合",
       "status": "1",
       "note": "MTV综合电视台",
       "logo": "https://gitee.com/hong-j/logo/raw/master/MTV.png"
@@ -4004,7 +4004,7 @@
     {
       "tvid": "501",
       "epgid": "爱尔达体育2",
-      "name": "爱尔达体育2台",
+      "name": "爱尔达体育2台,爱尔达体育2,爱尔达体育二台",
       "status": "1",
       "note": "爱尔达体育2台",
       "logo": "https://gitee.com/hong-j/logo/raw/master/elta_sports2.png"
@@ -4012,7 +4012,7 @@
     {
       "tvid": "502",
       "epgid": "LUXETV",
-      "name": "LUXE TV Channel",
+      "name": "LUXE TV Channel,LUXETV",
       "status": "1",
       "note": "LUXE TV Channel",
       "logo": "https://gitee.com/hong-j/logo/raw/master/luxetv.png"
@@ -4020,7 +4020,7 @@
     {
       "tvid": "503",
       "epgid": "rollor",
-      "name": "滚动力 rollor",
+      "name": "滚动力 rollor,rollor",
       "status": "1",
       "note": "滚动力 rollor",
       "logo": "https://gitee.com/hong-j/logo/raw/master/roller.png"
@@ -4052,7 +4052,7 @@
     {
       "tvid": "507",
       "epgid": "Ettoday",
-      "name": "ETtoday综合台",
+      "name": "ETtoday综合台,Ettoday,ETtoday综合",
       "status": "1",
       "note": "ETtoday综合台",
       "logo": "https://gitee.com/hong-j/logo/raw/master/etoday.png"
@@ -4124,7 +4124,7 @@
     {
       "tvid": "516",
       "epgid": "TFC",
-      "name": "TFC(ABS-CBN)",
+      "name": "TFC(ABS-CBN),TFC,tfc",
       "status": "1",
       "note": "TFC(ABS-CBN)",
       "logo": "https://gitee.com/hong-j/logo/raw/master/tfc.png"
@@ -4132,7 +4132,7 @@
     {
       "tvid": "517",
       "epgid": "MY-KIDS",
-      "name": "MY-KIDS TV",
+      "name": "MY-KIDS TV,MY-KIDS,mykids,MYKIDS,MY KIDS",
       "status": "1",
       "note": "MY-KIDS TV",
       "logo": "https://gitee.com/hong-j/logo/raw/master/mykids.png"
@@ -4140,7 +4140,7 @@
     {
       "tvid": "518",
       "epgid": "爱尔达体育1",
-      "name": "爱尔达体育1台",
+      "name": "爱尔达体育1台,爱尔达体育一台",
       "status": "1",
       "note": "爱尔达体育1台",
       "logo": "https://gitee.com/hong-j/logo/raw/master/eata_sports1.png"
@@ -4148,7 +4148,7 @@
     {
       "tvid": "519",
       "epgid": "爱尔达体育3",
-      "name": "爱尔达体育3台",
+      "name": "爱尔达体育3台,爱尔达体育三台",
       "status": "1",
       "note": "爱尔达体育3台",
       "logo": "https://gitee.com/hong-j/logo/raw/master/eata_sports3.png"
@@ -4156,7 +4156,7 @@
     {
       "tvid": "520",
       "epgid": "狼谷竞技",
-      "name": "狼谷竞技台",
+      "name": "狼谷竞技台,狼谷竞技",
       "status": "1",
       "note": "狼谷竞技台",
       "logo": "https://gitee.com/hong-j/logo/raw/master/wolvesvalley.png"
@@ -4172,7 +4172,7 @@
     {
       "tvid": "522",
       "epgid": "EYE旅游",
-      "name": "EYE TV旅游台",
+      "name": "EYE TV旅游台,EYE旅游",
       "status": "1",
       "note": "EYE TV旅游台",
       "logo": "https://gitee.com/hong-j/logo/raw/master/eyelvyou.png"
@@ -4204,7 +4204,7 @@
     {
       "tvid": "526",
       "epgid": "EYE戏剧",
-      "name": "EYE TV戏剧台",
+      "name": "EYE TV戏剧台,EYE戏剧",
       "status": "1",
       "note": "EYE TV戏剧台",
       "logo": "https://gitee.com/hong-j/logo/raw/master/eyexiju.png"
@@ -4220,7 +4220,7 @@
     {
       "tvid": "528",
       "epgid": "StarMoviesHD",
-      "name": "Star Movies HD(MOD)",
+      "name": "Star Movies HD(MOD),StarMoviesHD",
       "status": "1",
       "note": "Star Movies HD(MOD)",
       "logo": "https://gitee.com/hong-j/logo/raw/master/StarMoviesHD.png"
@@ -4260,7 +4260,7 @@
     {
       "tvid": "533",
       "epgid": "NHKWorld",
-      "name": "NHK World TV,日本NHK World,NHK World",
+      "name": "NHK World TV,日本NHK World,NHK World,NHKWorld",
       "status": "1",
       "note": "NHK World TV",
       "logo": "https://gitee.com/hong-j/logo/raw/master/NHKWorld.png"
@@ -4284,7 +4284,7 @@
     {
       "tvid": "536",
       "epgid": "MEZZOLIVEHD",
-      "name": "MEZZO LIVE HD",
+      "name": "MEZZO LIVE HD,MEZZO",
       "status": "1",
       "note": "MEZZO LIVE HD",
       "logo": "https://gitee.com/hong-j/logo/raw/master/mezzo.png"
@@ -4300,7 +4300,7 @@
     {
       "tvid": "538",
       "epgid": "Lifetime",
-      "name": "Lifetime 娱乐频道",
+      "name": "Lifetime 娱乐频道,Lifetime",
       "status": "1",
       "note": "Lifetime 娱乐频道",
       "logo": "https://gitee.com/hong-j/logo/raw/master/Lifetime.png"
@@ -4308,7 +4308,7 @@
     {
       "tvid": "539",
       "epgid": "BBCWorldNews",
-      "name": "BBC World News",
+      "name": "BBC World News,BBCWorldNews,BBC",
       "status": "1",
       "note": "BBC World News",
       "logo": "https://gitee.com/hong-j/logo/raw/master/BBCWORLDNEWSASIA.png"
@@ -4324,7 +4324,7 @@
     {
       "tvid": "541",
       "epgid": "浙江经济生活",
-      "name": "浙江经济",
+      "name": "浙江经济,浙江经济生活",
       "status": "1",
       "note": "浙江经济生活",
       "logo": "https://gitee.com/hong-j/logo/raw/master/浙江经济生活.png"
@@ -4348,7 +4348,7 @@
     {
       "tvid": "544",
       "epgid": "FashionTV",
-      "name": "法国时尚台",
+      "name": "法国时尚台,FashionTV",
       "status": "1",
       "note": "法国时尚台",
       "logo": "https://gitee.com/hong-j/logo/raw/master/faguoshishang.png"
@@ -4364,7 +4364,7 @@
     {
       "tvid": "546",
       "epgid": "FXHD",
-      "name": "FX HD",
+      "name": "FX HD,FX,FXHD",
       "status": "1",
       "note": "FX HD",
       "logo": "https://gitee.com/hong-j/logo/raw/master/FXHD.png"
@@ -4404,7 +4404,7 @@
     {
       "tvid": "551",
       "epgid": "SkyNews",
-      "name": "Sky News",
+      "name": "Sky News,SkyNews",
       "status": "1",
       "note": "Sky News",
       "logo": "https://gitee.com/hong-j/logo/raw/master/SkyNews.png"
@@ -4452,7 +4452,7 @@
     {
       "tvid": "557",
       "epgid": "TraceSports",
-      "name": "Trace Sports",
+      "name": "Trace Sports,TraceSports",
       "status": "1",
       "note": "Trace Sports",
       "logo": "https://gitee.com/hong-j/logo/raw/master/TRACESportStars.png"
@@ -4460,7 +4460,7 @@
     {
       "tvid": "558",
       "epgid": "Outdoor",
-      "name": "Outdoor Channel",
+      "name": "Outdoor Channel,Outdoor",
       "status": "1",
       "note": "Outdoor Channel",
       "logo": "https://gitee.com/hong-j/logo/raw/master/outdoor.png"
@@ -4468,7 +4468,7 @@
     {
       "tvid": "559",
       "epgid": "HITS",
-      "name": "HITS",
+      "name": "HITS,HITs",
       "status": "1",
       "note": "HITS",
       "logo": "https://gitee.com/hong-j/logo/raw/master/HITS.png"
@@ -4476,7 +4476,7 @@
     {
       "tvid": "560",
       "epgid": "CNN",
-      "name": "CNN国际新闻频道",
+      "name": "CNN国际新闻频道,CNN",
       "status": "1",
       "note": "CNN国际新闻频道",
       "logo": "https://gitee.com/hong-j/logo/raw/master/CNNNews.png"
@@ -4484,7 +4484,7 @@
     {
       "tvid": "561",
       "epgid": "国家地理频道(台湾)",
-      "name": "国家地理频道(台湾)",
+      "name": "国家地理频道(台湾),国家地理(台湾)",
       "status": "1",
       "note": "国家地理频道(台湾)",
       "logo": "https://gitee.com/hong-j/logo/raw/master/NationalGeographic_taiwan.png"
@@ -4500,7 +4500,7 @@
     {
       "tvid": "563",
       "epgid": "TLC旅游生活频道",
-      "name": "TLC旅游生活频道",
+      "name": "TLC旅游生活频道,TLC,tlc",
       "status": "1",
       "note": "TLC旅游生活频道",
       "logo": "https://gitee.com/hong-j/logo/raw/master/tlc.png"
@@ -4540,7 +4540,7 @@
     {
       "tvid": "568",
       "epgid": "FOXMOVIES",
-      "name": "FOX MOVIES",
+      "name": "FOX MOVIES,FOXMOVIES",
       "status": "1",
       "note": "FOX MOVIES",
       "logo": "https://gitee.com/hong-j/logo/raw/master/FOXMOVIES.png"
@@ -4556,7 +4556,7 @@
     {
       "tvid": "570",
       "epgid": "FOXSports",
-      "name": "FOX Sports",
+      "name": "FOX Sports,FOXSports",
       "status": "1",
       "note": "FOX Sports",
       "logo": "https://gitee.com/hong-j/logo/raw/master/FOXSports.png"
@@ -4572,7 +4572,7 @@
     {
       "tvid": "572",
       "epgid": "ELEVEN体育一台",
-      "name": "ELEVEN体育一台",
+      "name": "ELEVEN体育一台,ELEVEN体育1,ELEVEN体育1台",
       "status": "1",
       "note": "ELEVEN体育一台",
       "logo": "https://gitee.com/hong-j/logo/raw/master/ELEVENsports1.png"
@@ -4604,7 +4604,7 @@
     {
       "tvid": "576",
       "epgid": "ChannelNewsAsia",
-      "name": "亚洲新闻台,亚洲新闻",
+      "name": "亚洲新闻台,亚洲新闻,CNA",
       "status": "1",
       "note": "亚洲新闻台",
       "logo": "https://gitee.com/hong-j/logo/raw/master/亚洲新闻.png"
@@ -4612,7 +4612,7 @@
     {
       "tvid": "577",
       "epgid": "BloombergTV",
-      "name": "彭博财经台,彭博财经",
+      "name": "彭博财经台,彭博财经,BloombergTV",
       "status": "1",
       "note": "彭博财经台",
       "logo": "https://gitee.com/hong-j/logo/raw/master/BloombergTV.png"
@@ -4620,7 +4620,7 @@
     {
       "tvid": "578",
       "epgid": "ArirangTV",
-      "name": "韩国阿里郎,韩国Arirang",
+      "name": "韩国阿里郎,韩国Arirang,ArirangTV",
       "status": "1",
       "note": "韩国阿里郎",
       "logo": "https://gitee.com/hong-j/logo/raw/master/ArirangTV.png"
@@ -4628,7 +4628,7 @@
     {
       "tvid": "579",
       "epgid": "BBCLifestyle",
-      "name": "BBC Lifestyle",
+      "name": "BBC Lifestyle,BBCLifestyle",
       "status": "1",
       "note": "BBC Lifestyle",
       "logo": "https://gitee.com/hong-j/logo/raw/master/BBCLifestyle.png"
@@ -4636,7 +4636,7 @@
     {
       "tvid": "580",
       "epgid": "DREAMWORKS",
-      "name": "梦工厂",
+      "name": "梦工厂,DREAMWORKS",
       "status": "1",
       "note": "梦工厂",
       "logo": "https://gitee.com/hong-j/logo/raw/master/dreamworks.png"
@@ -4644,7 +4644,7 @@
     {
       "tvid": "581",
       "epgid": "WarnerTV",
-      "name": "Warner TV",
+      "name": "Warner TV,WarnerTV,Warner",
       "status": "1",
       "note": "Warner TV",
       "logo": "https://gitee.com/hong-j/logo/raw/master/WarnerTV.png"
@@ -4652,7 +4652,7 @@
     {
       "tvid": "582",
       "epgid": "HBOHD",
-      "name": "HBO HD",
+      "name": "HBO HD,HBOHD",
       "status": "1",
       "note": "HBO HD",
       "logo": "https://gitee.com/hong-j/logo/raw/master/HBOHD.png"
@@ -4708,7 +4708,7 @@
     {
       "tvid": "589",
       "epgid": "韩国娱乐台KMTV",
-      "name": "韩国娱乐台KMTV",
+      "name": "韩国娱乐台KMTV,KMTV",
       "status": "1",
       "note": "韩国娱乐台KMTV",
       "logo": "https://gitee.com/hong-j/logo/raw/master/KMTV.png"
@@ -4740,7 +4740,7 @@
     {
       "tvid": "593",
       "epgid": "DiscoveryAsia",
-      "name": "Discovery Asia",
+      "name": "Discovery Asia,DiscoveryAsia,Discovery-Asia",
       "status": "1",
       "note": "Discovery Asia",
       "logo": "https://gitee.com/hong-j/logo/raw/master/Discovery-Asia.png"
@@ -4780,15 +4780,15 @@
     {
       "tvid": "598",
       "epgid": "Nickelodeon",
-      "name": "尼克儿童频道",
+      "name": "尼克儿童频道,Nickelodeon",
       "status": "1",
       "note": "尼克儿童频道",
       "logo": "https://gitee.com/hong-j/logo/raw/master/Nickelodeon.png"
     },
     {
       "tvid": "599",
-      "epgid": "NickJr.",
-      "name": "小尼克频道",
+      "epgid": "NickJr",
+      "name": "小尼克频道,NickJr",
       "status": "1",
       "note": "小尼克频道",
       "logo": "https://gitee.com/hong-j/logo/raw/master/NickJr.png"
@@ -4828,7 +4828,7 @@
     {
       "tvid": "604",
       "epgid": "CNNHeadlineNews",
-      "name": "CNN头条新闻台",
+      "name": "CNN头条新闻台,CNN",
       "status": "1",
       "note": "CNN头条新闻台",
       "logo": "https://gitee.com/hong-j/logo/raw/master/CNN.png"
@@ -4844,7 +4844,7 @@
     {
       "tvid": "606",
       "epgid": "爱尔达娱乐台",
-      "name": "爱尔达娱乐台",
+      "name": "爱尔达娱乐台,爱尔达娱乐",
       "status": "1",
       "note": "爱尔达娱乐台",
       "logo": "https://gitee.com/hong-j/logo/raw/master/ELTA_Ent.png"
@@ -4852,7 +4852,7 @@
     {
       "tvid": "607",
       "epgid": "ELEVEN体育二台",
-      "name": "ELEVEN体育二台",
+      "name": "ELEVEN体育二台,ELEVEN体育2台,ELEVEN体育2",
       "status": "1",
       "note": "ELEVEN体育二台",
       "logo": "https://gitee.com/hong-j/logo/raw/master/elevensports2.png"
@@ -4860,7 +4860,7 @@
     {
       "tvid": "608",
       "epgid": "History",
-      "name": "History 历史频道",
+      "name": "History 历史频道,History",
       "status": "1",
       "note": "History 历史频道",
       "logo": "https://gitee.com/hong-j/logo/raw/master/HistoryChannel.png"
@@ -4876,7 +4876,7 @@
     {
       "tvid": "610",
       "epgid": "SMART知识频道",
-      "name": "SMART 知识频道",
+      "name": "SMART 知识频道,SMART,SMART知识频道",
       "status": "1",
       "note": "SMART 知识频道",
       "logo": "https://gitee.com/hong-j/logo/raw/master/Smart知识台.png"
@@ -5676,7 +5676,7 @@
     {
       "tvid": "711",
       "epgid": "TAIWANPLUS",
-      "name": "Taiwan Plus,TAIWANPLUS",
+      "name": "Taiwan Plus,TAIWANPLUS,TaiwanPlus",
       "status": "1",
       "note": "TAIWANPLUS",
       "logo": "https://gitee.com/hong-j/logo/raw/master/TaiwanPlus.png"
@@ -5930,7 +5930,7 @@
       "logo": "https://gitee.com/hong-j/logo/raw/master/江苏国际.png"
     },
     {
-      "tvid": "742",
+      "tvid": "743",
       "epgid": "安徽公共",
       "name": "安徽公共",
       "status": "1",
@@ -5938,7 +5938,7 @@
       "logo": "https://gitee.com/hong-j/logo/raw/master/安徽公共.png"
     },
     {
-      "tvid": "743",
+      "tvid": "744",
       "epgid": "北京体育休闲",
       "name": "北京体育休闲",
       "status": "1",
