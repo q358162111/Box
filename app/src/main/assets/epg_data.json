@@ -1883,7 +1883,7 @@
     {
       "tvid": "236",
       "epgid": "MAX极速汽车",
-      "name": "MAX极速汽车",
+      "name": "MAX极速汽车,极速汽车",
       "status": "1",
       "note": "MAX极速汽车",
       "logo": "https://gitee.com/hong-j/logo/raw/master/jisuqiche.png"
@@ -2310,7 +2310,7 @@
       "name": "辽宁都市",
       "status": "1",
       "note": "辽宁都市",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/LNTV2.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/辽宁都市.png"
     },
     {
       "tvid": "290",
@@ -2318,15 +2318,15 @@
       "name": "辽宁影视剧",
       "status": "1",
       "note": "辽宁影视剧",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/LNTV3.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/辽宁影视剧.png"
     },
     {
       "tvid": "291",
-      "epgid": "辽宁青少",
-      "name": "辽宁青少",
+      "epgid": "辽宁教育青少",
+      "name": "辽宁教育青少",
       "status": "1",
-      "note": "辽宁青少",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/LNTV5.png"
+      "note": "辽宁教育青少",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/辽宁教育青少.png"
     },
     {
       "tvid": "292",
@@ -2334,7 +2334,7 @@
       "name": "辽宁生活",
       "status": "1",
       "note": "辽宁生活",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/LNTV6.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/辽宁生活.png"
     },
     {
       "tvid": "293",
@@ -2342,7 +2342,7 @@
       "name": "辽宁公共",
       "status": "1",
       "note": "辽宁公共",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/LNTV7.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/辽宁公共.png"
     },
     {
       "tvid": "294",
@@ -2350,7 +2350,7 @@
       "name": "辽宁北方",
       "status": "1",
       "note": "辽宁北方",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/LNTV8.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/辽宁北方.png"
     },
     {
       "tvid": "295",
@@ -2358,7 +2358,7 @@
       "name": "辽宁体育",
       "status": "1",
       "note": "辽宁体育",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/LNTV-SPORT.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/辽宁体育.png"
     },
     {
       "tvid": "296",
@@ -2366,7 +2366,7 @@
       "name": "辽宁经济",
       "status": "1",
       "note": "辽宁经济",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/LNTV-FINANCE.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/辽宁经济.png"
     },
     {
       "tvid": "297",
@@ -2606,7 +2606,7 @@
       "name": "凤凰卫视中文台,凤凰卫视,凤凰中文",
       "status": "1",
       "note": "凤凰卫视中文台",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/fenghuangzhongwen.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/凤凰卫视中文台.png"
     },
     {
       "tvid": "327",
@@ -2614,7 +2614,7 @@
       "name": "凤凰卫视资讯台,凤凰资讯",
       "status": "1",
       "note": "凤凰卫视资讯台",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/fenghuangzixun.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/凤凰卫视资讯台.png"
     },
     {
       "tvid": "328",
@@ -2622,7 +2622,7 @@
       "name": "凤凰卫视香港台,凤凰香港",
       "status": "1",
       "note": "凤凰卫视香港台",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/fenghuangxianggang.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/凤凰卫视香港台.png"
     },
     {
       "tvid": "329",
@@ -2635,7 +2635,7 @@
     {
       "tvid": "330",
       "epgid": "美亚高清电影台",
-      "name": "美亚高清电影台(香港)",
+      "name": "美亚高清电影台(香港),美亚高清电影台(台湾),美亚电影台(台湾),美亚电影台(香港)",
       "status": "1",
       "note": "美亚高清电影台(香港)",
       "logo": "https://gitee.com/hong-j/logo/raw/master/meiyamovie.png"
@@ -3556,7 +3556,7 @@
     {
       "tvid": "445",
       "epgid": "HGTV居家乐活",
-      "name": "HGTV居家乐活",
+      "name": "HGTV居家乐活,居家乐活",
       "status": "1",
       "note": "HGTV居家乐活",
       "logo": "https://gitee.com/hong-j/logo/raw/master/HGTV.png"
@@ -3580,7 +3580,7 @@
     {
       "tvid": "448",
       "epgid": "寰宇新闻",
-      "name": "寰宇新闻",
+      "name": "寰宇新闻,寰宇新闻台",
       "status": "1",
       "note": "寰宇新闻",
       "logo": "https://gitee.com/hong-j/logo/raw/master/寰宇新闻.png"
@@ -3860,10 +3860,10 @@
     {
       "tvid": "483",
       "epgid": "乌兰察布新闻",
-      "name": "乌兰察布新闻",
+      "name": "乌兰察布新闻,乌兰察布新闻综合",
       "status": "1",
       "note": "乌兰察布新闻",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/乌兰察布.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/乌兰察布新闻综合.png"
     },
     {
       "tvid": "484",
@@ -5332,7 +5332,7 @@
     {
       "tvid": "668",
       "epgid": "河北公共",
-      "name": "河北公共，河北文旅公共",
+      "name": "河北公共",
       "status": "1",
       "note": "河北公共",
       "logo": "https://gitee.com/hong-j/logo/raw/master/河北公共.png"
@@ -5751,7 +5751,7 @@
       "name": "十堰新闻,十堰新闻综合",
       "status": "1",
       "note": "十堰新闻",
-      "logo": "https://gitee.com/hong-j/logo/raw/master/十堰新闻.png"
+      "logo": "https://gitee.com/hong-j/logo/raw/master/十堰新闻综合.png"
     },
     {
       "tvid": "721",
@@ -5944,6 +5944,790 @@
       "status": "1",
       "note": "北京体育休闲",
       "logo": "https://gitee.com/hong-j/logo/raw/master/北京体育休闲.png"
+    },
+    {
+      "tvid": "745",
+      "epgid": "上海教育",
+      "name": "上海教育,上海教育台",
+      "status": "1",
+      "note": "上海教育",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/上海教育.png"
+    },
+    {
+      "tvid": "745",
+      "epgid": "凤凰电影",
+      "name": "凤凰电影台,凤凰电影",
+      "status": "1",
+      "note": "凤凰电影",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/凤凰电影.png"
+    },
+    {
+      "tvid": "746",
+      "epgid": "1905电影网",
+      "name": "1905国内电影,1905国外电影",
+      "status": "1",
+      "note": "1905国外电影",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/1905电影网.png"
+    },
+    {
+      "tvid": "747",
+      "epgid": "澳视卫星",
+      "name": "澳视卫星,澳视卫星台",
+      "status": "1",
+      "note": "澳视卫星",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/澳视卫星.png"
+    },
+    {
+      "tvid": "748",
+      "epgid": "北京国际",
+      "name": "北京国际",
+      "status": "1",
+      "note": "北京国际",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/北京国际.png"
+    },
+    {
+      "tvid": "749",
+      "epgid": "淘电影",
+      "name": "淘电影",
+      "status": "1",
+      "note": "淘电影",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/淘电影.png"
+    },
+    {
+      "tvid": "750",
+      "epgid": "淘剧场",
+      "name": "淘剧场",
+      "status": "1",
+      "note": "淘剧场",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/淘剧场.png"
+    },
+    {
+      "tvid": "751",
+      "epgid": "淘娱乐",
+      "name": "淘娱乐",
+      "status": "1",
+      "note": "淘娱乐",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/淘娱乐.png"
+    },
+    {
+      "tvid": "752",
+      "epgid": "萌宠TV",
+      "name": "萌宠TV,淘tv",
+      "status": "1",
+      "note": "萌宠TV",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/萌宠TV.png"
+    },
+    {
+      "tvid": "753",
+      "epgid": "淘BABY",
+      "name": "淘BABY,淘baby",
+      "status": "1",
+      "note": "淘BABY",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/淘BABY.png"
+    },
+    {
+      "tvid": "754",
+      "epgid": "河南戏曲",
+      "name": "河南戏曲",
+      "status": "1",
+      "note": "河南戏曲",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/河南戏曲.png"
+    },
+    {
+      "tvid": "755",
+      "epgid": "象视界",
+      "name": "象视界",
+      "status": "1",
+      "note": "象视界",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/象视界.png"
+    },
+    {
+      "tvid": "756",
+      "epgid": "TVBJ1",
+      "name": "翡翠综合台,TVBJ1,J1",
+      "status": "1",
+      "note": "TVBJ1",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/TVBJ1.png"
+    },
+    {
+      "tvid": "757",
+      "epgid": "千禧经典",
+      "name": "千禧经典,TVB千禧经典,tvb千禧经典,tvb千禧经典台,TVB千禧经典台,千禧经典台",
+      "status": "1",
+      "note": "千禧经典",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/千禧经典.png"
+    },
+    {
+      "tvid": "758",
+      "epgid": "亚洲武侠",
+      "name": "亚洲武侠,TVB亚洲武侠,tvb亚洲武侠,tvb亚洲武侠台,TVB亚洲武侠台,亚洲武侠台",
+      "status": "1",
+      "note": "亚洲武侠",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/亚洲武侠.png"
+    },
+    {
+      "tvid": "759",
+      "epgid": "华艺中文台",
+      "name": "华艺中文台,华艺中文",
+      "status": "1",
+      "note": "华艺中文",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/华艺中文.png"
+    },
+    {
+      "tvid": "760",
+      "epgid": "astro QJ",
+      "name": "astro QJ,astroQJ",
+      "status": "1",
+      "note": "astro QJ",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/astroQJ.png"
+    },
+    {
+      "tvid": "761",
+      "epgid": "astro欢喜台",
+      "name": "astro欢喜台,astro欢喜",
+      "status": "1",
+      "note": "astro欢喜台",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/astro欢喜台.png"
+    },
+    {
+      "tvid": "762",
+      "epgid": "astro Boo",
+      "name": "astro Boo,astroBoo",
+      "status": "1",
+      "note": "astro Boo",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/astroBoo.png"
+    },
+    {
+      "tvid": "763",
+      "epgid": "湖南娱乐",
+      "name": "湖南娱乐,湖南娱乐台",
+      "status": "1",
+      "note": "湖南娱乐",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/湖南娱乐.png"
+    },
+    {
+      "tvid": "764",
+      "epgid": "江苏体育",
+      "name": "江苏体育,江苏体育台",
+      "status": "1",
+      "note": "江苏体育",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/江苏体育.png"
+    },
+    {
+      "tvid": "765",
+      "epgid": "苏州新闻综合",
+      "name": "苏州新闻综合,苏州新闻综合台,苏州一台",
+      "status": "1",
+      "note": "苏州新闻综合",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/苏州新闻综合.png"
+    },
+    {
+      "tvid": "766",
+      "epgid": "苏州社会经济",
+      "name": "苏州社会经济,苏州社会经济台,苏州二台",
+      "status": "1",
+      "note": "苏州社会经济",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/苏州社会经济.png"
+    },
+    {
+      "tvid": "767",
+      "epgid": "苏州文化生活",
+      "name": "苏州文化生活,苏州文化生活台,苏州三台",
+      "status": "1",
+      "note": "苏州文化生活",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/苏州文化生活.png"
+    },
+    {
+      "tvid": "768",
+      "epgid": "苏州电影娱乐信息",
+      "name": "苏州电影娱乐信息,苏州电影娱乐信息台,苏州四台",
+      "status": "1",
+      "note": "苏州电影娱乐信息",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/苏州电影娱乐信息.png"
+    },
+    {
+      "tvid": "769",
+      "epgid": "苏州生活资讯",
+      "name": "苏州生活资讯,苏州生活资讯台,苏州五台",
+      "status": "1",
+      "note": "苏州生活资讯",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/苏州生活资讯.png"
+    },
+    {
+      "tvid": "770",
+      "epgid": "南京新闻综合",
+      "name": "南京新闻综合,南京新闻综合台",
+      "status": "1",
+      "note": "南京新闻综合",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/南京新闻综合.png"
+    },
+    {
+      "tvid": "771",
+      "epgid": "福州新闻",
+      "name": "福州新闻,福州新闻综合",
+      "status": "1",
+      "note": "福州新闻",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/福州新闻.png"
+    },
+    {
+      "tvid": "772",
+      "epgid": "福州生活",
+      "name": "福州生活,福州生活台",
+      "status": "1",
+      "note": "福州生活",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/福州生活.png"
+    },
+    {
+      "tvid": "773",
+      "epgid": "福州少儿",
+      "name": "福州少儿,福州少儿台",
+      "status": "1",
+      "note": "福州少儿",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/福州少儿.png"
+    },
+    {
+      "tvid": "774",
+      "epgid": "青海经视",
+      "name": "青海经视",
+      "status": "1",
+      "note": "青海经视",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/青海经视.png"
+    },
+    {
+      "tvid": "775",
+      "epgid": "青海都市",
+      "name": "青海都市",
+      "status": "1",
+      "note": "青海都市",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/青海都市.png"
+    },
+    {
+      "tvid": "776",
+      "epgid": "CEC",
+      "name": "CEC文化,CEC旅游,CEC教育,CEC健康",
+      "status": "1",
+      "note": "CEC",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/CEC.png"
+    },
+    {
+      "tvid": "777",
+      "epgid": "家庭理财",
+      "name": "家庭理财",
+      "status": "1",
+      "note": "家庭理财",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/家庭理财.png"
+    },
+    {
+      "tvid": "778",
+      "epgid": "南宁新闻综合",
+      "name": "南宁新闻综合",
+      "status": "1",
+      "note": "南宁新闻综合",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/南宁新闻综合.png"
+    },
+    {
+      "tvid": "779",
+      "epgid": "西藏影视文化",
+      "name": "西藏影视文化",
+      "status": "1",
+      "note": "西藏影视文化",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/西藏影视文化.png"
+    },
+    {
+      "tvid": "780",
+      "epgid": "北京IPTV4K",
+      "name": "4K超清,北京IPTV4K,北京IPTV4K超清",
+      "status": "1",
+      "note": "北京IPTV4K",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/北京IPTV4K.png"
+    },
+    {
+      "tvid": "781",
+      "epgid": "湖南爱晚",
+      "name": "湖南爱晚",
+      "status": "1",
+      "note": "湖南爱晚",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/湖南爱晚.png"
+    },
+    {
+      "tvid": "782",
+      "epgid": "通辽新闻综合",
+      "name": "通辽新闻综合",
+      "status": "1",
+      "note": "通辽新闻综合",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/通辽新闻综合.png"
+    },
+    {
+      "tvid": "783",
+      "epgid": "睛彩中原",
+      "name": "睛彩中原",
+      "status": "1",
+      "note": "睛彩中原",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/睛彩中原.png"
+    },
+    {
+      "tvid": "784",
+      "epgid": "丹东新闻综合",
+      "name": "丹东新闻综合",
+      "status": "1",
+      "note": "丹东新闻综合",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/丹东新闻综合.png"
+    },
+    {
+      "tvid": "785",
+      "epgid": "Thrill",
+      "name": "Thrill",
+      "status": "1",
+      "note": "Thrill",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/Thrill.png"
+    },
+    {
+      "tvid": "786",
+      "epgid": "无线娱乐新闻",
+      "name": "无线娱乐新闻,无线娱乐新闻台",
+      "status": "1",
+      "note": "无线娱乐新闻",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/无线娱乐新闻.png"
+    },
+    {
+      "tvid": "787",
+      "epgid": "星光综合台",
+      "name": "星光综合台,星光综合",
+      "status": "1",
+      "note": "星光综合台",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/星光综合台.png"
+    },
+    {
+      "tvid": "788",
+      "epgid": "澳视卫星",
+      "name": "澳视卫星",
+      "status": "1",
+      "note": "澳视卫星",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/澳视Macau.png"
+    },
+    {
+      "tvid": "789",
+      "epgid": "潜江综合",
+      "name": "潜江综合",
+      "status": "1",
+      "note": "潜江综合",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/潜江综合.png"
+    },
+    {
+      "tvid": "790",
+      "epgid": "陕西秦腔",
+      "name": "陕西秦腔",
+      "status": "1",
+      "note": "陕西秦腔",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/陕西秦腔.png"
+    },
+    {
+      "tvid": "791",
+      "epgid": "陕西银龄",
+      "name": "陕西银龄",
+      "status": "1",
+      "note": "陕西银龄",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/陕西银龄.png"
+    },
+    {
+      "tvid": "792",
+      "epgid": "河北文旅公共",
+      "name": "河北文旅公共",
+      "status": "1",
+      "note": "河北文旅公共",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/河北文旅公共.png"
+    },
+    {
+      "tvid": "793",
+      "epgid": "广西公共",
+      "name": "广西公共",
+      "status": "1",
+      "note": "广西公共",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/广西公共.png"
+    },
+    {
+      "tvid": "794",
+      "epgid": "辽宁体育休闲",
+      "name": "辽宁体育休闲",
+      "status": "1",
+      "note": "辽宁体育休闲",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/辽宁体育休闲.png"
+    },
+    {
+      "tvid": "795",
+      "epgid": "移动戏曲频道",
+      "name": "移动戏曲,移动戏曲频道",
+      "status": "1",
+      "note": "移动戏曲",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/移动戏曲.PNG"
+    },
+    {
+      "tvid": "796",
+      "epgid": "黑龙江农业科教",
+      "name": "黑龙江农业科教",
+      "status": "1",
+      "note": "黑龙江农业科教",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/黑龙江农业科教.png"
+    },
+    {
+      "tvid": "797",
+      "epgid": "天门综合",
+      "name": "天门综合",
+      "status": "1",
+      "note": "天门综合",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/天门综合.png"
+    },
+    {
+      "tvid": "798",
+      "epgid": "石家庄都市",
+      "name": "石家庄都市",
+      "status": "1",
+      "note": "石家庄都市",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/石家庄都市.png"
+    },
+    {
+      "tvid": "799",
+      "epgid": "石家庄城市服务",
+      "name": "石家庄城市服务",
+      "status": "1",
+      "note": "石家庄城市服务",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/石家庄城市服务.png"
+    },
+    {
+      "tvid": "800",
+      "epgid": "石家庄生活",
+      "name": "石家庄生活",
+      "status": "1",
+      "note": "石家庄生活",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/石家庄生活.png"
+    },
+    {
+      "tvid": "801",
+      "epgid": "石家庄文化娱乐",
+      "name": "石家庄文化娱乐",
+      "status": "1",
+      "note": "石家庄文化娱乐",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/石家庄文化娱乐.png"
+    },
+    {
+      "tvid": "802",
+      "epgid": "黄冈新闻综合",
+      "name": "黄冈新闻综合",
+      "status": "1",
+      "note": "黄冈新闻综合",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/黄冈新闻综合.png"
+    },
+    {
+      "tvid": "803",
+      "epgid": "盘锦新闻综合",
+      "name": "盘锦新闻综合",
+      "status": "1",
+      "note": "盘锦新闻综合",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/盘锦新闻综合.png"
+    },
+    {
+      "tvid": "804",
+      "epgid": "鸡西新闻综合",
+      "name": "鸡西新闻综合",
+      "status": "1",
+      "note": "鸡西新闻综合",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/鸡西新闻综合.png"
+    },
+    {
+      "tvid": "805",
+      "epgid": "鸡西公共",
+      "name": "鸡西公共",
+      "status": "1",
+      "note": "鸡西公共",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/鸡西公共.png"
+    },
+    {
+      "tvid": "806",
+      "epgid": "黄石新闻综合",
+      "name": "黄石新闻综合",
+      "status": "1",
+      "note": "黄石新闻综合",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/黄石新闻综合.png"
+    },
+    {
+      "tvid": "807",
+      "epgid": "黄石都市",
+      "name": "黄石都市",
+      "status": "1",
+      "note": "黄石都市",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/黄石都市.png"
+    },
+    {
+      "tvid": "808",
+      "epgid": "朝阳新闻综合",
+      "name": "朝阳新闻综合",
+      "status": "1",
+      "note": "朝阳新闻综合",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/朝阳新闻综合.png"
+    },
+    {
+      "tvid": "809",
+      "epgid": "鄂州新闻综合",
+      "name": "鄂州新闻综合",
+      "status": "1",
+      "note": "鄂州新闻综合",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/鄂州新闻综合.png"
+    },
+    {
+      "tvid": "810",
+      "epgid": "鄂州公共",
+      "name": "鄂州公共",
+      "status": "1",
+      "note": "鄂州公共",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/鄂州公共.png"
+    },
+    {
+      "tvid": "811",
+      "epgid": "牡丹江新闻综合",
+      "name": "牡丹江新闻综合",
+      "status": "1",
+      "note": "牡丹江新闻综合",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/牡丹江新闻综合.png"
+    },
+    {
+      "tvid": "812",
+      "epgid": "铁岭新闻综合",
+      "name": "铁岭新闻综合",
+      "status": "1",
+      "note": "铁岭新闻综合",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/铁岭新闻综合.png"
+    },
+    {
+      "tvid": "813",
+      "epgid": "咸宁综合",
+      "name": "咸宁综合",
+      "status": "1",
+      "note": "咸宁综合",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/咸宁综合.png"
+    },
+    {
+      "tvid": "814",
+      "epgid": "咸宁经济生活",
+      "name": "咸宁经济生活",
+      "status": "1",
+      "note": "咸宁经济生活",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/咸宁经济生活.png"
+    },
+    {
+      "tvid": "814",
+      "epgid": "辽阳新闻综合",
+      "name": "辽阳新闻综合",
+      "status": "1",
+      "note": "辽阳新闻综合",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/辽阳新闻综合.png"
+    },
+    {
+      "tvid": "814",
+      "epgid": "双鸭山新闻综合",
+      "name": "双鸭山新闻综合",
+      "status": "1",
+      "note": "双鸭山新闻综合",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/双鸭山新闻综合.png"
+    },
+    {
+      "tvid": "815",
+      "epgid": "阜新综合",
+      "name": "阜新综合",
+      "status": "1",
+      "note": "阜新综合",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/阜新综合.png"
+    },
+    {
+      "tvid": "816",
+      "epgid": "鹤岗新闻综合",
+      "name": "鹤岗新闻综合",
+      "status": "1",
+      "note": "鹤岗新闻综合",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/鹤岗新闻综合.png"
+    },
+    {
+      "tvid": "817",
+      "epgid": "营口新闻综合",
+      "name": "营口新闻综合",
+      "status": "1",
+      "note": "营口新闻综合",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/营口新闻综合.png"
+    },
+    {
+      "tvid": "818",
+      "epgid": "佳木斯新闻综合",
+      "name": "佳木斯新闻综合",
+      "status": "1",
+      "note": "佳木斯新闻综合",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/佳木斯新闻综合.png"
+    },
+    {
+      "tvid": "819",
+      "epgid": "锦州新闻综合",
+      "name": "锦州新闻综合",
+      "status": "1",
+      "note": "锦州新闻综合",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/锦州新闻综合.png"
+    },
+    {
+      "tvid": "820",
+      "epgid": "伊春新闻综合",
+      "name": "伊春新闻综合",
+      "status": "1",
+      "note": "伊春新闻综合",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/伊春新闻综合.png"
+    },
+    {
+      "tvid": "821",
+      "epgid": "荆州新闻综合",
+      "name": "荆州新闻综合,荆州新闻",
+      "status": "1",
+      "note": "荆州新闻综合",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/荆州新闻综合.png"
+    },
+    {
+      "tvid": "822",
+      "epgid": "荆州垄上",
+      "name": "荆州垄上",
+      "status": "1",
+      "note": "荆州垄上",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/荆州垄上.png"
+    },
+    {
+      "tvid": "823",
+      "epgid": "荆州公共",
+      "name": "荆州公共",
+      "status": "1",
+      "note": "荆州公共",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/荆州公共.png"
+    },
+    {
+      "tvid": "824",
+      "epgid": "大庆新闻综合",
+      "name": "大庆新闻综合",
+      "status": "1",
+      "note": "大庆新闻综合",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/大庆新闻综合.png"
+    },
+    {
+      "tvid": "825",
+      "epgid": "本溪综合",
+      "name": "本溪综合",
+      "status": "1",
+      "note": "本溪综合",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/本溪综合.png"
+    },
+    {
+      "tvid": "826",
+      "epgid": "十堰经济旅游",
+      "name": "十堰经济旅游",
+      "status": "1",
+      "note": "十堰经济旅游",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/十堰经济旅游.png"
+    },
+    {
+      "tvid": "827",
+      "epgid": "襄阳综合",
+      "name": "襄阳综合",
+      "status": "1",
+      "note": "襄阳综合",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/襄阳综合.png"
+    },
+    {
+      "tvid": "828",
+      "epgid": "襄阳经济生活",
+      "name": "襄阳经济生活",
+      "status": "1",
+      "note": "襄阳经济生活",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/襄阳经济生活.png"
+    },
+    {
+      "tvid": "829",
+      "epgid": "襄阳公共",
+      "name": "襄阳公共",
+      "status": "1",
+      "note": "襄阳公共",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/襄阳公共.png"
+    },
+    {
+      "tvid": "830",
+      "epgid": "鞍山新闻综合",
+      "name": "鞍山新闻综合",
+      "status": "1",
+      "note": "鞍山新闻综合",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/鞍山新闻综合.png"
+    },
+    {
+      "tvid": "831",
+      "epgid": "齐齐哈尔新闻综合",
+      "name": "齐齐哈尔新闻综合",
+      "status": "1",
+      "note": "齐齐哈尔新闻综合",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/齐齐哈尔新闻综合.png"
+    },
+    {
+      "tvid": "832",
+      "epgid": "齐齐哈尔经济法治",
+      "name": "齐齐哈尔经济法治",
+      "status": "1",
+      "note": "齐齐哈尔经济法治",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/齐齐哈尔经济法治.png"
+    },
+    {
+      "tvid": "833",
+      "epgid": "抚顺综合",
+      "name": "抚顺综合",
+      "status": "1",
+      "note": "抚顺综合",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/抚顺综合.png"
+    },
+    {
+      "tvid": "834",
+      "epgid": "黄冈生活",
+      "name": "黄冈生活",
+      "status": "1",
+      "note": "黄冈生活",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/黄冈生活.png"
+    },
+    {
+      "tvid": "835",
+      "epgid": "葫芦岛新闻综合",
+      "name": "葫芦岛新闻综合",
+      "status": "1",
+      "note": "葫芦岛新闻综合",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/葫芦岛新闻综合.png"
+    },
+    {
+      "tvid": "836",
+      "epgid": "随州综合",
+      "name": "随州综合",
+      "status": "1",
+      "note": "随州综合",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/随州综合.png"
+    },
+    {
+      "tvid": "837",
+      "epgid": "鸡西安全生活",
+      "name": "鸡西安全生活",
+      "status": "1",
+      "note": "鸡西安全生活",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/鸡西安全生活.png"
+    },
+    {
+      "tvid": "837",
+      "epgid": "随州农村",
+      "name": "随州农村",
+      "status": "1",
+      "note": "随州农村",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/随州农村.png"
+    },
+    {
+      "tvid": "838",
+      "epgid": "华丽翡翠台",
+      "name": "无线华丽台,华丽翡翠台,无线华丽",
+      "status": "1",
+      "note": "翡翠台",
+      "logo": "https://gitee.com/hong-j/logo/raw/master/TVB翡翠台.png"
     }
   ]
 }
