@@ -1,4 +1,5 @@
 package com.github.tvbox.osc.ui.dialog;
+
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -9,7 +10,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 
 import com.github.tvbox.osc.R;
-
 import com.github.tvbox.osc.util.UpdateChecker;
 
 import org.jetbrains.annotations.NotNull;
