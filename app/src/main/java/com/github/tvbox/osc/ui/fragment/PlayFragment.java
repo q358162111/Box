@@ -1723,7 +1723,8 @@ public class PlayFragment extends BaseLazyFragment {
                 XWalkUtils.tryUseXWalk(mContext, new XWalkUtils.XWalkState() {
                     @Override
                     public void success() {
-                        initWebView(!sourceBean.getClickSelector().isEmpty());
+                        //initWebView(!sourceBean.getClickSelector().isEmpty());
+                        initWebView(false);
                         loadUrl(url);
                     }
 
@@ -1975,9 +1976,9 @@ public class PlayFragment extends BaseLazyFragment {
         @Override
         public void onPageFinished(WebView view, String url) {
             super.onPageFinished(view, url);
-            String clickSelector = sourceBean.getClickSelector().trim();
+            //String clickSelector = sourceBean.getClickSelector().trim();
             LOG.i("echo-onPageFinished url:" + url);
-            if (!clickSelector.isEmpty()) {
+            /*if (!clickSelector.isEmpty()) {
                 String selector;
                 if (clickSelector.contains(";") && !clickSelector.endsWith(";")) {
                     String[] parts = clickSelector.split(";", 2);
@@ -1997,7 +1998,9 @@ public class PlayFragment extends BaseLazyFragment {
                     view.evaluateJavascript(js, null);
                 } else {
                     view.loadUrl("javascript:" + js);
-                }
+                }*/
+            if(!url.equals("about:blank")){
+                mController.evaluateScript(sourceBean,url,view,null);
             }
             mHandler.sendEmptyMessage(200);
         }
@@ -2163,7 +2166,12 @@ public class PlayFragment extends BaseLazyFragment {
 
         @Override
         public void onLoadFinished(XWalkView view, String url) {
+
             super.onLoadFinished(view, url);
+            LOG.i("echo-onLoadFinished url:" + url);
+            if(!url.equals("about:blank")){
+                mController.evaluateScript(sourceBean,url,null,view);
+            }
         }
 
         @Override

@@ -2085,24 +2085,26 @@ public class PlayActivity extends BaseActivity {
         @Override
         public void onPageFinished(WebView view, String url) {
             super.onPageFinished(view,url);
-            String click=sourceBean.getClickSelector().trim();
+            //String click=sourceBean.getClickSelector().trim();
             LOG.i("echo-onPageFinished url:" + url);
-            if(!click.isEmpty()){
-                String selector;
-                if(click.contains(";") && !click.endsWith(";")){
-                    if(!url.contains(click.split(";")[0]))return;
-                    selector=click.split(";")[1];
-                }else {
-                    selector=click;
-                }
-                String js = selector;
-                if(!selector.contains("click()"))js+=".click();";
-                LOG.i("echo-javascript:" + js);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                    view.evaluateJavascript(js, null);
-                } else {
-                    view.loadUrl("javascript:" + js);
-                }
+            //if(!click.isEmpty()){
+             //   String selector;
+             //   if(click.contains(";") && !click.endsWith(";")){
+              //      if(!url.contains(click.split(";")[0]))return;
+             //       selector=click.split(";")[1];
+             //   }else {
+             //       selector=click;
+              //  }
+              //  String js = selector;
+              //  if(!selector.contains("click()"))js+=".click();";
+             //   LOG.i("echo-javascript:" + js);
+             //   if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+             //       view.evaluateJavascript(js, null);
+             //   } else {
+              //      view.loadUrl("javascript:" + js);
+              //  }
+            if(!url.equals("about:blank")){
+                mController.evaluateScript(sourceBean,url,view,null);
             }
             mHandler.sendEmptyMessage(200);
         }
@@ -2267,7 +2269,12 @@ public class PlayActivity extends BaseActivity {
 
         @Override
         public void onLoadFinished(XWalkView view, String url) {
+
             super.onLoadFinished(view, url);
+            LOG.i("echo-onPageFinished url:" + url);
+            if(!url.equals("about:blank")){
+                mController.evaluateScript(sourceBean,url,null,view);
+            }
         }
 
         @Override
