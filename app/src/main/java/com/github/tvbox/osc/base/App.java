@@ -170,7 +170,8 @@ public class App extends MultiDexApplication {
     @Override
     public void onTerminate() {
         super.onTerminate();
-        JsLoader.load();
+        //JsLoader.load();
+        JsLoader.destroy();
     }
 
     public void setDashData(String data) {
