@@ -33,8 +33,8 @@ import java.net.URL;
 public class UpdateChecker {
 
     private static final String TAG = "UpdateChecker";
-    private static final String UPDATE_URL = "https://codeberg.org/caihj/apk/raw/branch/main/firmware/output-metadata.json";
-    private static final String APK_URL = "https://codeberg.org/caihj/apk/raw/branch/main/firmware/TVBox_release-arm64-generic-java.apk";
+    private static final String UPDATE_URL = "https://gitee.com/hong-j/apk/raw/main/firmware/output-metadata.json";
+    private static final String APK_URL = "https://gitee.com/hong-j/apk/raw/main/firmware/TVBox_release-arm64-generic-java.apk";
 
     public static void checkForUpdates(Context context) {
         new CheckUpdateTask(context).execute();
