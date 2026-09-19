@@ -92,7 +92,7 @@ public class VodInfo implements Serializable {
             seriesMap = new LinkedHashMap<>();
             for (VodSeriesFlag flag : seriesFlags) {
                 List<VodSeries> list = tempSeriesMap.get(flag.name);
-                assert list != null;
+                if (list == null) list = new ArrayList<>();
                 if(seriesFlags.size()<=3){
                     if(isReverse(list))Collections.reverse(list);
                 }
@@ -131,6 +131,7 @@ public class VodInfo implements Serializable {
     }
 
     public void reverse() {
+        if (seriesMap == null) return;
         Set<String> flags = seriesMap.keySet();
         for (String flag : flags) {
             Collections.reverse(seriesMap.get(flag));

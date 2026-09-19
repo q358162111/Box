@@ -91,7 +91,8 @@ public class App extends MultiDexApplication {
         dir = getExternalCacheDir();
         FileUtils.recursiveDelete(dir);*/
 
-        FileUtils.cleanPlayerCache();
+        // 后台线程清理播放缓存，避免大缓存目录拖慢冷启动
+        new Thread(FileUtils::cleanPlayerCache, "cleanPlayerCache").start();
 
         // Add JS support
         QuickJSLoader.init();
@@ -126,7 +127,7 @@ public class App extends MultiDexApplication {
     private void initParams() {
         // Hawk
         Hawk.init(this).build();
-        Hawk.put(HawkConfig.DEBUG_OPEN, false);
+        putDefault(HawkConfig.DEBUG_OPEN, false);
 
         // 首页选项
         putDefault(HawkConfig.HOME_SHOW_SOURCE, true);       //数据源显示: true=开启, false=关闭

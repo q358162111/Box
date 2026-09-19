@@ -108,14 +108,17 @@ public class GridFilterDialog extends BaseDialog {
 //                        val.setTextColor(getContext().getResources().getColor(R.color.color_theme));
                         TypedArray a = getContext().obtainStyledAttributes(R.styleable.themeColor);
                         int themeColor = a.getColor(R.styleable.themeColor_color_theme, 0);
+                        a.recycle();
                         val.setTextColor(themeColor);
                         pre = view;
                     } else {
                         sortData.filterSelect.remove(key);
-                        TextView val = pre.findViewById(R.id.filterValue);
-                        val.getPaint().setFakeBoldText(false);
-                        val.setTextColor(getContext().getResources().getColor(R.color.color_FFFFFF));
-                        pre = null;
+                        if (pre != null) {
+                            TextView val = pre.findViewById(R.id.filterValue);
+                            val.getPaint().setFakeBoldText(false);
+                            val.setTextColor(getContext().getResources().getColor(R.color.color_FFFFFF));
+                            pre = null;
+                        }
                     }
                 }
             });

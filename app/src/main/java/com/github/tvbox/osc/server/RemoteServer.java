@@ -386,34 +386,37 @@ public class RemoteServer extends NanoHTTPD {
         if (!destDir.exists()) {
             destDir.mkdirs();
         }
-        ZipFile zip = new ZipFile(zipFilePath);
-        Enumeration < ZipEntry > iter = (Enumeration < ZipEntry > ) zip.entries();
-        while (iter.hasMoreElements()) {
-            ZipEntry entry = iter.nextElement();
-            InputStream is = zip.getInputStream(entry);
-            String filePath = destDirectory + File.separator + entry.getName();
-            if (!entry.isDirectory()) {
-                extractFile(is, filePath);
-            } else {
-                File dir = new File(filePath);
-                if (!dir.exists()) dir.mkdirs();
-                File flag = new File(dir + "/.tvbox_folder");
-                if (!flag.exists()) flag.createNewFile();
+        String destCanonical = destDir.getCanonicalPath() + File.separator;
+        try (ZipFile zip = new ZipFile(zipFilePath)) {
+            Enumeration<ZipEntry> iter = (Enumeration<ZipEntry>) zip.entries();
+            while (iter.hasMoreElements()) {
+                ZipEntry entry = iter.nextElement();
+                try (InputStream is = zip.getInputStream(entry)) {
+                    File outFile = new File(destDir, entry.getName());
+                    // 防 Zip Slip 路径穿越
+                    if (!outFile.getCanonicalPath().startsWith(destCanonical)) {
+                        throw new SecurityException("非法的 zip 条目: " + entry.getName());
+                    }
+                    if (!entry.isDirectory()) {
+                        extractFile(is, outFile);
+                    } else {
+                        if (!outFile.exists()) outFile.mkdirs();
+                        File flag = new File(outFile, ".tvbox_folder");
+                        if (!flag.exists()) flag.createNewFile();
+                    }
+                }
             }
         }
     }
 
-    void extractFile(InputStream inputStream, String destFilePath) throws Throwable {
-        File dst = new File(destFilePath);
-        if (dst.exists()) dst.delete();
-        BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(destFilePath));
-        byte[] bytesIn = new byte[2048];
-        int len = inputStream.read(bytesIn);
-        while (len > 0) {
-            bos.write(bytesIn, 0, len);
-            len = inputStream.read(bytesIn);
+    void extractFile(InputStream inputStream, File destFile) throws Throwable {
+        try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(destFile))) {
+            byte[] bytesIn = new byte[2048];
+            int len;
+            while ((len = inputStream.read(bytesIn)) > 0) {
+                bos.write(bytesIn, 0, len);
+            }
         }
-        bos.close();
     }
 
 }

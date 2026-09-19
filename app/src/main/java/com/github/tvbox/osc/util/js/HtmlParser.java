@@ -18,14 +18,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class HtmlParser {
-    private static String pdfh_html = "";
-    private static String pdfa_html = "";
+    // 缓存改为 ThreadLocal：静态共享时多源并发解析会互相覆盖缓存导致结果错乱
+    private static final ThreadLocal<String> pdfh_html = new ThreadLocal<>();
+    private static final ThreadLocal<String> pdfa_html = new ThreadLocal<>();
     private static final Pattern p = Pattern.compile("url\\((.*?)\\)", Pattern.MULTILINE | Pattern.DOTALL);
     private static final Pattern NOADD_INDEX = Pattern.compile(":eq|:lt|:gt|:first|:last|^body$|^#"); // 不自动加eq下标索引
     private static final Pattern URLJOIN_ATTR = Pattern.compile("(url|src|href|-original|-src|-play|-url|style)$", Pattern.MULTILINE | Pattern.CASE_INSENSITIVE); // 需要自动urljoin的属性
     private static final Pattern SPECIAL_URL = Pattern.compile("^(ftp|magnet|thunder|ws):", Pattern.MULTILINE | Pattern.CASE_INSENSITIVE); // 过滤特殊链接,不走urlJoin
-    private static Document pdfh_doc = null;
-    private static Document pdfa_doc = null;
+    private static final ThreadLocal<Document> pdfh_doc = new ThreadLocal<>();
+    private static final ThreadLocal<Document> pdfa_doc = new ThreadLocal<>();
 
     public static String joinUrl(String parent, String child) {
         if (StringUtils.isEmpty(parent)) {
@@ -171,11 +172,16 @@ public class HtmlParser {
     }
 
     public static String parseDomForUrl(String html, String rule, String add_url) {
-        if (!pdfh_html.equals(html)) {
-            pdfh_html = html;
-            pdfh_doc = Jsoup.parse(html);
+        String cachedHtml = pdfh_html.get();
+        if (cachedHtml == null || !cachedHtml.equals(html)) {
+            pdfh_html.set(html);
+            pdfh_doc.set(Jsoup.parse(html));
         }
-        Document doc = pdfh_doc;
+        Document doc = pdfh_doc.get();
+        if (doc == null) {
+            doc = Jsoup.parse(html);
+            pdfh_doc.set(doc);
+        }
         if (rule.equals("body&&Text") || rule.equals("Text")) {
             return doc.text();
         } else if (rule.equals("body&&Html") || rule.equals("Html")) {
@@ -216,7 +222,7 @@ public class HtmlParser {
                     }
                     if (StringUtils.isNotEmpty(result)) {
                         // 2023/07/28新增 style取内部链接自动去除首尾单双引号
-                        result = result.replaceAll("^['|\"](.*)['|\"]$", "$1");
+                        result = result.replaceAll("^[\"'](.*)[\"']$", "$1");
                     }
                 }
                 if (StringUtils.isNotEmpty(result) && StringUtils.isNotEmpty(add_url)) {
@@ -241,11 +247,16 @@ public class HtmlParser {
     }
 
     public static List < String > parseDomForArray(String html, String rule) {
-        if (!pdfa_html.equals(html)) {
-            pdfa_html = html;
-            pdfa_doc = Jsoup.parse(html);
+        String cachedHtml = pdfa_html.get();
+        if (cachedHtml == null || !cachedHtml.equals(html)) {
+            pdfa_html.set(html);
+            pdfa_doc.set(Jsoup.parse(html));
         }
-        Document doc = pdfa_doc;
+        Document doc = pdfa_doc.get();
+        if (doc == null) {
+            doc = Jsoup.parse(html);
+            pdfa_doc.set(doc);
+        }
         rule = parseHikerToJq(rule, false);
         String[] parses = rule.split(" ");
         Elements ret = new Elements();
@@ -291,11 +302,16 @@ public class HtmlParser {
     }
 
     public static List < String > parseDomForList(String html, String p1, String list_text, String list_url, String add_url) {
-        if (!pdfa_html.equals(html)) {
-            pdfa_html = html;
-            pdfa_doc = Jsoup.parse(html);
+        String cachedHtml = pdfa_html.get();
+        if (cachedHtml == null || !cachedHtml.equals(html)) {
+            pdfa_html.set(html);
+            pdfa_doc.set(Jsoup.parse(html));
         }
-        Document doc = pdfa_doc;
+        Document doc = pdfa_doc.get();
+        if (doc == null) {
+            doc = Jsoup.parse(html);
+            pdfa_doc.set(doc);
+        }
         p1 = parseHikerToJq(p1, false);
         String[] parses = p1.split(" ");
         Elements ret = new Elements();

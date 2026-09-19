@@ -150,10 +150,10 @@ public class M3U8 {
                     if (end != -1) {
                         keyUrl = lines[i].substring(start, end);
                     }
-                    if (!keyUrl.startsWith("http://") && !keyUrl.startsWith("https://")) {
+                    if (!keyUrl.isEmpty() && !keyUrl.startsWith("http://") && !keyUrl.startsWith("https://")) {
                         String newKeyUrl;
-                        if (keyUrl.charAt(0) == '/') {
-                            int ifirst = tsUrlPre.indexOf('/', 9);//skip https://, http://
+                        int ifirst = tsUrlPre.indexOf('/', 9);//skip https://, http://
+                        if (keyUrl.charAt(0) == '/' && ifirst > 0) {
                             newKeyUrl = tsUrlPre.substring(0, ifirst) + keyUrl;
                         } else
                             newKeyUrl = tsUrlPre + keyUrl;
@@ -176,8 +176,8 @@ public class M3U8 {
             if (!domainFiltering) {
                 if (lines[i].startsWith(maxTimesPreUrl)) {
                     if (!lines[i].startsWith("http://") && !lines[i].startsWith("https://")) {
-                        if (lines[i].charAt(0) == '/') {
-                            int ifirst = tsUrlPre.indexOf('/', 9); //skip https://, http://
+                        int ifirst = tsUrlPre.indexOf('/', 9); //skip https://, http://
+                        if (lines[i].charAt(0) == '/' && ifirst > 0) {
                             lines[i] = tsUrlPre.substring(0, ifirst) + lines[i];
                         } else
                             lines[i] = tsUrlPre + lines[i];
@@ -195,8 +195,8 @@ public class M3U8 {
                 // 域名过滤模式：先转换为绝对 URL
                 String absoluteUrl = lines[i];
                 if (!absoluteUrl.startsWith("http://") && !absoluteUrl.startsWith("https://")) {
-                    if (absoluteUrl.charAt(0) == '/') {
-                        int ifirst = tsUrlPre.indexOf('/', 9);
+                    int ifirst = tsUrlPre.indexOf('/', 9);
+                    if (absoluteUrl.charAt(0) == '/' && ifirst > 0) {
                         absoluteUrl = tsUrlPre.substring(0, ifirst) + absoluteUrl;
                     } else {
                         absoluteUrl = tsUrlPre + absoluteUrl;
@@ -233,7 +233,7 @@ public class M3U8 {
     }
 
     private static List<String> getRegex(String tsUrlPre) {
-        HashMap<String, ArrayList<String>> hostsRegex = VideoParseRuler.getHostsRegex();
+        Map<String, ArrayList<String>> hostsRegex = VideoParseRuler.getHostsRegex();
         List<String> list = new ArrayList<>();
         for (String host : hostsRegex.keySet()) {
             if (!tsUrlPre.contains(host)) continue;

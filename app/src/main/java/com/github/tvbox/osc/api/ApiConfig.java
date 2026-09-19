@@ -170,7 +170,7 @@ public class ApiConfig {
         } else if (apiUrl.startsWith("clan")) {
             configUrl = clanToAddress(apiUrl);
         } else if (!apiUrl.startsWith("http")) {
-            configUrl = "http://" + configUrl;
+            configUrl = "http://" + apiUrl;
         } else {
             configUrl = apiUrl;
         }
@@ -191,10 +191,10 @@ public class ApiConfig {
                                     cacheDir.mkdirs();
                                 if (cache.exists())
                                     cache.delete();
-                                FileOutputStream fos = new FileOutputStream(cache);
-                                fos.write(json.getBytes("UTF-8"));
-                                fos.flush();
-                                fos.close();
+                                try (FileOutputStream fos = new FileOutputStream(cache)) {
+                                    fos.write(json.getBytes("UTF-8"));
+                                    fos.flush();
+                                }
                             } catch (Throwable th) {
                                 th.printStackTrace();
                             }
@@ -335,13 +335,13 @@ public class ApiConfig {
 
     private void parseJson(String apiUrl, File f) throws Throwable {
         System.out.println("从本地缓存加载" + f.getAbsolutePath());
-        BufferedReader bReader = new BufferedReader(new InputStreamReader(new FileInputStream(f), "UTF-8"));
         StringBuilder sb = new StringBuilder();
-        String s = "";
-        while ((s = bReader.readLine()) != null) {
-            sb.append(s + "\n");
+        try (BufferedReader bReader = new BufferedReader(new InputStreamReader(new FileInputStream(f), "UTF-8"))) {
+            String s;
+            while ((s = bReader.readLine()) != null) {
+                sb.append(s).append('\n');
+            }
         }
-        bReader.close();
         parseJson(apiUrl, sb.toString());
     }
 
@@ -358,6 +358,8 @@ public class ApiConfig {
         livePlayHeaders = infoJson.getAsJsonArray("livePlayHeaders");
         // 远端站点源
         SourceBean firstSite = null;
+        // 重新解析配置时清空旧源，避免新旧配置站点混杂
+        sourceBeanList.clear();
         JsonArray sites = infoJson.has("video") ? infoJson.getAsJsonObject("video").getAsJsonArray("sites") : infoJson.get("sites").getAsJsonArray();
         for (JsonElement opt : sites) {
             JsonObject obj = (JsonObject) opt;
@@ -845,6 +847,12 @@ public class ApiConfig {
     }
 
     public IJKCode getIJKCodec(String name) {
+        // ijkCodes 仅在配置解析后初始化，配置加载失败时避免 NPE
+        if (ijkCodes == null || ijkCodes.isEmpty()) {
+            IJKCode code = new IJKCode();
+            code.setName(name);
+            return code;
+        }
         for (IJKCode code : ijkCodes) {
             if (code.getName().equals(name))
                 return code;

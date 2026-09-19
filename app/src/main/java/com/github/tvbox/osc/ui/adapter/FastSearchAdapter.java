@@ -8,6 +8,7 @@ import com.chad.library.adapter.base.BaseViewHolder;
 import com.github.tvbox.osc.R;
 import com.github.tvbox.osc.api.ApiConfig;
 import com.github.tvbox.osc.bean.Movie;
+import com.github.tvbox.osc.bean.SourceBean;
 import com.github.tvbox.osc.util.DefaultConfig;
 import com.github.tvbox.osc.util.ImgUtil;
 
@@ -25,7 +26,8 @@ public class FastSearchAdapter extends BaseQuickAdapter<Movie.Video, BaseViewHol
 
         // with preview
         helper.setText(R.id.tvName, item.name);
-        helper.setText(R.id.tvSite, ApiConfig.get().getSource(item.sourceKey).getName());
+        SourceBean source = ApiConfig.get().getSource(item.sourceKey);
+        helper.setText(R.id.tvSite, source != null ? source.getName() : "");
         helper.setVisible(R.id.tvNote, item.note != null && !item.note.isEmpty());
         if (item.note != null && !item.note.isEmpty()) {
             helper.setText(R.id.tvNote, item.note);

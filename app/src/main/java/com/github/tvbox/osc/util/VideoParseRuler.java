@@ -3,17 +3,18 @@ package com.github.tvbox.osc.util;
 import static com.github.tvbox.osc.util.RegexUtils.getPattern;
 import android.net.Uri;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 public class VideoParseRuler {
 
-    private static final HashMap<String, ArrayList<ArrayList<String>>> HOSTS_RULE = new HashMap<>();
-    private static final HashMap<String, ArrayList<ArrayList<String>>> HOSTS_FILTER = new HashMap<>();
-    private static final HashMap<String, ArrayList<String>> HOSTS_REGEX = new HashMap<>();
-    private static final HashMap<String, ArrayList<String>> HOSTS_SCRIPT = new HashMap<>();
+    // 嗅探线程读取 / 配置解析线程重建，必须线程安全
+    private static final Map<String, ArrayList<ArrayList<String>>> HOSTS_RULE = new ConcurrentHashMap<>();
+    private static final Map<String, ArrayList<ArrayList<String>>> HOSTS_FILTER = new ConcurrentHashMap<>();
+    private static final Map<String, ArrayList<String>> HOSTS_REGEX = new ConcurrentHashMap<>();
+    private static final Map<String, ArrayList<String>> HOSTS_SCRIPT = new ConcurrentHashMap<>();
     public static void clearRule() {
         HOSTS_RULE.clear();
         HOSTS_FILTER.clear();
@@ -23,12 +24,7 @@ public class VideoParseRuler {
 
     public static void addHostRule(String host, ArrayList<String> rule) {
         if (rule == null || rule.size() == 0) return;
-        ArrayList<ArrayList<String>> rules = new ArrayList<>();
-        if (HOSTS_RULE.get(host) != null && HOSTS_RULE.get(host).size() > 0) {
-            rules = HOSTS_RULE.get(host);
-        }
-        rules.add(rule);
-        HOSTS_RULE.put(host, rules);
+        HOSTS_RULE.computeIfAbsent(host, k -> new ArrayList<>()).add(rule);
     }
 
     public static ArrayList<ArrayList<String>> getHostRules(String host) {
@@ -39,12 +35,7 @@ public class VideoParseRuler {
     }
 
     public static void addHostFilter(String host, ArrayList<String> rule) {
-        ArrayList<ArrayList<String>> filters = new ArrayList<>();
-        if (HOSTS_FILTER.get(host) != null && HOSTS_FILTER.get(host).size() > 0) {
-            filters = HOSTS_FILTER.get(host);
-        }
-        filters.add(rule);
-        HOSTS_FILTER.put(host, filters);
+        HOSTS_FILTER.computeIfAbsent(host, k -> new ArrayList<>()).add(rule);
     }
 
     public static ArrayList<ArrayList<String>> getHostFilters(String host) {
@@ -56,13 +47,10 @@ public class VideoParseRuler {
 
     public static void addHostRegex(String host, ArrayList<String> regex) {
         if (regex == null || regex.size() == 0) return;
-        ArrayList<String> temp = new ArrayList<>();
-        if (HOSTS_REGEX.get(host) != null && HOSTS_REGEX.get(host).size() > 0) temp = HOSTS_REGEX.get(host);
-        temp.addAll(regex);
-        HOSTS_REGEX.put(host, temp);
+        HOSTS_REGEX.computeIfAbsent(host, k -> new ArrayList<>()).addAll(regex);
     }
 
-    public static HashMap<String, ArrayList<String>> getHostsRegex() {
+    public static Map<String, ArrayList<String>> getHostsRegex() {
         return HOSTS_REGEX;
     }
 
@@ -165,11 +153,7 @@ public class VideoParseRuler {
     }
     public static void addHostScript(String host, ArrayList<String> script) {
         if (script == null || script.size() == 0) return;
-        ArrayList<String> temp = new ArrayList<>();
-        if (HOSTS_SCRIPT.get(host) != null && HOSTS_SCRIPT.get(host).size() > 0) temp = HOSTS_SCRIPT.get(host);
-        assert temp != null;
-        temp.addAll(script);
-        HOSTS_SCRIPT.put(host, temp);
+        HOSTS_SCRIPT.computeIfAbsent(host, k -> new ArrayList<>()).addAll(script);
     }
     public static String getHostScript(String url) {
         for (Map.Entry<String, ArrayList<String>> entry : HOSTS_SCRIPT.entrySet()) {

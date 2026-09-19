@@ -27,12 +27,11 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class Connect {
-    static OkHttpClient client;
-    
+
     public static Call to(String url, Req req) {
         OkHttpClient client = OkHttp.client(req.isRedirect(), req.getTimeout());
         return client.newCall(getRequest(url, req, Headers.of(req.getHeader())));
-    }    
+    }
 
     public static JSObject success(QuickJSContext ctx, Req req, Response res) {
         try {
@@ -107,16 +106,17 @@ public class Connect {
     }
     public static void cancelByTag(Object tag) {
         try {
-            if (client != null) {
-                for (Call call : client.dispatcher().queuedCalls()) {
-                    if (tag.equals(call.request().tag())) {
-                        call.cancel();
-                    }
+            // client(timeout) 派生的客户端共享基础客户端的 dispatcher，
+            // 直接遍历基础客户端的调度队列即可取消所有 js_okhttp_tag 请求
+            OkHttpClient base = OkHttp.client();
+            for (Call call : base.dispatcher().queuedCalls()) {
+                if (tag.equals(call.request().tag())) {
+                    call.cancel();
                 }
-                for (Call call : client.dispatcher().runningCalls()) {
-                    if (tag.equals(call.request().tag())) {
-                        call.cancel();
-                    }
+            }
+            for (Call call : base.dispatcher().runningCalls()) {
+                if (tag.equals(call.request().tag())) {
+                    call.cancel();
                 }
             }
             OkGo.getInstance().cancelTag(tag);

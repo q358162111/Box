@@ -18,6 +18,7 @@ import org.json.JSONObject;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -48,9 +49,9 @@ public class FileUtils {
         try {
             if (dst.exists())
                 dst.delete();
-            BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(dst));
-            bos.write(data);
-            bos.close();
+            try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(dst))) {
+                bos.write(data);
+            }
             return true;
         } catch (IOException e) {
             e.printStackTrace();
@@ -59,13 +60,15 @@ public class FileUtils {
     }
 
     public static byte[] readSimple(File src) {
-        try {
-            BufferedInputStream bis = new BufferedInputStream(new FileInputStream(src));
-            int len = bis.available();
-            byte[] data = new byte[len];
-            bis.read(data);
-            bis.close();
-            return data;
+        try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(src))) {
+            // 循环读满，单次 read 不保证读完整个文件
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            byte[] buffer = new byte[8192];
+            int len;
+            while ((len = bis.read(buffer)) > 0) {
+                bos.write(buffer, 0, len);
+            }
+            return bos.toByteArray();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -98,19 +101,13 @@ public class FileUtils {
     }
 
     public static void copyFile(File source, File dest) throws IOException {
-        InputStream is = null;
-        OutputStream os = null;
-        try {
-            is = new FileInputStream(source);
-            os = new FileOutputStream(dest);
+        try (InputStream is = new FileInputStream(source);
+             OutputStream os = new FileOutputStream(dest)) {
             byte[] buffer = new byte[1024];
             int length;
             while ((length = is.read(buffer)) > 0) {
                 os.write(buffer, 0, length);
             }
-        } finally {
-            is.close();
-            os.close();
         }
     }
     public static String getRootPath() {
@@ -224,11 +221,14 @@ public class FileUtils {
     }
 
     public static String getAsOpen(String name) {
-        try {
-            InputStream is = App.getInstance().getAssets().open(name);
-            byte[] data = new byte[is.available()];
-            is.read(data);
-            return new String(data, "UTF-8");
+        try (InputStream is = App.getInstance().getAssets().open(name)) {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            byte[] buffer = new byte[8192];
+            int len;
+            while ((len = is.read(buffer)) > 0) {
+                bos.write(buffer, 0, len);
+            }
+            return new String(bos.toByteArray(), "UTF-8");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -316,6 +316,8 @@ public class FileUtils {
             if (response.isSuccessful() && response.body() != null){
                 return new String(response.body().bytes(), "UTF-8");
             } else {
+                // 非 2xx 时关闭响应体，避免连接无法归还连接池
+                response.close();
                 return "";
             }
         } catch (IOException e) {

@@ -11,6 +11,7 @@ import com.chad.library.adapter.base.BaseViewHolder;
 import com.github.tvbox.osc.R;
 import com.github.tvbox.osc.api.ApiConfig;
 import com.github.tvbox.osc.base.App;
+import com.github.tvbox.osc.bean.SourceBean;
 import com.github.tvbox.osc.bean.VodInfo;
 import com.github.tvbox.osc.util.HawkConfig;
 import com.github.tvbox.osc.util.ImgUtil;
@@ -38,7 +39,8 @@ public class HistoryAdapter extends BaseQuickAdapter<VodInfo, BaseViewHolder> {
         }
 
         TextView tvYear = helper.getView(R.id.tvYear);
-        tvYear.setText(ApiConfig.get().getSource(item.sourceKey).getName());
+        SourceBean source = ApiConfig.get().getSource(item.sourceKey);
+        tvYear.setText(source != null ? source.getName() : "");
         /*if (item.year <= 0) {
             tvYear.setVisibility(View.GONE);
         } else {
@@ -73,6 +75,7 @@ public class HistoryAdapter extends BaseQuickAdapter<VodInfo, BaseViewHolder> {
             helper.setVisible(R.id.tvNote, false);
         } else {
             helper.setText(R.id.tvNote, item.note);
+            helper.setVisible(R.id.tvNote, true);
         }
         helper.setText(R.id.tvName, item.name);
         // helper.setText(R.id.tvActor, item.actor);
