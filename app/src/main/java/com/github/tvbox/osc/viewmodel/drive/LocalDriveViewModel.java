@@ -40,7 +40,8 @@ public class LocalDriveViewModel extends AbstractDriveViewModel {
             }
         } else {
             sortData(currentDriveNote.getChildren());
-            callback.callback(currentDriveNote.getChildren(), true);
+            if (callback != null)
+                callback.callback(currentDriveNote.getChildren(), true);
         }
         return path;
     }

@@ -44,13 +44,19 @@ public class IjkmPlayer extends IjkPlayer {
             for (String key : options.keySet()) {
                 String value = options.get(key);
                 String[] opt = key.split("\\|");
-                int category = Integer.parseInt(opt[0].trim());
-                String name = opt[1].trim();
+                // key 格式来自站点/用户配置，格式错误时跳过该条而非崩溃
+                if (opt.length < 2) continue;
                 try {
-                    long valLong = Long.parseLong(value);
-                    mMediaPlayer.setOption(category, name, valLong);
+                    int category = Integer.parseInt(opt[0].trim());
+                    String name = opt[1].trim();
+                    try {
+                        long valLong = Long.parseLong(value);
+                        mMediaPlayer.setOption(category, name, valLong);
+                    } catch (Exception e) {
+                        mMediaPlayer.setOption(category, name, value);
+                    }
                 } catch (Exception e) {
-                    mMediaPlayer.setOption(category, name, value);
+                    e.printStackTrace();
                 }
             }
         }
@@ -91,6 +97,8 @@ public class IjkmPlayer extends IjkPlayer {
             setDataSourceHeader(headers);
         } catch (Exception e) {
             mPlayerEventListener.onError(-1, PlayerHelper.getRootCauseMessage(e));
+            // 出错后不再继续设置数据源，避免同时收到错误与 prepared 状态
+            return;
         }
         //mMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "protocol_whitelist", "ijkio,ffio,async,cache,crypto,file,http,https,ijkhttphook,ijkinject,ijklivehook,ijklongurl,ijksegment,ijktcphook,pipe,rtp,tcp,tls,udp,ijkurlhook,data");
         mMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "protocol_whitelist", "ijkio,ffio,async,cache,crypto,file,dash,http,https,ijkhttphook,ijkinject,ijklivehook,ijklongurl,ijksegment,ijktcphook,pipe,rtp,tcp,tls,udp,ijkurlhook,data,concat,subfile,ffconcat");
@@ -122,23 +130,24 @@ public class IjkmPlayer extends IjkPlayer {
     }
     private void setDataSourceHeader(Map<String, String> headers) {
         if (headers != null && !headers.isEmpty()) {
-            String userAgent = headers.get("User-Agent");
+            // 复制到本地 Map 处理，避免修改调用方传入的 headers（副作用：调用方后续使用时 UA 丢失）
+            Map<String, String> local = new LinkedHashMap<>(headers);
+            String userAgent = local.remove("User-Agent");
             if (!TextUtils.isEmpty(userAgent)) {
                 mMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "user_agent", userAgent);
-                // 移除header中的User-Agent，防止重复
-                headers.remove("User-Agent");
             }
-            if (headers.size() > 0) {
+            if (local.size() > 0) {
                 StringBuilder sb = new StringBuilder();
-                for (Map.Entry<String, String> entry : headers.entrySet()) {
+                for (Map.Entry<String, String> entry : local.entrySet()) {
                     sb.append(entry.getKey());
                     sb.append(":");
                     String value = entry.getValue();
                     if (!TextUtils.isEmpty(value))
                         sb.append(entry.getValue());
                     sb.append("\r\n");
-                    mMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "headers", sb.toString());
                 }
+                // 拼接完成后只提交一次，避免循环内重复向 native 层传全量字符串
+                mMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "headers", sb.toString());
             }
         }
     }

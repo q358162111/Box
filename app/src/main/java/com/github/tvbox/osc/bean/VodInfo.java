@@ -103,9 +103,13 @@ public class VodInfo implements Serializable {
 
     private int extractNumber(String name) {
         //java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("\\d+").matcher(name);
-        java.util.regex.Matcher matcher = getPattern("\\d+").matcher(name);
+        java.util.regex.Matcher matcher = getPattern("\\d{1,9}").matcher(name);
         if (matcher.find()) {
-            return Integer.parseInt(matcher.group());
+            try {
+                return Integer.parseInt(matcher.group());
+            } catch (NumberFormatException e) {
+                return 0;
+            }
         }
         return 0;
     }
@@ -180,9 +184,36 @@ public class VodInfo implements Serializable {
             Gson gson = new Gson();
             String json = gson.toJson(this);
             return gson.fromJson(json, VodInfo.class);
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            // 反序列化失败时返回字段拷贝副本，绝不返回 this（否则调用方的修改会污染原件）
+            VodInfo copy = new VodInfo();
+            copy.last = last;
+            copy.id = id;
+            copy.tid = tid;
+            copy.name = name;
+            copy.type = type;
+            copy.dt = dt;
+            copy.pic = pic;
+            copy.lang = lang;
+            copy.area = area;
+            copy.year = year;
+            copy.state = state;
+            copy.note = note;
+            copy.actor = actor;
+            copy.director = director;
+            copy.seriesFlags = seriesFlags;
+            copy.seriesMap = seriesMap;
+            copy.des = des;
+            copy.playFlag = playFlag;
+            copy.playIndex = playIndex;
+            copy.playGroup = playGroup;
+            copy.playGroupCount = playGroupCount;
+            copy.playNote = playNote;
+            copy.sourceKey = sourceKey;
+            copy.playerCfg = playerCfg;
+            copy.reverseSort = reverseSort;
+            return copy;
         }
-        return this;
     }
 
     //takagen99

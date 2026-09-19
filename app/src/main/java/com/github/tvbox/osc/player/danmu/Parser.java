@@ -52,10 +52,16 @@ public class Parser extends BaseDanmakuParser {
         for (Danmu.Data data : danmu.getData()) {
             String[] values = data.getParam().split(",");
             if (values.length < 4) continue;
-            setParam(values);
-            setText(data.getText());
-            synchronized (result.obtainSynchronizer()) {
-                result.addItem(item);
+            try {
+                setParam(values);
+                // 外部弹幕数据不可信：单条解析失败仅跳过，不影响其余弹幕
+                if (item != null && setText(data.getText())) {
+                    synchronized (result.obtainSynchronizer()) {
+                        result.addItem(item);
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
         return result;
@@ -83,13 +89,15 @@ public class Parser extends BaseDanmakuParser {
         item.flags = mContext.mGlobalFlagValues;
     }
 
-    private void setText(String text) {
+    private boolean setText(String text) {
         item.index = index++;
         DanmakuUtils.fillText(item, decodeXmlString(text));
-        if (item.getType() == BaseDanmaku.TYPE_SPECIAL && text.startsWith("[") && text.endsWith("]")) setSpecial();
+        if (item.getType() == BaseDanmaku.TYPE_SPECIAL && text.startsWith("[") && text.endsWith("]"))
+            return setSpecial();
+        return true;
     }
 
-    private void setSpecial() {
+    private boolean setSpecial() {
         String[] textArr = null;
         try {
             JSONArray jsonArray = new JSONArray(item.text);
@@ -101,8 +109,8 @@ public class Parser extends BaseDanmakuParser {
             e.printStackTrace();
         }
         if (textArr == null || textArr.length < 5 || TextUtils.isEmpty(textArr[4])) {
-            item = null;
-            return;
+            // 返回失败标记，不再置空共享的 item 字段
+            return false;
         }
         DanmakuUtils.fillText(item, textArr[4]);
         float beginX = Float.parseFloat(textArr[0]);
@@ -177,6 +185,7 @@ public class Parser extends BaseDanmakuParser {
                 }
             }
         }
+        return true;
     }
 
     private boolean isPercentageNumber(String number) {
@@ -184,10 +193,11 @@ public class Parser extends BaseDanmakuParser {
     }
 
     private String decodeXmlString(String title) {
-        if (title.contains("&amp;")) title = title.replace("&amp;", "&");
+        // 注意替换顺序：&amp; 必须最后处理，否则 "&amp;lt;" 会被二次解码成 "<"
         if (title.contains("&quot;")) title = title.replace("&quot;", "\"");
         if (title.contains("&gt;")) title = title.replace("&gt;", ">");
         if (title.contains("&lt;")) title = title.replace("&lt;", "<");
+        if (title.contains("&amp;")) title = title.replace("&amp;", "&");
         return title;
     }
 }

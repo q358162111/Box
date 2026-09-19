@@ -263,9 +263,7 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomAd
 
     protected String getAssetText(String fileName) {
         StringBuilder stringBuilder = new StringBuilder();
-        try {
-            AssetManager assets = getAssets();
-            BufferedReader bf = new BufferedReader(new InputStreamReader(assets.open(fileName)));
+        try (BufferedReader bf = new BufferedReader(new InputStreamReader(getAssets().open(fileName)))) {
             String line;
             while ((line = bf.readLine()) != null) {
                 stringBuilder.append(line);
@@ -313,6 +311,7 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomAd
     public int getThemeColor() {
         TypedArray a = mContext.obtainStyledAttributes(R.styleable.themeColor);
         int themeColor = a.getColor(R.styleable.themeColor_color_theme, 0);
+        a.recycle();
         return themeColor;
     }
 

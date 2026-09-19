@@ -158,8 +158,15 @@ public class SubtitleViewModel extends ViewModel {
                             setSearchListData(data, true, false);
                         } else {//有的字幕 不一定是压缩包
                             Element item = doc.selectFirst(".download a#btn_download");
+                            if (item == null) {
+                                setSearchListData(null, true, false);
+                                return;
+                            }
                             String href = item.attr("href");
-                            if (TextUtils.isEmpty(href)) setSearchListData(null, true, false);
+                            if (TextUtils.isEmpty(href)) {
+                                setSearchListData(null, true, false);
+                                return;
+                            }
                             String h2 = href.toLowerCase();
                             if (h2.endsWith("srt") || h2.endsWith("ass") || h2.endsWith("scc") || h2.endsWith("ttml")) {
                                 String url = "https://assrt.net" + href;
@@ -196,6 +203,16 @@ public class SubtitleViewModel extends ViewModel {
         }
     }
 
+    // 复用单例 client，避免每次请求新建连接池/线程池
+    private final OkHttpClient redirectClient = new OkHttpClient.Builder()
+            .readTimeout(15, TimeUnit.SECONDS)
+            .writeTimeout(15, TimeUnit.SECONDS)
+            .connectTimeout(15, TimeUnit.SECONDS)
+            .followRedirects(false)
+            .followSslRedirects(false)
+            .retryOnConnectionFailure(true)
+            .build();
+
     private void getSubtitleUrlFromAssrt(SubtitleBean subtitle, SearchSubtitleDialog.SubtitleLoader subtitleLoader) {
         String ua = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.54 Safari/537.36";
         Request request = new Request.Builder()
@@ -204,15 +221,7 @@ public class SubtitleViewModel extends ViewModel {
                 .addHeader("Referer", "https://secure.assrt.net")
                 .addHeader("User-Agent", ua)
                 .build();
-        OkHttpClient.Builder builder = new OkHttpClient.Builder()
-                .readTimeout(15, TimeUnit.SECONDS)
-                .writeTimeout(15, TimeUnit.SECONDS)
-                .connectTimeout(15, TimeUnit.SECONDS)
-                .followRedirects(false)
-                .followSslRedirects(false)
-                .retryOnConnectionFailure(true);
-        OkHttpClient client = builder.build();
-        client.newCall(request).enqueue(new Callback() {
+        redirectClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 e.printStackTrace();
@@ -220,8 +229,17 @@ public class SubtitleViewModel extends ViewModel {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                subtitle.setUrl(response.header("location"));
-                subtitleLoader.loadSubtitle(subtitle);
+                try {
+                    String location = response.header("location");
+                    if (TextUtils.isEmpty(location)) {
+                        // 无重定向头时直接使用请求地址
+                        location = subtitle.getUrl();
+                    }
+                    subtitle.setUrl(location);
+                    subtitleLoader.loadSubtitle(subtitle);
+                } finally {
+                    response.close();
+                }
             }
         });
     }

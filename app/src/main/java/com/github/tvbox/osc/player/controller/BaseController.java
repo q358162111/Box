@@ -64,7 +64,7 @@ public abstract class BaseController extends BaseVideoController implements Gest
                 switch (what) {
                     case 100: { // 亮度+音量调整
                         mSlideInfo.setVisibility(VISIBLE);
-                        mSlideInfo.setText(msg.obj.toString());
+                        mSlideInfo.setText(msg.obj != null ? msg.obj.toString() : "");
                         break;
                     }
                     case 101: { // 亮度+音量调整 关闭
@@ -127,6 +127,11 @@ public abstract class BaseController extends BaseVideoController implements Gest
     private final Runnable mRunnable = new Runnable() {
         @Override
         public void run() {
+            // attach 前后 mControlWrapper 可能为 null，防护避免 NPE
+            if (mControlWrapper == null) {
+                mHandler.postDelayed(this, 1000);
+                return;
+            }
             String format = String.format("%.2f", (float) mControlWrapper.getTcpSpeed() / 1024.0 / 1024.0);
             mSpeedTextTop.setText(format);
             mSpeedTextTopr.setText(format);
@@ -134,6 +139,13 @@ public abstract class BaseController extends BaseVideoController implements Gest
             mHandler.postDelayed(this, 1000);
         }
     };
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        // 停止每秒网速刷新任务，避免 Handler 持有 controller 造成 Activity 泄漏
+        mHandler.removeCallbacks(mRunnable);
+    }
 
     @Override
     protected void initView() {
@@ -454,7 +466,8 @@ public abstract class BaseController extends BaseVideoController implements Gest
             switch (action) {
                 case MotionEvent.ACTION_UP:
                     stopSlide();
-                    if (mSeekPosition > 0) {
+                    // 滑到 0 位置也应生效，用 mChangePosition 区分是否真实拖动了进度
+                    if (mChangePosition && mSeekPosition >= 0) {
                         mControlWrapper.seekTo(mSeekPosition);
                         mSeekPosition = 0;
                     }

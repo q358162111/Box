@@ -30,6 +30,8 @@ public class CustomWebReceiver extends BroadcastReceiver {
         if (action.equals(intent.getAction()) && intent.getExtras() != null) {
             Object refreshObj = null;
             String action = intent.getExtras().getString("action");
+            // "action" extra 缺失时 getString 返回 null，判空防止 receiver 进程崩溃
+            if (action == null) return;
             if (action.equals(REFRESH_PARSE)) {
                 /*String name = intent.getExtras().getString("name");
                 String url = intent.getExtras().getString("url");*/

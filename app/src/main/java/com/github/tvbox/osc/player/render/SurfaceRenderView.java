@@ -75,7 +75,8 @@ public class SurfaceRenderView extends SurfaceView implements IRenderView, Surfa
 
     @Override
     public void release() {
-
+        getHolder().removeCallback(this);
+        mMediaPlayer = null;
     }
 
     @Override
@@ -86,9 +87,10 @@ public class SurfaceRenderView extends SurfaceView implements IRenderView, Surfa
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        /*if (mMediaPlayer != null) {
+        // Surface 就绪后立即绑定，防止只有 created 无 changed 时画面不显示
+        if (mMediaPlayer != null) {
             mMediaPlayer.setDisplay(holder);
-        }*/
+        }
     }
 
     @Override
@@ -100,8 +102,9 @@ public class SurfaceRenderView extends SurfaceView implements IRenderView, Surfa
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
-        /*if (mMediaPlayer != null) {
+        // 解绑失效 Surface，防止播放器继续向已销毁的 Surface 输出帧导致黑屏/native crash
+        if (mMediaPlayer != null) {
             mMediaPlayer.setDisplay(null);
-        }*/
+        }
     }
 }

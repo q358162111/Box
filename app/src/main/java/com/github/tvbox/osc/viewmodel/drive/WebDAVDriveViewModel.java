@@ -48,8 +48,9 @@ public class WebDAVDriveViewModel extends AbstractDriveViewModel {
             new Thread() {
                 public void run() {
                     Sardine webDAV = getWebDAV();
-                    if (webDAV == null && callback != null) {
-                        callback.fail("无法访问该WebDAV地址");
+                    if (webDAV == null) {
+                        if (callback != null)
+                            callback.fail("无法访问该WebDAV地址");
                         return;
                     }
                     List<DavResource> files = null;
@@ -64,7 +65,7 @@ public class WebDAVDriveViewModel extends AbstractDriveViewModel {
                     List<DriveFolderFile> items = new ArrayList<>();
                     if (files != null) {
                         for (DavResource file : files) {
-                            if (targetPath != "" && file.getPath().toUpperCase(Locale.ROOT).endsWith(targetPath.toUpperCase(Locale.ROOT) + "/"))
+                            if (!targetPath.isEmpty() && file.getPath().toUpperCase(Locale.ROOT).endsWith(targetPath.toUpperCase(Locale.ROOT) + "/"))
                                 continue;
                             int extNameStartIndex = file.getName().lastIndexOf(".");
                             items.add(new DriveFolderFile(currentDriveNote, file.getName(), 0, !file.isDirectory(),

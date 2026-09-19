@@ -26,7 +26,8 @@ public class RefreshEvent {
     public static final int TYPE_APP_REFRESH = 15;
     public static final int TYPE_FILTER_CHANGE = 16;
     public static final int TYPE_REFRESH_NOTIFY = 17;
-    public static final int TYPE_SET_DANMU_SETTINGS = 18;
+    // 注意: 18 已被 TYPE_PROXYS_CHANGE 占用，事件类型值不可重复
+    public static final int TYPE_SET_DANMU_SETTINGS = 19;
     public int type;
     public Object obj;
 

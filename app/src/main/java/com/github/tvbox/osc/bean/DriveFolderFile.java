@@ -33,8 +33,14 @@ public class DriveFolderFile {
     public DriveFolderFile(StorageDrive driveData) {
         this.driveData = driveData;
         this.name = driveData.name;
-        if(driveData.configJson != null && driveData.configJson.length() > 0)
-            this.config = JsonParser.parseString(driveData.configJson).getAsJsonObject();
+        if(driveData.configJson != null && driveData.configJson.length() > 0) {
+            try {
+                this.config = JsonParser.parseString(driveData.configJson).getAsJsonObject();
+            } catch (Exception e) {
+                // 非法/非对象 JSON 不应导致构造失败
+                e.printStackTrace();
+            }
+        }
     }
 
     public DriveFolderFile(DriveFolderFile parent, String name, int version, boolean isFile, String fileType, Long lastModifiedDate) {
@@ -77,7 +83,10 @@ public class DriveFolderFile {
     }
 
     public StorageDriveType.TYPE getDriveType() {
-        return StorageDriveType.TYPE.values()[driveData.type];
+        if (driveData == null) return StorageDriveType.TYPE.WEBDAV;
+        StorageDriveType.TYPE[] types = StorageDriveType.TYPE.values();
+        if (driveData.type < 0 || driveData.type >= types.length) return StorageDriveType.TYPE.WEBDAV;
+        return types[driveData.type];
     }
 
     public StorageDrive getDriveData() {

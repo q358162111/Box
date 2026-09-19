@@ -19,6 +19,7 @@ import xyz.doikki.videoplayer.exo.ExoMediaPlayer;
 public class EXOmPlayer extends ExoMediaPlayer {
     private String audioId = "";
     private String subtitleId = "";
+    private Player.Listener timedTextListener;
 
     public EXOmPlayer(Context context) {
         super(context);
@@ -38,7 +39,7 @@ public class EXOmPlayer extends ExoMediaPlayer {
                     for (int formatIndex = 0; formatIndex < group.length; formatIndex++) {
                         Format format = group.getFormat(formatIndex);
                         if (MimeTypes.isAudio(format.sampleMimeType)) {
-                            String trackName = (data.getAudio().size() + 1) + "：" + trackNameProvider.getTrackName(format) + "[" + format.codecs + "]";
+                            String trackName = (data.getAudio().size() + 1) + "：" + trackNameProvider.getTrackName(format) + (format.codecs != null ? "[" + format.codecs + "]" : "");
                             TrackInfoBean t = new TrackInfoBean();
                             t.name = trackName;
                             t.language = "";
@@ -110,6 +111,11 @@ public class EXOmPlayer extends ExoMediaPlayer {
     }
 
     public void setOnTimedTextListener(Player.Listener listener) {
+        // 先移除旧监听，防止播放器实例复用时监听器叠加导致重复回调与泄漏
+        if (timedTextListener != null) {
+            mMediaPlayer.removeListener(timedTextListener);
+        }
+        timedTextListener = listener;
         mMediaPlayer.addListener(listener);
     }
 

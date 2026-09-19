@@ -57,7 +57,7 @@ public class MovieSort implements Serializable {
 
         @Override
         public int compareTo(SortData o) {
-            return this.sort - o.sort;
+            return Integer.compare(this.sort, o.sort);
         }
     }
 

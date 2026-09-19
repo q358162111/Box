@@ -79,7 +79,8 @@ public class AppDataManager {
         return DB_NAME + ".v" + DB_FILE_VERSION + ".db";
     }
 
-    public static AppDataBase get() {
+    // 静态实例加锁保护，防止并发构建多个 Room 实例
+    public static synchronized AppDataBase get() {
         if (manager == null) {
             throw new RuntimeException("AppDataManager is no init");
         }
@@ -105,9 +106,11 @@ public class AppDataManager {
         return dbInstance;
     }
 
-    public static boolean backup(File path) throws IOException {
+    public static synchronized boolean backup(File path) throws IOException {
         if (dbInstance != null && dbInstance.isOpen()) {
             dbInstance.close();
+            // close 后必须置空，否则后续 get() 返回已关闭的实例导致崩溃
+            dbInstance = null;
         }
         File db = App.getInstance().getDatabasePath(dbPath());
         if (db.exists()) {
@@ -118,9 +121,10 @@ public class AppDataManager {
         }
     }
 
-    public static boolean restore(File path) throws IOException {
+    public static synchronized boolean restore(File path) throws IOException {
         if (dbInstance != null && dbInstance.isOpen()) {
             dbInstance.close();
+            dbInstance = null;
         }
         File db = App.getInstance().getDatabasePath(dbPath());
         if (db.exists()) {

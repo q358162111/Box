@@ -1,18 +1,13 @@
 package com.github.tvbox.osc.bean;
 
 import androidx.annotation.NonNull;
-import androidx.exifinterface.media.ExifInterface;
 
-import com.github.tvbox.osc.api.ApiConfig;
 import com.github.tvbox.osc.util.HawkConfig;
 import com.github.tvbox.osc.util.PlayerHelper;
 import com.orhanobut.hawk.Hawk;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.HashMap;
-import java.util.Objects;
 
 import xyz.doikki.videoplayer.player.VideoView;
 
@@ -44,6 +39,10 @@ public class LivePlayerManager {
     }
 
     public void getLiveChannelPlayer(VideoView videoView, String channelName) {
+        if (currentPlayerConfig == null) {
+            getDefaultLiveChannelPlayer(videoView);
+            return;
+        }
         JSONObject playerConfig = Hawk.get(channelName, null);
         if (playerConfig == null) {
             if (!currentPlayerConfig.toString().equals(defaultPlayerConfig.toString()))
@@ -71,6 +70,7 @@ public class LivePlayerManager {
     public int getLivePlayerType() {
         int playerTypeIndex = 0;
         try {
+            if (currentPlayerConfig == null) return playerTypeIndex;
             int playerType = currentPlayerConfig.getInt("pl");
             String ijkCodec = currentPlayerConfig.getString("ijk");
             switch (playerType) {
@@ -95,6 +95,7 @@ public class LivePlayerManager {
 
     public int getLivePlayerScale() {
         try {
+            if (currentPlayerConfig == null) return 0;
             return currentPlayerConfig.getInt("sc");
         } catch (JSONException e) {
             e.printStackTrace();
@@ -103,7 +104,15 @@ public class LivePlayerManager {
     }
 
     public void changeLivePlayerType(VideoView videoView, int playerType, String channelName) {
-        JSONObject playerConfig = currentPlayerConfig;
+        if (currentPlayerConfig == null) return;
+        // 复制副本再修改，避免与其他线程对同一 JSONObject 并发读写
+        JSONObject playerConfig;
+        try {
+            playerConfig = new JSONObject(currentPlayerConfig.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return;
+        }
         try {
             switch (playerType) {
                 case 0:
@@ -139,11 +148,14 @@ public class LivePlayerManager {
     public void changeLivePlayerScale(@NonNull VideoView videoView, int playerScale, String channelName){
         videoView.setScreenScaleType(playerScale);
 
-        JSONObject playerConfig = currentPlayerConfig;
+        if (currentPlayerConfig == null) return;
+        JSONObject playerConfig;
         try {
+            playerConfig = new JSONObject(currentPlayerConfig.toString());
             playerConfig.put("sc", playerScale);
         } catch (JSONException e) {
             e.printStackTrace();
+            return;
         }
         if (playerConfig.toString().equals(defaultPlayerConfig.toString()))
             Hawk.delete(channelName);

@@ -269,11 +269,10 @@ public class ApiConfig {
                     @Override
                     public File convertResponse(okhttp3.Response response){
                         File cacheDir = cache.getParentFile();
-                        assert cacheDir != null;
-                        if (!cacheDir.exists()) cacheDir.mkdirs();
+                        if (cacheDir != null && !cacheDir.exists()) cacheDir.mkdirs();
                         if (cache.exists()) cache.delete();
-                        // 3. 使用 try-with-resources 确保流关闭
-                        assert response.body() != null;
+                        // assert 在 Android 发布版不生效，改为显式判空
+                        if (response.body() == null) return null;
                         try (FileOutputStream fos = new FileOutputStream(cache)) {
                             if (isJarInImg) {
                                 String respData = response.body().string();
@@ -282,6 +281,8 @@ public class ApiConfig {
                                 if (imgJar == null || imgJar.length == 0) {
                                     LOG.e("echo---Generated JAR data is empty");
                                     callback.error("JAR data is empty");
+                                    // 数据为空时直接失败返回，避免写空文件后又走 onSuccess 造成二次回调
+                                    return null;
                                 }
                                 fos.write(imgJar);
                             } else {
@@ -361,6 +362,8 @@ public class ApiConfig {
         // 重新解析配置时清空旧源，避免新旧配置站点混杂
         sourceBeanList.clear();
         JsonArray sites = infoJson.has("video") ? infoJson.getAsJsonObject("video").getAsJsonArray("sites") : infoJson.get("sites").getAsJsonArray();
+        // sites 字段缺失/为空时跳过解析，避免整个配置加载 NPE 失败
+        if (sites == null) sites = new JsonArray();
         for (JsonElement opt : sites) {
             JsonObject obj = (JsonObject) opt;
             SourceBean sb = new SourceBean();

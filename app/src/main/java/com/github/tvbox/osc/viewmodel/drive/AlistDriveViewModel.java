@@ -86,7 +86,7 @@ public class AlistDriveViewModel extends AbstractDriveViewModel {
                             PostRequest<String> request = OkGo.<String>post(webLink + "/api/public/path").tag("drive");
                             JSONObject requestBody = new JSONObject();
                             requestBody.put("path", targetPath.isEmpty() ? "/" : targetPath);
-                            requestBody.put("password", currentDrive.getConfig().get("password").getAsString());
+                            requestBody.put("password", getPassword(currentDrive.getConfig()));
                             requestBody.put("page_num", 1);
                             requestBody.put("page_size", 200);
                             request.upJson(requestBody);
@@ -144,7 +144,7 @@ public class AlistDriveViewModel extends AbstractDriveViewModel {
                             PostRequest<String> request = OkGo.<String>post(webLink + "/api/fs/list").tag("drive");
                             JSONObject requestBody = new JSONObject();
                             requestBody.put("path", targetPath.isEmpty() ? "/" : targetPath);
-                            requestBody.put("password", currentDrive.getConfig().get("password").getAsString());
+                            requestBody.put("password", getPassword(currentDrive.getConfig()));
                             requestBody.put("page", 1);
                             requestBody.put("per_page", 200);
                             requestBody.put("refresh", false);
@@ -225,7 +225,8 @@ public class AlistDriveViewModel extends AbstractDriveViewModel {
             }
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
-            callback.fail(e.getMessage());
+            if (callback != null)
+                callback.fail(e.getMessage());
         }
 
     }
@@ -234,5 +235,10 @@ public class AlistDriveViewModel extends AbstractDriveViewModel {
         void callback(String fileUrl);
 
         void fail(String msg);
+    }
+
+    // password 字段可能未配置，缺失时返回空串
+    private String getPassword(JsonObject config) {
+        return config.has("password") && !config.get("password").isJsonNull() ? config.get("password").getAsString() : "";
     }
 }

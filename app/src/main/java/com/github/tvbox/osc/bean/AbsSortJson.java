@@ -17,18 +17,24 @@ public class AbsSortJson implements Serializable {
         AbsSortXml absSortXml = new AbsSortXml();
         MovieSort movieSort = new MovieSort();
         movieSort.sortList = new ArrayList<>();
-        for (AbsJsonClass cls : classes) {
-            MovieSort.SortData sortData = new MovieSort.SortData();
-            sortData.id = cls.type_id;
-            sortData.name = cls.type_name;
-            sortData.flag = cls.type_flag;
-            movieSort.sortList.add(sortData);
+        if (classes != null) {
+            for (AbsJsonClass cls : classes) {
+                MovieSort.SortData sortData = new MovieSort.SortData();
+                sortData.id = cls.type_id;
+                sortData.name = cls.type_name;
+                sortData.flag = cls.type_flag;
+                movieSort.sortList.add(sortData);
+            }
         }
         if (list != null && !list.isEmpty()) {
             Movie movie = new Movie();
             ArrayList<Movie.Video> videos = new ArrayList<>();
             for (AbsJson.AbsJsonVod vod : list) {
-                videos.add(vod.toXmlVideo());
+                try {
+                    videos.add(vod.toXmlVideo());
+                } catch (Throwable th) {
+                    th.printStackTrace();
+                }
             }
             movie.videoList = videos;
             absSortXml.list = movie;

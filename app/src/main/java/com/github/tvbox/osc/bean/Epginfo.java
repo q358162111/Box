@@ -32,12 +32,21 @@ public class Epginfo {
         simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT+8:00"));
         SimpleDateFormat userSimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
         userSimpleDateFormat.setTimeZone(TimeZone.getDefault());
+        // parse 失败返回 null 而非抛异常，需判空防止后续 format(null) 崩溃
         startdateTime = userSimpleDateFormat.parse(simpleDateFormat.format(date) + " " + str1 + ":00 GMT+8:00", new ParsePosition(0));
         enddateTime = userSimpleDateFormat.parse(simpleDateFormat.format(date) + " " + str2 + ":00 GMT+8:00", new ParsePosition(0));
         SimpleDateFormat zoneFormat = new SimpleDateFormat("HH:mm");
-        start = zoneFormat.format(startdateTime);
-        end = zoneFormat.format(enddateTime);
-        datestart = Integer.parseInt(start.replace(":", ""));
-        dateend = Integer.parseInt(end.replace(":", ""));
+        start = startdateTime != null ? zoneFormat.format(startdateTime) : str1;
+        end = enddateTime != null ? zoneFormat.format(enddateTime) : str2;
+        datestart = parseIntSafe(start);
+        dateend = parseIntSafe(end);
+    }
+
+    private static int parseIntSafe(String value) {
+        try {
+            return Integer.parseInt(value.replace(":", ""));
+        } catch (Exception e) {
+            return 0;
+        }
     }
 }

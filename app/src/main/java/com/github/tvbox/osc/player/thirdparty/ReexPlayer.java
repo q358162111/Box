@@ -67,7 +67,10 @@ public class ReexPlayer {
             try {
                 JSONObject json = new JSONObject();
                 for (String key : headers.keySet()) {
-                    json.put(key, headers.get(key).trim());
+                    String value = headers.get(key);
+                    // value 可能为 null（站点配置缺字段），跳过而非 NPE
+                    if (value == null) continue;
+                    json.put(key, value.trim());
                 }
                 intent.putExtra("reex.extra.http_header", json.toString());
             } catch (JSONException e) {

@@ -68,6 +68,9 @@ public abstract class BaseLazyFragment extends Fragment implements CustomAdapt {
         AutoSize.autoConvertDensity(getActivity(), getSizeInDp(), isBaseOnWidth());
         if (null == rootView) {
             rootView = inflater.inflate(getLayoutResID(), container, false);
+        } else if (rootView.getParent() instanceof ViewGroup) {
+            // 视图重建复用缓存 rootView 时先与旧父容器解绑，防止 "child already has a parent"
+            ((ViewGroup) rootView.getParent()).removeView(rootView);
         }
         isViewCreated = true;
         return rootView;

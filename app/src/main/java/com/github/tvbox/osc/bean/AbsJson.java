@@ -140,7 +140,8 @@ public class AbsJson implements Serializable {
                     if(StringUtils.isEmpty(playUrls[i])){
                         continue;
                     }
-                    if(i > playFlags.length){
+                    // vod_play_from 拆出的线路数可能少于 vod_play_url 拆出的段数，越界防护
+                    if(i >= playFlags.length){
                         urlInfo.flag = "线路" + i;
                     } else {
                         urlInfo.flag = StringUtils.isEmpty(playFlags[i]) ? "线路" + i : playFlags[i];
@@ -174,7 +175,8 @@ public class AbsJson implements Serializable {
                 try {
                     videoList.add(vod.toXmlVideo());
                 } catch (Throwable th) {
-                    movie.pagesize = 0;
+                    // 单条数据异常仅跳过该条，不影响分页信息
+                    th.printStackTrace();
                 }
             }
         }

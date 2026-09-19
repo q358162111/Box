@@ -47,6 +47,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -113,12 +114,13 @@ public class SourceViewModel extends ViewModel {
     public static final ExecutorService spThreadPool = Executors.newSingleThreadExecutor();
 
     //homeContent缓存，最多存储5个sourceKey的AbsSortXml对象
-    private static final Map<String, AbsSortXml> sortCache = new LinkedHashMap<String, AbsSortXml>(5, 0.75f, true) {
+    //主线程回调与后台线程并发读写，必须同步包装（LinkedHashMap accessOrder 并发访问会损坏链表）
+    private static final Map<String, AbsSortXml> sortCache = Collections.synchronizedMap(new LinkedHashMap<String, AbsSortXml>(5, 0.75f, true) {
         @Override
         protected boolean removeEldestEntry(Entry<String, AbsSortXml> eldest) {
             return size() > 5;
         }
-    };
+    });
     // homeContent
     public void getSort(final String sourceKey) {
         LOG.i("echo--getSort-start");
@@ -140,6 +142,10 @@ public class SourceViewModel extends ViewModel {
         }
 
         SourceBean sourceBean = ApiConfig.get().getSource(sourceKey);
+        if (sourceBean == null) {
+            sortResult.postValue(null);
+            return;
+        }
         final int type = sourceBean.getType();
         if (type == 3) {
             Runnable waitResponse = new Runnable() {
@@ -599,6 +605,10 @@ public class SourceViewModel extends ViewModel {
     // searchContent
     public void getSearch(String sourceKey, String wd) {
         SourceBean sourceBean = ApiConfig.get().getSource(sourceKey);
+        if (sourceBean == null) {
+            searchResult.postValue(null);
+            return;
+        }
         int type = sourceBean.getType();
         if (type == 3) {
             try {
@@ -684,6 +694,10 @@ public class SourceViewModel extends ViewModel {
     // searchContent
     public void getQuickSearch(String sourceKey, String wd) {
         SourceBean sourceBean = ApiConfig.get().getSource(sourceKey);
+        if (sourceBean == null) {
+            quickSearchResult.postValue(null);
+            return;
+        }
         int type = sourceBean.getType();
         if (type == 3) {
             try {
@@ -1132,15 +1146,24 @@ public class SourceViewModel extends ViewModel {
                             if (code >= 0) {
                                 LOG.i(info);
                             } else {
-                                video.urlBean.infoList.get(0).beanList.get(0).name = info;
+                                if (video.urlBean != null && video.urlBean.infoList != null && video.urlBean.infoList.size() > 0
+                                        && video.urlBean.infoList.get(0).beanList != null && !video.urlBean.infoList.get(0).beanList.isEmpty()) {
+                                    video.urlBean.infoList.get(0).beanList.get(0).name = info;
+                                }
                                 detailResult.postValue(data);
                             }
                         }
 
                         @Override
                         public void list(Map<Integer, String> urlMap) {
+                            if (video.urlBean == null || video.urlBean.infoList == null) {
+                                detailResult.postValue(data);
+                                return;
+                            }
                             for (int key : urlMap.keySet()) {
                                 String playList=urlMap.get(key);
+                                // key 超出 infoList 范围时跳过，防止越界崩溃
+                                if (key < 0 || key >= video.urlBean.infoList.size() || playList == null) continue;
                                 video.urlBean.infoList.get(key).urls = playList;
                                 String[] str = playList.split("#");
                                 List<Movie.Video.UrlBean.UrlInfo.InfoBean> infoBeanList = new ArrayList<>();

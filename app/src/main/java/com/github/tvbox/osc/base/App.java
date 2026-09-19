@@ -111,7 +111,8 @@ public class App extends MultiDexApplication {
         }
     }
 
-    public static P2PClass getp2p() {
+    // synchronized 防止并发创建多个 native P2P 实例导致泄漏
+    public static synchronized P2PClass getp2p() {
         try {
             if (p == null) {
                 p = new P2PClass(FileUtils.getExternalCachePath());

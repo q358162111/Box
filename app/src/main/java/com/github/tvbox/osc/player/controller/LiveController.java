@@ -50,25 +50,28 @@ public class LiveController extends BaseController {
 
     @Override
     public boolean onSingleTapConfirmed(MotionEvent e) {
-        if (listener.singleTap(e))
+        if (listener != null && listener.singleTap(e))
             return true;
         return super.onSingleTapConfirmed(e);
     }
 
     @Override
     public void onLongPress(MotionEvent e) {
-        listener.longPress();
+        if (listener != null)
+            listener.longPress();
         super.onLongPress(e);
     }
 
     @Override
     protected void onPlayStateChanged(int playState) {
         super.onPlayStateChanged(playState);
-        listener.playStateChanged(playState);
+        if (listener != null)
+            listener.playStateChanged(playState);
     }
 
     @Override
     public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+        if (e1 == null || e2 == null || listener == null) return false;
         if (e1.getX() - e2.getX() > minFlingDistance && Math.abs(velocityX) > minFlingVelocity) {
             listener.changeSource(-1);          //左滑
         } else if (e2.getX() - e1.getX() > minFlingDistance && Math.abs(velocityX) > minFlingVelocity) {

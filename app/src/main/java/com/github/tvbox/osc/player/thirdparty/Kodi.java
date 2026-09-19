@@ -12,6 +12,7 @@ import android.util.Log;
 import com.github.tvbox.osc.base.App;
 
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Kodi {
@@ -83,7 +84,12 @@ public class Kodi {
                 url = url + "|";
                 int idx = 0;
                 for (String hk : headers.keySet()) {
-                    url += hk + "=" + URLEncoder.encode(headers.get(hk), "UTF-8");
+                    String hv = headers.get(hk);
+                    if (hv == null) {
+                        idx++;
+                        continue;
+                    }
+                    url += hk + "=" + URLEncoder.encode(hv, "UTF-8");
                     if (idx < headers.keySet().size() -1) {
                         url += "&";
                     }
@@ -95,7 +101,10 @@ public class Kodi {
             intent.putExtra("name", title);
 
             if (subtitle != null && !subtitle.isEmpty()) {
-                intent.putExtra("subs", subtitle);
+                // Kodi 官方 API 要求 subs 为 StringArrayList
+                ArrayList<String> subs = new ArrayList<>();
+                subs.add(subtitle);
+                intent.putStringArrayListExtra("subs", subs);
             }
             activity.startActivity(intent);
             return true;

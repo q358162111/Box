@@ -64,15 +64,19 @@ public class LiveChannelItem {
 
     public void setChannelUrls(ArrayList<String> channelUrls) {
         this.channelUrls = channelUrls;
-        sourceNum = channelUrls.size();
+        sourceNum = channelUrls == null ? 0 : channelUrls.size();
+        // 源列表变更后钳制索引，防止越界
+        if (sourceIndex >= sourceNum) sourceIndex = 0;
     }
     public void preSource() {
+        if (sourceNum <= 0) return;
         sourceIndex--;
         if (sourceIndex < 0) sourceIndex = sourceNum - 1;
     }
     public void nextSource() {
+        if (sourceNum <= 0) return;
         sourceIndex++;
-        if (sourceIndex == sourceNum) sourceIndex = 0;
+        if (sourceIndex >= sourceNum) sourceIndex = 0;
     }
 
     public void setSourceIndex(int sourceIndex) {
@@ -84,6 +88,7 @@ public class LiveChannelItem {
     }
 
     public String getUrl() {
+        if (channelUrls == null || sourceIndex < 0 || sourceIndex >= channelUrls.size()) return "";
         return channelUrls.get(sourceIndex);
     }
 
@@ -100,6 +105,7 @@ public class LiveChannelItem {
     }
 
     public String getSourceName() {
+        if (channelSourceNames == null || sourceIndex < 0 || sourceIndex >= channelSourceNames.size()) return "";
         return channelSourceNames.get(sourceIndex);
     }
 }
