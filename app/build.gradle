@@ -92,16 +92,13 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
-    lintOptions {
-        checkReleaseBuilds false
-        abortOnError false
-    }
-
     buildFeatures {
         dataBinding = true
     }
 
     lint {
+        checkReleaseBuilds false
+        abortOnError false
         disable 'UnsafeOptInUsageError'
     }
 }
@@ -131,7 +128,7 @@ dependencies {
     implementation 'com.google.android.material:material:1.12.0'
     implementation project(path: ':quickjs')
     pythonImplementation project(":pyramid")
-    
+
     kapt 'androidx.room:room-compiler:2.6.1'
     implementation 'com.github.alidili:FlowLayout:v1.5'
     implementation 'androidx.room:room-runtime:2.6.1'
