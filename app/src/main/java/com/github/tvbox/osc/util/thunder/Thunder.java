@@ -218,7 +218,18 @@ public class Thunder {
 
     public static boolean play(String url, ThunderCallback callback) {
         if (url.startsWith("tvbox-torrent:")) {
-            int idx = Integer.parseInt(url.substring(14));
+            int idx;
+            try {
+                idx = Integer.parseInt(url.substring(14));
+            } catch (NumberFormatException e) {
+                callback.status(-1, "索引解析失败");
+                return true;
+            }
+            if (torrentFileInfoArrayList == null || idx < 0 || idx >= torrentFileInfoArrayList.size()) {
+                callback.status(-1, "索引越界");
+                return true;
+            }
+            if (threadPool == null) return false;
             TorrentFileInfo info = torrentFileInfoArrayList.get(idx);
             if (currentTask > 0) {
                 XLTaskHelper.instance().stopTask(currentTask);
@@ -228,10 +239,13 @@ public class Thunder {
                 @Override
                 public void run() {
                     String torrentName = new File(info.torrentPath).getName();
-                    String cache = cacheRoot + File.separator + torrentName.substring(0, torrentName.lastIndexOf("."));
+                    int dot = torrentName.lastIndexOf(".");
+                    String cache = cacheRoot + File.separator + (dot > 0 ? torrentName.substring(0, dot) : torrentName);
                     currentTask = XLTaskHelper.instance().addTorrentTask(info.torrentPath, cache, info.mFileIndex);
-                    if (currentTask < 0)
+                    if (currentTask < 0) {
                         callback.status(-1, "下载出错");
+                        return;
+                    }
                     int count = 30;
                     while (true) {
                         count--;
@@ -265,7 +279,18 @@ public class Thunder {
         }
         if (url.startsWith("tvbox-oth:")) {
             stop(false);
-            int idx = Integer.parseInt(url.substring(10));
+            int idx;
+            try {
+                idx = Integer.parseInt(url.substring(10));
+            } catch (NumberFormatException e) {
+                callback.status(-1, "索引解析失败");
+                return true;
+            }
+            if (ed2kList == null || idx < 0 || idx >= ed2kList.size()) {
+                callback.status(-1, "索引越界");
+                return true;
+            }
+            if (threadPool == null) return false;
             task_url=ed2kList.get(idx);
             name = XLTaskHelper.instance().getFileName(task_url);
             localPath = (new File(cacheRoot+File.separator+"temp",FileUtils.getFileNameWithoutExt(name)))+"/";
@@ -464,7 +489,7 @@ public class Thunder {
     }
 
     public static void stopTask(){
-        if(currentTask != 0L){
+        if(currentTask > 0){
             XLTaskHelper.instance().deleteTask(currentTask, task_url.isEmpty()?cacheRoot:localPath);
             currentTask = 0L;
         }

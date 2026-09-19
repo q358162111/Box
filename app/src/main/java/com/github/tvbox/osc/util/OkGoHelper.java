@@ -77,7 +77,7 @@ public class OkGoHelper {
         } catch (Throwable th) {
             th.printStackTrace();
         }
-        builder.dns(dnsOverHttps);
+        if (dnsOverHttps != null) builder.dns(dnsOverHttps);
 
         ExoMediaSourceHelper.getInstance(App.getInstance()).setOkClient(builder.build());
     }
@@ -143,7 +143,8 @@ public class OkGoHelper {
         builder.cache(new Cache(new File(App.getInstance().getCacheDir().getAbsolutePath(), "dohcache"), 10 * 1024 * 1024));
         OkHttpClient dohClient = builder.build();
         String dohUrl = getDohUrl(Hawk.get(HawkConfig.DOH_URL, 0));
-        dnsOverHttps = new DnsOverHttps.Builder().client(dohClient).url(dohUrl.isEmpty() ? null : HttpUrl.get(dohUrl)).build();
+        // DOH 关闭时不构建 DnsOverHttps，回退系统 DNS（避免 null url 的 DoH 对象导致 NPE）
+        dnsOverHttps = dohUrl.isEmpty() ? null : new DnsOverHttps.Builder().client(dohClient).url(HttpUrl.get(dohUrl)).build();
     }
 
     static OkHttpClient defaultClient = null;
@@ -176,8 +177,8 @@ public class OkGoHelper {
         builder = builder.addInterceptor(loggingInterceptor)
                 .readTimeout(DEFAULT_MILLISECONDS, TimeUnit.MILLISECONDS)
                 .writeTimeout(DEFAULT_MILLISECONDS, TimeUnit.MILLISECONDS)
-                .connectTimeout(DEFAULT_MILLISECONDS, TimeUnit.MILLISECONDS)
-                .dns(dnsOverHttps);
+                .connectTimeout(DEFAULT_MILLISECONDS, TimeUnit.MILLISECONDS);
+        if (dnsOverHttps != null) builder.dns(dnsOverHttps);
         try {
             setOkHttpSsl(builder);
         } catch (Throwable th) {

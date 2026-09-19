@@ -190,7 +190,11 @@ public class DriveActivity extends BaseActivity {
             @Override
             public void onItemClick(TvRecyclerView parent, View itemView, int position) {
                 if (delMode) {
-                    DriveFolderFile selectedDrive = drives.get(position);
+                    // 文件夹浏览时 adapter 数据是子文件列表而非磁盘列表，需按当前数据取并校验
+                    if (viewModel != null) return;
+                    List<DriveFolderFile> data = adapter.getData();
+                    if (position < 0 || position >= data.size()) return;
+                    DriveFolderFile selectedDrive = data.get(position);
                     RoomDataManger.deleteDrive(selectedDrive.getDriveData().getId());
                     EventBus.getDefault().post(new RefreshEvent(RefreshEvent.TYPE_DRIVE_REFRESH));
                     return;
@@ -464,11 +468,12 @@ public class DriveActivity extends BaseActivity {
 
             @Override
             public void fail(String message) {
-                showSuccess();
-                viewModel = null;
+                // 回调在 WebDAV/Alist 子线程执行，UI 操作需切回主线程
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
+                        showSuccess();
+                        viewModel = null;
                         Toast.makeText(mContext, message, Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -541,5 +546,7 @@ public class DriveActivity extends BaseActivity {
     protected void onDestroy() {
         super.onDestroy();
         EventBus.getDefault().unregister(this);
+        // 清理挂起的延时任务，避免销毁后回调访问已失效的 View
+        if (mHandler != null) mHandler.removeCallbacksAndMessages(null);
     }
 }

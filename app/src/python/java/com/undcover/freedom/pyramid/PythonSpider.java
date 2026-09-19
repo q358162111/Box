@@ -41,10 +41,15 @@ public class PythonSpider extends Spider {
 
     @Override
     public void init(Context context) {
+        if (app == null || pySpider == null) return;
         app.callAttr("init", pySpider);
     }
 
     public void init(Context context, String url) {
+        if (url == null || url.isEmpty()) {
+            PyToast.showCancelableToast(name + "插件地址为空");
+            return;
+        }
         app = PythonLoader.getInstance().pyApp;
         PyObject retValue = app.callAttr("downloadPlugin", cachePath, url);
         Uri uri = Uri.parse(url);
@@ -82,7 +87,8 @@ public class PythonSpider extends Spider {
     }
 
     public String getName() {
-        if (name.isEmpty()) {
+        if (!loadSuccess || name.isEmpty()) {
+            if (!loadSuccess) return name;
             PyObject po = app.callAttr("getName", pySpider);
             return po.toString();
         } else {
@@ -157,10 +163,11 @@ public class PythonSpider extends Spider {
         if (headerObj == null) {
             return null;
         }
-        // 处理 headerObj
+        // asMap 每次调用都做完整转换，只转换一次后复用
         Map<String, String> headerMap = new HashMap<>();
-        for (PyObject key : headerObj.asMap().keySet()) {
-            headerMap.put(key.toString(), Objects.requireNonNull(headerObj.asMap().get(key)).toString());
+        Map<PyObject, PyObject> pyMap = headerObj.asMap();
+        for (Map.Entry<PyObject, PyObject> entry : pyMap.entrySet()) {
+            headerMap.put(entry.getKey().toString(), Objects.requireNonNull(entry.getValue()).toString());
         }
         return headerMap;
     }
@@ -171,7 +178,8 @@ public class PythonSpider extends Spider {
         if (typeStr.contains("bytes")) return new ByteArrayInputStream(o.toJava(byte[].class));
         String content = o.toString();
         if (base64 && content.contains("base64,")) {
-            content = content.split("base64,")[1];
+            String[] parts = content.split("base64,", 2);
+            if (parts.length > 1) content = parts[1];
         }
         return new ByteArrayInputStream(base64 ? decode(content) : content.getBytes());
     }
@@ -187,6 +195,7 @@ public class PythonSpider extends Spider {
      * @return
      */
     public String homeContent(boolean filter) {
+        if (!loadSuccess) return "{}";
         PyLog.nw("homeContent" + "-" + name, paramLog(filter));
         PyObject po = app.callAttr("homeContent", pySpider, filter);
         String rsp = po.toString();
@@ -200,6 +209,7 @@ public class PythonSpider extends Spider {
      * @return
      */
     public String homeVideoContent() {
+        if (!loadSuccess) return "{}";
         PyLog.nw("homeVideoContent" + "-" + name, "");
         PyObject po = app.callAttr("homeVideoContent", pySpider);
         String rsp = po.toString();
@@ -217,6 +227,7 @@ public class PythonSpider extends Spider {
      * @return
      */
     public String categoryContent(String tid, String pg, boolean filter, HashMap<String, String> extend) {
+        if (!loadSuccess) return "{}";
         PyLog.nw("categoryContent" + "-" + name, paramLog(tid, pg, filter, map2json(extend).toString()));
         PyObject po = app.callAttr("categoryContent", pySpider, tid, pg, filter, map2json(extend).toString());
         String rsp = po.toString();
@@ -231,6 +242,7 @@ public class PythonSpider extends Spider {
      * @return
      */
     public String detailContent(List<String> ids) {
+        if (!loadSuccess) return "{}";
         PyLog.nw("detailContent" + "-" + name, paramLog(list2json(ids).toString()));
         PyObject po = app.callAttr("detailContent", pySpider, list2json(ids).toString());
         String rsp = po.toString();
@@ -246,6 +258,7 @@ public class PythonSpider extends Spider {
      * @return
      */
     public String searchContent(String key, boolean quick) {
+        if (!loadSuccess) return "{}";
         PyLog.nw("searchContent" + "-" + name, paramLog(key, quick));
         PyObject po = app.callAttr("searchContent", pySpider, key, quick);
         String rsp = po.toString();
@@ -261,6 +274,7 @@ public class PythonSpider extends Spider {
      * @return
      */
     public String playerContent(String flag, String id, List<String> vipFlags) {
+        if (!loadSuccess) return "{}";
         PyLog.nw("playerContent" + "-" + name, paramLog(flag, id, list2json(vipFlags).toString()));
         PyObject po = app.callAttr("playerContent", pySpider, flag, id, list2json(vipFlags).toString());
         String rsp = replaceLocalUrl(po.toString());
@@ -273,6 +287,7 @@ public class PythonSpider extends Spider {
      * @return
      */
     public String liveContent(String url) {
+        if (!loadSuccess) return "{}";
         PyLog.nw("liveContent" + "-" + name, "");
         PyObject po = app.callAttr("liveContent", pySpider,url);
         String rsp = po.toString();

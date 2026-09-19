@@ -69,6 +69,23 @@ public class RemoteServer extends NanoHTTPD {
         addPostRequestProcess();
     }
 
+    /**
+     * 校验目标路径未逃逸出存储根目录，防止局域网请求通过 ../ 进行路径穿越
+     */
+    private boolean isPathSafe(File file) {
+        try {
+            String root = Environment.getExternalStorageDirectory().getCanonicalPath();
+            String canonical = file.getCanonicalPath();
+            return canonical.equals(root) || canonical.startsWith(root + File.separator);
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
+    private Response forbidden() {
+        return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.FORBIDDEN, NanoHTTPD.MIME_PLAINTEXT, "Forbidden: path traversal detected");
+    }
+
     private void addGetRequestProcess() {
         getRequestList.add(new RawRequestProcess(this.mContext, "/", R.raw.index, NanoHTTPD.MIME_HTML));
         getRequestList.add(new RawRequestProcess(this.mContext, "/index.html", R.raw.index, NanoHTTPD.MIME_HTML));
@@ -85,8 +102,8 @@ public class RemoteServer extends NanoHTTPD {
 
     @Override
     public void start(int timeout, boolean daemon) throws IOException {
-        isStarted = true;
         super.start(timeout, daemon);
+        isStarted = true;
         EventBus.getDefault().post(new ServerEvent(ServerEvent.SERVER_SUCCESS));
     }
 
@@ -154,6 +171,9 @@ public class RemoteServer extends NanoHTTPD {
                         String root = Environment.getExternalStorageDirectory().getAbsolutePath();
                         String file = root + "/" + f;
                         File localFile = new File(file);
+                        if (!isPathSafe(localFile)) {
+                            return forbidden();
+                        }
                         if (localFile.exists()) {
                             if (localFile.isFile()) {
                                 return NanoHTTPD.newChunkedResponse(NanoHTTPD.Response.Status.OK, "application/octet-stream", new FileInputStream(localFile));
@@ -176,7 +196,7 @@ public class RemoteServer extends NanoHTTPD {
                     }
                     return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/dns-message", new ByteArrayInputStream(rs), rs.length);
                 } else if (fileName.equals("/m3u8")) {
-                    return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, NanoHTTPD.MIME_PLAINTEXT, m3u8Content);
+                    return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, NanoHTTPD.MIME_PLAINTEXT, m3u8Content == null ? "" : m3u8Content);
                 } else if (fileName.startsWith("/dash/")) {
                     String dashData = App.getInstance().getDashData();
                     try {
@@ -218,13 +238,20 @@ public class RemoteServer extends NanoHTTPD {
                     Map < String, String > params = session.getParms();
                     if (fileName.equals("/upload")) {
                         String path = params.get("path");
+                        String root = Environment.getExternalStorageDirectory().getAbsolutePath();
+                        File targetDir = new File(root + "/" + path);
+                        if (!isPathSafe(targetDir)) {
+                            return forbidden();
+                        }
                         for (String k: files.keySet()) {
                             if (k.startsWith("files-")) {
                                 String fn = params.get(k);
                                 String tmpFile = files.get(k);
                                 File tmp = new File(tmpFile);
-                                String root = Environment.getExternalStorageDirectory().getAbsolutePath();
                                 File file = new File(root + "/" + path + "/" + fn);
+                                if (!isPathSafe(file)) {
+                                    return forbidden();
+                                }
                                 if (file.exists()) file.delete();
                                 if (tmp.exists()) {
                                     if (fn.toLowerCase().endsWith(".zip")) {
@@ -242,6 +269,9 @@ public class RemoteServer extends NanoHTTPD {
                         String name = params.get("name");
                         String root = Environment.getExternalStorageDirectory().getAbsolutePath();
                         File file = new File(root + "/" + path + "/" + name);
+                        if (!isPathSafe(file)) {
+                            return forbidden();
+                        }
                         if (!file.exists()) {
                             file.mkdirs();
                             File flag = new File(root + "/" + path + "/" + name + "/.tvbox_folder");
@@ -252,6 +282,9 @@ public class RemoteServer extends NanoHTTPD {
                         String path = params.get("path");
                         String root = Environment.getExternalStorageDirectory().getAbsolutePath();
                         File file = new File(root + "/" + path);
+                        if (!isPathSafe(file)) {
+                            return forbidden();
+                        }
                         if (file.exists()) {
                             FileUtils.recursiveDelete(file);
                         }
@@ -260,6 +293,9 @@ public class RemoteServer extends NanoHTTPD {
                         String path = params.get("path");
                         String root = Environment.getExternalStorageDirectory().getAbsolutePath();
                         File file = new File(root + "/" + path);
+                        if (!isPathSafe(file)) {
+                            return forbidden();
+                        }
                         if (file.exists()) {
                             file.delete();
                         }

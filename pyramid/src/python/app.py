@@ -13,20 +13,33 @@ def createFile(file_path):
         os.makedirs(file_path)
 
 def redirectResponse(tUrl):
-  rsp = requests.get(tUrl, allow_redirects=False,verify = False)
-  if 'Location' in rsp.headers:
-    return redirectResponse(rsp.headers['Location'])
-  else:
-    return rsp
+  # 限制最大跳转次数并设置超时，避免循环重定向递归爆栈、网络挂起线程卡死
+  currentUrl = tUrl
+  for _ in range(10):
+    rsp = requests.get(currentUrl, allow_redirects=False, verify=False, timeout=(5, 10))
+    if 'Location' in rsp.headers:
+      currentUrl = rsp.headers['Location']
+    else:
+      return rsp
+  return rsp
 
 def downloadFile(name,url):
     try:
         rsp = redirectResponse(url)
-        with open(name,'wb') as f:
+        # 先写临时文件，成功后再落盘，避免留下损坏的半成品插件
+        tmpName = name + '.tmp'
+        with open(tmpName,'wb') as f:
             f.write(rsp.content)
+        os.replace(tmpName, name)
         print(url)
-    except:
-        print(name + ' =======================================> error')
+    except Exception as e:
+        # 清理可能残留的临时文件
+        try:
+            if os.path.exists(name + '.tmp'):
+                os.remove(name + '.tmp')
+        except OSError:
+            pass
+        print(name + ' =======================================> error: ' + str(e))
         print(url)
 
 def downloadPlugin(basePath,url):

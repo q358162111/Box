@@ -37,8 +37,10 @@ public class TxtSubscribe {
                 if (line.startsWith("#EXTINF")) {
                     String name = getStrByRegex(NAME_PATTERN, line);
                     String group = getStrByRegex(GROUP_PATTERN, line);
-                    // 此时再读取一行，就是对应的 url 链接了
-                    String url = bufferedReader.readLine().trim();
+                    // At this point, reading another line gives the corresponding url link (may be the last line of the file)
+                    String url = bufferedReader.readLine();
+                    if (url == null) break;
+                    url = url.trim();
                     if (linkedHashMap.containsKey(group)) {
                         channelTemp = linkedHashMap.get(group);
                     } else {
@@ -117,7 +119,8 @@ public class TxtSubscribe {
                 return;
             }
             linkedHashMap.put("未分组", linkedHashMap2);
-        } catch (Throwable unused) {
+        } catch (Throwable e) {
+            e.printStackTrace();
         }
     }
 

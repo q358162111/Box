@@ -45,6 +45,10 @@ class OKRequest {
 
     public void setTag(Object tag) {
         mTag = tag;
+        // The request was already built in the constructor (tag was null then), so re-attach the tag after setting it, otherwise cancel(tag) will not take effect
+        if (tag != null && mOkHttpRequest != null) {
+            mOkHttpRequest = mOkHttpRequest.newBuilder().tag(tag).build();
+        }
     }
 
     private void getInstance() {

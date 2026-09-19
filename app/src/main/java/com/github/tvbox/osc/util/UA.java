@@ -3,29 +3,44 @@ package com.github.tvbox.osc.util;
 import com.github.tvbox.osc.base.App;
 
 import java.io.DataInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class UA {
-	
-	public static String random() {
-        try {
-            InputStream fis = App.getInstance().getAssets().open("ua.db");
-            DataInputStream dis = new DataInputStream(fis);
+
+    private static final String DEFAULT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36";
+    private static final Random RANDOM = new Random();
+    // 首次调用时一次性读入内存，避免每次随机取 UA 都打开 asset 文件（主线程 IO + fd 泄漏）
+    private static volatile List<String> uaList;
+
+    public static String random() {
+        List<String> list = uaList;
+        if (list == null) {
+            synchronized (UA.class) {
+                if (uaList == null) {
+                    uaList = load();
+                }
+                list = uaList;
+            }
+        }
+        if (list == null || list.isEmpty()) return DEFAULT;
+        return list.get(RANDOM.nextInt(list.size()));
+    }
+
+    private static List<String> load() {
+        List<String> result = new ArrayList<>();
+        try (InputStream fis = App.getInstance().getAssets().open("ua.db");
+             DataInputStream dis = new DataInputStream(fis)) {
             int len = dis.readInt();
-            int random = new Random().nextInt(len);
-            dis.skipBytes(random * 4);
-            int offset = dis.readInt();
-            dis.skipBytes((len - 1 - random) * 4 + offset);
-            String s = dis.readUTF();
-            return s;
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+            dis.skipBytes(len * 4); // 跳过偏移索引表，字符串数据按序存储
+            for (int i = 0; i < len; i++) {
+                result.add(dis.readUTF());
+            }
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        return "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36";
+        return result;
     }
 }

@@ -121,11 +121,17 @@ public class ControlManager {
                 mServer.stop();
             }
         } while (RemoteServer.serverPort < 9999);
+        // 全部端口占用时重置引用，避免后续 startServer 空转（直接 return）
+        if (mServer != null && !mServer.isStarting()) {
+            mServer = null;
+        }
     }
 
     public void stopServer() {
         if (mServer != null && mServer.isStarting()) {
             mServer.stop();
         }
+        // 置空以允许后续重新启动
+        mServer = null;
     }
 }

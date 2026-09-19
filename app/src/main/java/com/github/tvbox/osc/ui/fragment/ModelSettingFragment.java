@@ -138,7 +138,9 @@ public class ModelSettingFragment extends BaseLazyFragment {
         tvSearchView = findViewById(R.id.tvSearchView);
         tvSearchView.setText(getSearchView(Hawk.get(HawkConfig.SEARCH_VIEW, 0)));
         tvDns = findViewById(R.id.tvDns);
-        tvDns.setText(OkGoHelper.dnsHttpsList.get(Hawk.get(HawkConfig.DOH_URL, 0)));
+        int dnsIndex = Hawk.get(HawkConfig.DOH_URL, 0);
+        if (dnsIndex < 0 || dnsIndex >= OkGoHelper.dnsHttpsList.size()) dnsIndex = 0;
+        tvDns.setText(OkGoHelper.dnsHttpsList.get(dnsIndex));
         tvHomeDefaultShow = findViewById(R.id.tvHomeDefaultShow);
         tvHomeDefaultShow.setText(Hawk.get(HawkConfig.HOME_DEFAULT_SHOW, false) ? "开启" : "关闭");
 

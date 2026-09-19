@@ -3,11 +3,12 @@ package com.github.tvbox.osc.util;
 import android.webkit.WebResourceResponse;
 
 import java.io.ByteArrayInputStream;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class AdBlocker {
-    private static final List<String> AD_HOSTS = new ArrayList<>();
+    // 后台线程填充、WebView IO 线程并发读取，使用 COW 列表保证线程安全
+    private static final List<String> AD_HOSTS = new CopyOnWriteArrayList<>();
 
     public static void clear() {
         AD_HOSTS.clear();

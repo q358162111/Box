@@ -132,6 +132,9 @@ public abstract class CallBackUtil<T> {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            if (data == null) {
+                throw new RuntimeException("Failed to read stream.");
+            }
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inJustDecodeBounds = true;
 
@@ -186,51 +189,35 @@ public abstract class CallBackUtil<T> {
 
         @Override
         public File onParseResponse(RealResponse response) {
-
-            InputStream is = null;
+            InputStream is = response.inputStream;
+            if (is == null) return null;
             byte[] buf = new byte[1024 * 8];
-            int len = 0;
-            FileOutputStream fos = null;
-            try {
-                is = response.inputStream;
+            int len;
+            try (InputStream in = is) {
                 final long total = response.contentLength;
-
                 long sum = 0;
-
                 File dir = new File(mDestFileDir);
                 if (!dir.exists()) {
                     dir.mkdirs();
                 }
                 File file = new File(dir, mdestFileName);
-                fos = new FileOutputStream(file);
-                while ((len = is.read(buf)) != -1) {
-                    sum += len;
-                    fos.write(buf, 0, len);
-                    final long finalSum = sum;
-                    mMainHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            onProgress(finalSum * 100.0f / total, total);
-                        }
-                    });
+                try (FileOutputStream fos = new FileOutputStream(file)) {
+                    while ((len = in.read(buf)) != -1) {
+                        sum += len;
+                        fos.write(buf, 0, len);
+                        final long finalSum = sum;
+                        mMainHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                onProgress(finalSum * 100.0f / total, total);
+                            }
+                        });
+                    }
+                    fos.flush();
                 }
-                fos.flush();
-
                 return file;
-
             } catch (Exception e) {
                 e.printStackTrace();
-            } finally {
-                try {
-                    fos.close();
-                    if (is != null) is.close();
-                } catch (IOException e) {
-                }
-                try {
-                    if (fos != null) fos.close();
-                } catch (IOException e) {
-                }
-
             }
             return null;
         }
@@ -238,19 +225,25 @@ public abstract class CallBackUtil<T> {
 
     private static String getRetString(InputStream is) {
         String buf;
+        BufferedReader reader = null;
         try {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(is, "utf-8"));
+            reader = new BufferedReader(new InputStreamReader(is, "utf-8"));
             StringBuilder sb = new StringBuilder();
-            String line = "";
+            String line;
             while ((line = reader.readLine()) != null) {
-                sb.append(line + "\n");
+                sb.append(line).append("\n");
             }
-            is.close();
             buf = sb.toString();
             return buf;
-
         } catch (Exception e) {
             return null;
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException ignored) {
+                }
+            }
         }
     }
 

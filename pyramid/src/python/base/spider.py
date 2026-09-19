@@ -115,11 +115,13 @@ class Spider(metaclass=ABCMeta):
     def html(self, content):
         return etree.HTML(content)
 
-    def str2json(str):
-        return json.loads(str)
+    @staticmethod
+    def str2json(content):
+        return json.loads(content)
 
-    def json2str(str):
-        return json.dumps(str, ensure_ascii=False)
+    @staticmethod
+    def json2str(obj):
+        return json.dumps(obj, ensure_ascii=False)
 
     def getProxyUrl(self, local=True):
         return f'{Proxy.getUrl(self,local)}?do=py'
@@ -134,7 +136,10 @@ class Spider(metaclass=ABCMeta):
         value = self.fetch(f'http://127.0.0.1:{Proxy.getPort(self)}/cache?do=get&key={key}', timeout=5).text
         if len(value) > 0:
             if value.startswith('{') and value.endswith('}') or value.startswith('[') and value.endswith(']'):
-                value = json.loads(value)
+                try:
+                    value = json.loads(value)
+                except ValueError:
+                    return value
                 if type(value) == dict:
                     if not 'expiresAt' in value or value['expiresAt'] >= int(time.time()):
                         return value
@@ -146,6 +151,8 @@ class Spider(metaclass=ABCMeta):
             return None
 
     def setCache(self, key, value):
+        if value is None or isinstance(value, bool):
+            return 'failed'
         if type(value) in [int, float]:
             value = str(value)
         if len(value) > 0:

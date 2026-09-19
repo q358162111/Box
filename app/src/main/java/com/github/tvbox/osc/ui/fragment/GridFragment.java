@@ -370,7 +370,7 @@ public class GridFragment extends BaseLazyFragment {
     }
 
     public void showFilter() {
-    	if (sortData!=null && !sortData.filters.isEmpty() && gridFilterDialog == null) {
+    	if (sortData!=null && sortData.filters != null && !sortData.filters.isEmpty() && gridFilterDialog == null) {
             gridFilterDialog = new GridFilterDialog(mContext);
 //            gridFilterDialog.setData(sortData);
 //            gridFilterDialog.setOnDismiss(new GridFilterDialog.Callback() {

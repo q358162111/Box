@@ -16,7 +16,9 @@ public class PyLog {
     private static PyLog mLog;
 
     public synchronized static PyLog getInstance() {
-        mLog = new PyLog();
+        if (mLog == null) {
+            mLog = new PyLog();
+        }
         return mLog;
     }
 

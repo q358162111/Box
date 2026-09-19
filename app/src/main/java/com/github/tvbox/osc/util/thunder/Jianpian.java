@@ -32,7 +32,9 @@ public class Jianpian {
                 App.getp2p().P2Pdoxadd(replace.getBytes("GBK"));
                 return "http://" + LocalIPAddress.getIP(App.getInstance()) + ":" + P2PClass.port + "/" + URLEncoder.encode(Uri.parse(replace).getLastPathSegment(), "GBK");
             } catch (Exception e) {
-                return e.getLocalizedMessage();
+                e.printStackTrace();
+                // Never use the exception message as the playback URL
+                return "";
             }
         }else {
             return "";
@@ -52,6 +54,6 @@ public class Jianpian {
     }
 
     public static Boolean isJpUrl(String url) {
-        return url.startsWith("tvbox-xg:") || (Thunder.isFtp(url) && url.contains("gbl.114s"));
+        return url != null && (url.startsWith("tvbox-xg:") || (Thunder.isFtp(url) && url.contains("gbl.114s")));
     }
 }

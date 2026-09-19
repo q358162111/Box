@@ -37,20 +37,21 @@ import okhttp3.Response;
 
 public class PythonLoader {
     private final ConcurrentHashMap<String, Spider> spiders = new ConcurrentHashMap<>();
-    private static PythonLoader sInstance;
+    private static volatile PythonLoader sInstance;
     private Application app;
-    private final HashMap<String, JSONObject> siteMap;
+    // setConfig 写 / getSpider 子线程读，使用并发容器保证线程安全
+    private final ConcurrentHashMap<String, JSONObject> siteMap;
     Python pyInstance;
     PyObject pyApp;
     Python.Platform androidPlatform;
 
     public PythonLoader() {
-        siteMap = new HashMap<>();
+        siteMap = new ConcurrentHashMap<>();
     }
 
     public static PythonLoader getInstance() {
         if (sInstance == null) {
-            synchronized (PyToast.class) {
+            synchronized (PythonLoader.class) {
                 if (sInstance == null) {
                     sInstance = new PythonLoader();
                 }
@@ -145,9 +146,12 @@ public class PythonLoader {
             // 等待线程完成，最多10秒
             future.get(10, TimeUnit.SECONDS);
 
-            // 任务成功，缓存并返回
-            spiders.put(key, sp);
-            return sp;
+            // 初始化失败（插件下载失败/依赖缺失）的 Spider 不入缓存，避免该站点永久失效
+            if (sp.loadSuccess) {
+                spiders.put(key, sp);
+                return sp;
+            }
+            PyLog.e(key + " :插件初始化失败，返回空 Spider");
         } catch (TimeoutException e) {
             PyLog.e("echo-init方法执行超时");
             // 超时了，不做中断，返回空的Spider
@@ -214,7 +218,11 @@ public class PythonLoader {
                 }
             };
             OkHttpUtil.get(OkGoHelper.getDefaultClient(), url, str2map(param), str2map(header), callBack);
-            return callBack.getResult().body().byteStream();
+            Response response = callBack.getResult();
+            if (response == null || response.body() == null) {
+                return new ByteArrayInputStream(new byte[0]);
+            }
+            return response.body().byteStream();
         }
     }
 

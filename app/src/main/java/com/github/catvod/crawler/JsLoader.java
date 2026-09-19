@@ -111,6 +111,11 @@ public class JsLoader {
         }
         try {
             Response response = OkGo.<File>get(jar).execute();
+            // 校验 HTTP 状态码，避免把 404/500 错误页写入缓存损坏 jar
+            if (!response.isSuccessful() || response.body() == null) {
+                cache.delete();
+                return classes.get(key);
+            }
             InputStream is = response.body().byteStream();
             OutputStream os = new FileOutputStream(cache);
             try {
@@ -132,6 +137,8 @@ public class JsLoader {
             return classes.get(key);
         } catch (Throwable e) {
             e.printStackTrace();
+            // 下载失败时清理半成品，避免损坏文件残留缓存
+            cache.delete();
         }
         return null;
     }
@@ -176,7 +183,7 @@ public class JsLoader {
                 return proxyFun.proxyLocal(params);
             }
         } catch (Throwable th) {
-            //LOG.e("proxyInvoke", th);
+            LOG.e("proxyInvoke", th);
         }
         return null;
     }
