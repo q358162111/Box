@@ -100,3 +100,6 @@ lint/tmp/
 output-metadata.json
 /adb.exe
 /LTDecodeNew3.exe
+
+# Local portable JDK for building
+/.jdk/

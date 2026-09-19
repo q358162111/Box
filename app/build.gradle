@@ -7,13 +7,19 @@ def static buildTime() {
     return new Date().format("yyyyMMdd_HHmm", TimeZone.getTimeZone("GMT+08:00"))
 }
 
+def static versionCodeFromBuildTime() {
+    String t = buildTime()
+    // yyMMddHH，随每次构建递增且不超过 int 上限
+    return Integer.parseInt(t.substring(2, 8) + t.substring(9, 11))
+}
+
 android {
     compileSdk 34
 
     defaultConfig {
         applicationId 'com.github.tvbox.osc.tk'
         targetSdkVersion 28
-        versionCode 1
+        versionCode versionCodeFromBuildTime()
         versionName "1.0.".concat(buildTime())
         multiDexEnabled true
         //设置room的Schema的位置
