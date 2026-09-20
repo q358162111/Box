@@ -76,7 +76,8 @@ public class Connect {
         if (req.getData() != null && req.getPostType().equals("form")) return getFormBody(req);
         if (req.getData() != null && req.getPostType().equals("form-data")) return getFormDataBody(req);
         if (req.getBody() != null && contentType != null) return RequestBody.create(MediaType.get(contentType), req.getBody());
-        return RequestBody.create(null, "");
+        // 修复：OkHttp 3.13+ MediaType 为 null 抛 NullPointerException；缺省使用空 JSON 体
+        return RequestBody.create(MediaType.parse("application/json"), "");
     }
 
     private static RequestBody getJsonBody(Req req) {

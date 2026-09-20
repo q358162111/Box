@@ -229,7 +229,7 @@ public class ApiDialog extends BaseDialog {
                                 public void onDenied(List<String> permissions, boolean never) {
                                     if (never) {
                                         Toast.makeText(getContext(), "获取存储权限失败,请在系统设置中开启", Toast.LENGTH_SHORT).show();
-                                        XXPermissions.startPermissionActivity((Activity) getContext(), permissions);
+                                        if (getContext() instanceof Activity) XXPermissions.startPermissionActivity((Activity) getContext(), permissions); else { Toast.makeText(getContext(), "无法定位 Activity，请重试", Toast.LENGTH_SHORT).show(); }
                                     } else {
                                         Toast.makeText(getContext(), "获取存储权限失败", Toast.LENGTH_SHORT).show();
                                     }

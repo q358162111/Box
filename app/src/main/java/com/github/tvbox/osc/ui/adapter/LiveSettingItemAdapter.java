@@ -31,7 +31,7 @@ public class LiveSettingItemAdapter extends BaseQuickAdapter<LiveSettingItem, Ba
         if (item.isItemSelected() && itemIndex != focusedItemIndex) {
             // takagen99: Added Theme Color
 //            tvItemName.setTextColor(mContext.getResources().getColor(R.color.color_theme));
-            tvItemName.setTextColor(((BaseActivity) mContext).getThemeColor());
+            tvItemName.setTextColor((mContext instanceof BaseActivity ? ((BaseActivity) mContext).getThemeColor() : 0));
         } else {
             tvItemName.setTextColor(Color.WHITE);
         }

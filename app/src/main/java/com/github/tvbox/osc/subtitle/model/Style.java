@@ -109,7 +109,7 @@ public class Style {
             else if (value.equals("fuchsia"))
                 color = "ff00ffff";
             else if (value.equals("magenta"))
-                color = "ff00ffff ";
+                color = "ff00ffff";
             else if (value.equals("green"))
                 color = "008000ff";
             else if (value.equals("lime"))
@@ -127,7 +127,7 @@ public class Style {
             else if (value.equals("aqua"))
                 color = "00ffffff";
             else if (value.equals("cyan"))
-                color = "00ffffff ";
+                color = "00ffffff";
         } else if (format.equalsIgnoreCase("&HBBGGRR")) {
             // hex format from SSA
             StringBuilder sb = new StringBuilder();

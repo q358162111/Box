@@ -145,8 +145,14 @@ public class FormatTTML implements TimedTextFileFormat {
                         if (aa.length() < 2)
                             aa = "0" + aa;
 
-                        style.color = style.color.substring(0, 6) + aa;
-                        style.backgroundColor = style.backgroundColor.substring(0, 6) + aa;
+                        // 修复：当 style 仅声明 tts:opacity 而未声明 tts:color / tts:backgroundColor 时，
+                        // style.color / style.backgroundColor 仍为 null，substring 会抛 NullPointerException
+                        // 缺省补全为不透明黑/透明黑，再追加 alpha 通道
+                        if (style.color == null) style.color = "000000" + aa;
+                        else if (style.color.length() >= 6) style.color = style.color.substring(0, 6) + aa;
+
+                        if (style.backgroundColor == null) style.backgroundColor = "000000" + aa;
+                        else if (style.backgroundColor.length() >= 6) style.backgroundColor = style.backgroundColor.substring(0, 6) + aa;
 
                     } catch (NumberFormatException e) {
                         //ignore the alpha

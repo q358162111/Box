@@ -76,7 +76,8 @@ public class HomeHotVodAdapter extends BaseQuickAdapter<Movie.Video, BaseViewHol
         int newHeight = ImgUtil.defaultHeight;
         if(style!=null){
             newWidth = defaultWidth;
-            newHeight = (int)(newWidth / style.ratio);
+            // 修复：style.ratio=0 时原代码抛 ArithmeticException 除零异常
+            newHeight = style.ratio > 0 ? (int)(newWidth / style.ratio) : newWidth;
         }
         //由于部分电视机使用glide报错
         if (!TextUtils.isEmpty(item.pic)) {

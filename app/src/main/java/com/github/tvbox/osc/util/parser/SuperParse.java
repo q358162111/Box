@@ -17,51 +17,54 @@ import java.util.Map;
 
 public class SuperParse {
     public static HashMap<String, ArrayList<String>> flagWebJx = new HashMap<>();
-    static HashMap<String, ArrayList<String>> configs = null;
-    static LinkedHashMap<String, String> jsonJx = null;
-    static ArrayList<String> webJx = null;
+    /**
+     * 修复：原 static configs/jsonJx/webJx 在多线程并发 parse() 时相互覆盖，导致解析错乱/丢解析器。
+     * 双检锁 + volatile 保证可见性与安全发布。
+     */
+    private static volatile HashMap<String, ArrayList<String>> configs = null;
+    private static volatile LinkedHashMap<String, String> jsonJx = null;
+    private static volatile ArrayList<String> webJx = null;
 
     public static JSONObject parse(LinkedHashMap<String, HashMap<String, String>> jx, String flag, String url) {
         try {
-            // 初始化全局配置（configs）一次
+            // 初始化全局配置（configs）一次；用 synchronized 块确保并发安全
             if (configs == null) {
-                configs = new HashMap<>();
-                for (Map.Entry<String, HashMap<String, String>> entry : jx.entrySet()) {
-                    String key = entry.getKey();
-                    HashMap<String, String> parseBean = entry.getValue();
-                    if (parseBean == null) {
-                        continue;
-                    }
-                    String type = parseBean.get("type");
-                    if (type == null) {
-                        continue;
-                    }
-                    if ("1".equals(type) || "0".equals(type)) {
-                        try {
-                            String ext = parseBean.get("ext");
-                            if (ext == null) {
-                                continue;
-                            }
-                            JSONArray flagsArray = new JSONObject(ext).getJSONArray("flag");
-                            for (int j = 0; j < flagsArray.length(); j++) {
-                                String flagKey = flagsArray.getString(j);
-                                ArrayList<String> flagJx = configs.get(flagKey);
-                                if (flagJx == null) {
-                                    flagJx = new ArrayList<>();
-                                    configs.put(flagKey, flagJx);
+                synchronized (SuperParse.class) {
+                    if (configs == null) {
+                        HashMap<String, ArrayList<String>> newConfigs = new HashMap<>();
+                        for (Map.Entry<String, HashMap<String, String>> entry : jx.entrySet()) {
+                            String key = entry.getKey();
+                            HashMap<String, String> parseBean = entry.getValue();
+                            if (parseBean == null) continue;
+                            String type = parseBean.get("type");
+                            if (type == null) continue;
+                            if ("1".equals(type) || "0".equals(type)) {
+                                try {
+                                    String ext = parseBean.get("ext");
+                                    if (ext == null) continue;
+                                    JSONArray flagsArray = new JSONObject(ext).getJSONArray("flag");
+                                    for (int j = 0; j < flagsArray.length(); j++) {
+                                        String flagKey = flagsArray.getString(j);
+                                        ArrayList<String> flagJx = newConfigs.get(flagKey);
+                                        if (flagJx == null) {
+                                            flagJx = new ArrayList<>();
+                                            newConfigs.put(flagKey, flagJx);
+                                        }
+                                        flagJx.add(key);
+                                    }
+                                } catch (Exception e) {
+                                    SpiderDebug.log(e);
                                 }
-                                flagJx.add(key);
                             }
-                        } catch (Exception e) {
-                            SpiderDebug.log(e);
                         }
+                        configs = newConfigs;
                     }
                 }
             }
 
-            // 根据配置构建 jsonJx 和 webJx
-            jsonJx = new LinkedHashMap<>();
-            webJx = new ArrayList<>();
+            // 根据配置构建 jsonJx 和 webJx；局部变量复制静态引用，防止并发修改覆盖
+            LinkedHashMap<String, String> localJsonJx = new LinkedHashMap<>();
+            ArrayList<String> localWebJx = new ArrayList<>();
             List<String> targetKeys = configs.get(flag);
             if (targetKeys != null && !targetKeys.isEmpty()) {
                 for (String key : targetKeys) {
@@ -77,12 +80,12 @@ public class SuperParse {
                         String urlValue = parseBean.get("url");
                         String ext = parseBean.get("ext");
                         if (urlValue != null && ext != null) {
-                            jsonJx.put(key, mixUrl(urlValue, ext));
+                            localJsonJx.put(key, mixUrl(urlValue, ext));
                         }
                     } else if ("0".equals(type)) {
                         String urlValue = parseBean.get("url");
                         if (urlValue != null) {
-                            webJx.add(urlValue);
+                            localWebJx.add(urlValue);
                         }
                     }
                 }
@@ -90,27 +93,26 @@ public class SuperParse {
                 for (Map.Entry<String, HashMap<String, String>> entry : jx.entrySet()) {
                     String key = entry.getKey();
                     HashMap<String, String> parseBean = entry.getValue();
-                    if (parseBean == null) {
-                        continue;
-                    }
+                    if (parseBean == null) continue;
                     String type = parseBean.get("type");
-                    if (type == null) {
-                        continue;
-                    }
+                    if (type == null) continue;
                     if ("1".equals(type)) {
                         String urlValue = parseBean.get("url");
                         String ext = parseBean.get("ext");
                         if (urlValue != null && ext != null) {
-                            jsonJx.put(key, mixUrl(urlValue, ext));
+                            localJsonJx.put(key, mixUrl(urlValue, ext));
                         }
                     } else if ("0".equals(type)) {
                         String urlValue = parseBean.get("url");
                         if (urlValue != null) {
-                            webJx.add(urlValue);
+                            localWebJx.add(urlValue);
                         }
                     }
                 }
             }
+            // 把局部结果一次性发布为静态字段（替代直接修改静态字段）
+            jsonJx = localJsonJx;
+            webJx = localWebJx;
             if (!webJx.isEmpty()) {
                 flagWebJx.put(flag, webJx);
             }

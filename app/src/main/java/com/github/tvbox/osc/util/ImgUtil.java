@@ -52,15 +52,17 @@ public class ImgUtil {
     }
 
     public static Style initStyle() {
+        if (ApiConfig.get() == null || ApiConfig.get().getHomeSourceBean() == null) return null;
         String bStyle = ApiConfig.get().getHomeSourceBean().getStyle();
-        if(!bStyle.isEmpty()){
+        // 修复：原代码未判空直接调用 bStyle.isEmpty() 会抛 NullPointerException
+        if (!TextUtils.isEmpty(bStyle)) {
             try {
                 JSONObject jsonObject = new JSONObject(bStyle);
                 float ratio = (float) jsonObject.getDouble("ratio");
                 String type = jsonObject.getString("type");
                 return new Style(ratio, type);
-            }catch (JSONException e){
-
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
         }
         return null;
@@ -187,6 +189,8 @@ public class ImgUtil {
     }
 
     private static Object getUrl(String url) {
+        // 修复：上游偶有 null 入参，原代码 url.startsWith("data:") 抛 NullPointerException
+        if (TextUtils.isEmpty(url)) return null;
         if (url.startsWith("data:")) return url;
         url = DefaultConfig.checkReplaceProxy(url);
 

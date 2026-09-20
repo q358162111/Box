@@ -9,6 +9,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
 import android.view.View;
+
+import java.lang.ref.WeakReference;
 import java.util.Random;
 
 public class AudioWaveView extends View {
@@ -25,18 +27,18 @@ public class AudioWaveView extends View {
     /** 每个条的宽度 */
     private int rectWidth;
     /** 条数 */
-    private int columnCount = 7;
+    private final int columnCount = 7;
     /** 条间距 */
     private final int space = 8;
     /** 条随机高度 */
     private int randomHeight;
     private Random random;
-    private Handler handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            invalidate();
-        }
-    };
+    /**
+     * 静态 Handler + WeakReference：避免非静态内部 Handler 持有外部 View 引用导致泄漏
+     */
+    private final WaveHandler handler = new WaveHandler(this);
+    /** View 是否已 attached 到窗口，未 attached 时不再 post 刷新 */
+    private boolean attached = false;
 
     public AudioWaveView(Context context) {
         super(context);
@@ -56,6 +58,20 @@ public class AudioWaveView extends View {
         viewHeight = MeasureSpec.getSize(heightMeasureSpec);
 
         rectWidth = (viewWidth - space * (columnCount - 1)) / columnCount;
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        attached = true;
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        // View 脱离窗口时清空所有待处理回调，避免泄漏与无效重绘
+        attached = false;
+        handler.removeCallbacksAndMessages(null);
+        super.onDetachedFromWindow();
     }
 
     private void init() {
@@ -80,6 +96,10 @@ public class AudioWaveView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+
+        // View 已 detached 时停止重绘循环
+        if (!attached) return;
+        if (viewHeight <= 0) return;
 
         int left = rectWidth + space;
 
@@ -107,6 +127,24 @@ public class AudioWaveView extends View {
         canvas.drawRect(rectF6, paint);
         canvas.drawRect(rectF7, paint);
 
-        handler.sendEmptyMessageDelayed(0, 300); //每间隔200毫秒发送消息刷新
+        handler.sendEmptyMessageDelayed(0, 300); //每间隔300毫秒发送消息刷新
+    }
+
+    /**
+     * 静态 Handler 持有外部 View 的弱引用，避免内部类隐式持有外部 View 造成泄漏
+     */
+    private static class WaveHandler extends Handler {
+        private final WeakReference<AudioWaveView> ref;
+
+        WaveHandler(AudioWaveView view) {
+            this.ref = new WeakReference<>(view);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            AudioWaveView v = ref.get();
+            if (v == null || !v.attached) return;
+            v.invalidate();
+        }
     }
 }

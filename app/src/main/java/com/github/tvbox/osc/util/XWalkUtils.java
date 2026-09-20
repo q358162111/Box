@@ -55,37 +55,41 @@ public class XWalkUtils {
     }
 
     public static void tryUseXWalk(Context context, XWalkState state) {
-        if (!xWalkLibExist(context)) {
-            state.ignore();
+        // 修复：context 或 state 为 null 时直接 ignore/return，避免后续 initAsync 持有非法 Context
+        if (context == null) {
+            if (state != null) state.ignore();
             return;
         }
-        if (xWalkInitializer == null) {
-            xWalkInitializer = new XWalkInitializer(new XWalkInitializer.XWalkInitListener() {
-                @Override
-                public void onXWalkInitStarted() {
+        if (!xWalkLibExist(context)) {
+            if (state != null) state.ignore();
+            return;
+        }
+        // 修复：xWalkInitializer 静态字段在并发 tryUseXWalk 时可能创建多个实例，导致回调泄露与多个 listener
+        synchronized (XWalkUtils.class) {
+            if (xWalkInitializer == null) {
+                xWalkInitializer = new XWalkInitializer(new XWalkInitializer.XWalkInitListener() {
+                    @Override
+                    public void onXWalkInitStarted() {
+                    }
 
-                }
+                    @Override
+                    public void onXWalkInitCancelled() {
+                    }
 
-                @Override
-                public void onXWalkInitCancelled() {
+                    @Override
+                    public void onXWalkInitFailed() {
+                        if (state != null) state.fail();
+                    }
 
-                }
-
-                @Override
-                public void onXWalkInitFailed() {
-                    if (state != null)
-                        state.fail();
-                }
-
-                @Override
-                public void onXWalkInitCompleted() {
-                    if (state != null)
-                        state.success();
-                }
-            }, context);
+                    @Override
+                    public void onXWalkInitCompleted() {
+                        if (state != null) state.success();
+                    }
+                }, context);
+            }
         }
         if (xWalkInitializer.isXWalkReady()) {
-            state.success();
+            if (state != null) state.success();
         } else {
             xWalkInitializer.initAsync();
         }
@@ -118,16 +122,20 @@ public class XWalkUtils {
     }
 
     public static void unzipXWalkZip(Context context, String archive) throws Throwable {
-        BufferedInputStream bi;
-        ZipFile zf = new ZipFile(archive);
-        Enumeration e = zf.entries();
-        while (e.hasMoreElements()) {
-            ZipEntry ze2 = (ZipEntry) e.nextElement();
-            String entryName = ze2.getName();
-            if (ze2.isDirectory()) {
-                continue;
-            } else {
-                String fileName = entryName.substring(entryName.lastIndexOf("/") + 1, entryName.length());
+        if (archive == null || context == null) return;
+        ZipFile zf = null;
+        try {
+            zf = new ZipFile(archive);
+            Enumeration<?> e = zf.entries();
+            while (e.hasMoreElements()) {
+                ZipEntry ze2 = (ZipEntry) e.nextElement();
+                String entryName = ze2.getName();
+                if (ze2.isDirectory()) {
+                    continue;
+                }
+                int slashIdx = entryName.lastIndexOf("/");
+                // 修复：entryName 不含 "/" 时 lastIndexOf 返回 -1，原代码 substring(-1+1, length) 不报错但逻辑错误
+                String fileName = slashIdx >= 0 ? entryName.substring(slashIdx + 1) : entryName;
                 if (fileName.equals("XWalkRuntimeLib.apk")) {
                     String tempFile = apkPath(context) + ".tmp";
                     String finalApk = apkPath(context);
@@ -137,23 +145,24 @@ public class XWalkUtils {
                     f = new File(finalApk);
                     if (f.exists())
                         f.delete();
-                    BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(tempFile));
-                    bi = new BufferedInputStream(zf.getInputStream(ze2));
-                    byte[] readContent = new byte[1024];
-                    int readCount = bi.read(readContent);
-                    while (readCount != -1) {
-                        bos.write(readContent, 0, readCount);
-                        readCount = bi.read(readContent);
+                    // 修复：使用 try-with-resources 保证 bi/bos 异常路径也关闭，避免资源泄漏
+                    try (BufferedInputStream bi = new BufferedInputStream(zf.getInputStream(ze2));
+                         BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(tempFile))) {
+                        byte[] readContent = new byte[1024];
+                        int readCount;
+                        while ((readCount = bi.read(readContent)) != -1) {
+                            bos.write(readContent, 0, readCount);
+                        }
+                        bos.flush();
                     }
-                    bos.flush();
-                    bos.close();
                     if (new File(tempFile).renameTo(new File(finalApk))) {
                         LOG.i(finalApk);
                     }
                 }
             }
+        } finally {
+            if (zf != null) zf.close();
         }
-        zf.close();
         File zipFile = new File(archive);
         if (zipFile.exists() && zipFile.getName().endsWith(".zip")) {
             zipFile.delete();

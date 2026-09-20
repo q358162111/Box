@@ -28,7 +28,8 @@ public class QRCodeGen {
             for (int i = 0; i < height; i++) {
                 for (int j = 0; j < width; j++) {
                     if (encode.get(j, i)) {
-                        pixels[i * width + j] = 0x00000000;
+                        // 修复：0x00000000 是完全透明黑，二维码深色像素应使用 0xff000000 不透明黑
+                        pixels[i * width + j] = 0xff000000;
                     } else {
                         pixels[i * width + j] = 0xffffffff;
                     }

@@ -55,7 +55,7 @@ public class SearchSubtitleDialog extends BaseDialog {
         super(context);
         mContext = context;
         if (context instanceof Activity) {
-            setOwnerActivity((Activity) context);
+            if (context instanceof Activity) setOwnerActivity((Activity) context); else { /* Context is not Activity, dialog window will use default token */ };
         }
         setContentView(R.layout.dialog_search_subtitle);
         initView(context);
@@ -96,7 +96,10 @@ public class SearchSubtitleDialog extends BaseDialog {
         searchAdapter.setOnLoadMoreListener(new BaseQuickAdapter.RequestLoadMoreListener() {
             @Override
             public void onLoadMoreRequested() {
-                if (searchAdapter.getData().get(0).getIsZip()) {
+                // 修复：loadMore 时若 data 为空（清空列表后未加载），原代码 get(0) 抛 IndexOutOfBoundsException
+                if (searchAdapter.getData() != null && !searchAdapter.getData().isEmpty()
+                        && searchAdapter.getData().get(0) != null
+                        && searchAdapter.getData().get(0).getIsZip()) {
                     subtitleViewModel.searchResult(searchWord, page);
                 }
             }

@@ -38,7 +38,7 @@ public class SubtitleDialog extends BaseDialog {
     public SubtitleDialog(@NotNull Context context) {
         super(context);
         if (context instanceof Activity) {
-            setOwnerActivity((Activity) context);
+            if (context instanceof Activity) setOwnerActivity((Activity) context); else { /* Context is not Activity, dialog window will use default token */ };
         }
         setContentView(R.layout.dialog_subtitle);
         initView(context);

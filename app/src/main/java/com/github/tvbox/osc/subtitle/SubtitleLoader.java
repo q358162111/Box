@@ -142,48 +142,59 @@ public class SubtitleLoader {
             referer = "https://secure.assrt.net/";
         }
         String ua = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.54 Safari/537.36";
-        Response response = OkGo.<String>get(remoteSubtitlePath.split("#")[0])
-                .headers("Referer", referer)
-                .headers("User-Agent", ua)
-                .execute();
-        byte[] bytes = response.body().bytes();
-        UniversalDetector detector = new UniversalDetector(null);
-        detector.handleData(bytes, 0, bytes.length);
-        detector.dataEnd();
-        String encoding = detector.getDetectedCharset();
-        if (TextUtils.isEmpty(encoding)) encoding = "UTF-8";
-        String content = new String(bytes, encoding);
-        InputStream is = new ByteArrayInputStream(content.getBytes());
-        String filename = "";
-        String contentDispostion = response.header("content-disposition", "");
-        String[] cd = contentDispostion.split(";");
-        if (cd.length > 1) {
-            String filenameInfo = cd[1];
-            filenameInfo = filenameInfo.trim();
-            if (filenameInfo.startsWith("filename=")) {
-                filename = filenameInfo.replace("filename=", "");
-                filename = filename.replace("\"", "");
-            } else if (filenameInfo.startsWith("filename*=")) {
-                filename = filenameInfo.substring(filenameInfo.lastIndexOf("''")+2);
+        Response response = null;
+        try {
+            response = OkGo.<String>get(remoteSubtitlePath.split("#")[0])
+                    .headers("Referer", referer)
+                    .headers("User-Agent", ua)
+                    .execute();
+            byte[] bytes = response.body().bytes();
+            UniversalDetector detector = new UniversalDetector(null);
+            detector.handleData(bytes, 0, bytes.length);
+            detector.dataEnd();
+            String encoding = detector.getDetectedCharset();
+            if (TextUtils.isEmpty(encoding)) encoding = "UTF-8";
+            String content = new String(bytes, encoding);
+            InputStream is = new ByteArrayInputStream(content.getBytes());
+            String filename = "";
+            String contentDispostion = response.header("content-disposition", "");
+            String[] cd = contentDispostion.split(";");
+            if (cd.length > 1) {
+                String filenameInfo = cd[1];
+                filenameInfo = filenameInfo.trim();
+                if (filenameInfo.startsWith("filename=")) {
+                    filename = filenameInfo.replace("filename=", "");
+                    filename = filename.replace("\"", "");
+                } else if (filenameInfo.startsWith("filename*=")) {
+                    filename = filenameInfo.substring(filenameInfo.lastIndexOf("''")+2);
+                }
+                filename = filename.trim();
+                filename = URLDecoder.decode(filename);
             }
-            filename = filename.trim();
-            filename = URLDecoder.decode(filename);
+            String filePath = filename;
+            if (filename == null || filename.length() < 1) {
+                Uri uri = Uri.parse(remoteSubtitlePath);
+                filePath = uri.getPath();
+            }
+            if (!filePath.contains(".") && remoteSubtitlePath.contains("#")) {
+                filePath = remoteSubtitlePath.split("#")[1];
+                filePath = URLDecoder.decode(filePath);
+            }
+            SubtitleLoadSuccessResult subtitleLoadSuccessResult = new SubtitleLoadSuccessResult();
+            subtitleLoadSuccessResult.timedTextObject = loadAndParse(is, filePath);
+            subtitleLoadSuccessResult.fileName = filePath;
+            subtitleLoadSuccessResult.content = content;
+            subtitleLoadSuccessResult.subtitlePath = remoteSubtitlePath;
+            return subtitleLoadSuccessResult;
+        } finally {
+            // 修复：原代码未 close Response，导致 OkHttp 连接/Socket 持续泄漏
+            if (response != null) {
+                try {
+                    response.close();
+                } catch (Throwable ignored) {
+                }
+            }
         }
-        String filePath = filename;
-        if (filename == null || filename.length() < 1) {
-            Uri uri = Uri.parse(remoteSubtitlePath);
-            filePath = uri.getPath();
-        }
-        if (!filePath.contains(".") && remoteSubtitlePath.contains("#")) {
-            filePath = remoteSubtitlePath.split("#")[1];
-            filePath = URLDecoder.decode(filePath);
-        }
-        SubtitleLoadSuccessResult subtitleLoadSuccessResult = new SubtitleLoadSuccessResult();
-        subtitleLoadSuccessResult.timedTextObject = loadAndParse(is, filePath);
-        subtitleLoadSuccessResult.fileName = filePath;
-        subtitleLoadSuccessResult.content = content;
-        subtitleLoadSuccessResult.subtitlePath = remoteSubtitlePath;
-        return subtitleLoadSuccessResult;
     }
 
     private static SubtitleLoadSuccessResult loadFromLocal(final String localSubtitlePath)
@@ -227,18 +238,34 @@ public class SubtitleLoader {
         } else if (".stl".equalsIgnoreCase(ext)) {
             return new FormatSTL().parseFile(fileName, newInputStream);
         } else if (".ttml".equalsIgnoreCase(ext)) {
-            return new FormatSTL().parseFile(fileName, newInputStream);
+            // 修复：原代码将 .ttml 误映射为 FormatSTL，导致 TTML 字幕永远解析失败
+            return new com.github.tvbox.osc.subtitle.format.FormatTTML().parseFile(fileName, newInputStream);
         }
-        TimedTextFileFormat[] arr = {new FormatSRT(), new FormatASS(), new FormatSTL(), new FormatSTL()};
+        // 修复：arr 中重复 FormatSTL、缺失 FormatTTML；fallback 循环必须每次重建流，否则后续 parser 拿到的是空流
+        TimedTextFileFormat[] arr = {new FormatSRT(), new FormatASS(), new FormatSTL(), new com.github.tvbox.osc.subtitle.format.FormatTTML()};
         for(TimedTextFileFormat oneFormat : arr) {
             try {
-                TimedTextObject obj = oneFormat.parseFile(fileName, newInputStream);
+                // 重新包装流，保证每个 parser 都能从开头读
+                InputStream retryStream = new ReaderInputStream(new UnicodeReader(new ByteArrayInputStream(readAllBytes(newInputStream))), Charset.defaultCharset());
+                TimedTextObject obj = oneFormat.parseFile(fileName, retryStream);
                 return obj;
             } catch (Exception e) {
-                continue;
+                Log.d(TAG, "fallback parse failed for " + oneFormat.getClass().getSimpleName() + ": " + e.getMessage());
             }
         }
         return null;
+    }
+
+    private static byte[] readAllBytes(InputStream input) throws IOException {
+        java.io.ByteArrayOutputStream buf = new java.io.ByteArrayOutputStream();
+        byte[] data = new byte[8192];
+        int n;
+        try {
+            while ((n = input.read(data)) != -1) buf.write(data, 0, n);
+        } finally {
+            try { input.close(); } catch (IOException ignored) {}
+        }
+        return buf.toByteArray();
     }
 
     public interface Callback {

@@ -11,10 +11,11 @@ import android.widget.Scroller;
  */
 
 public class FixedSpeedScroller extends Scroller {
-    private int mDuration = 0;
+    /** 默认 300ms，避免外部未调用 setmDuration 时滚动为瞬时完成 */
+    private int mDuration = 300;
 
     public void setmDuration(int mDuration) {
-        this.mDuration = mDuration;
+        this.mDuration = Math.max(mDuration, 1);
     }
 
     public FixedSpeedScroller(Context context) {
@@ -40,4 +41,3 @@ public class FixedSpeedScroller extends Scroller {
         super.startScroll(startX, startY, dx, dy, mDuration);
     }
 }
-

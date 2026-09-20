@@ -36,6 +36,16 @@ public class WebdavDialog extends BaseDialog {
         setContentView(R.layout.dialog_webdav);
         if(drive != null)
             this.drive = drive;
+        // 启用 EventBus 以接收 IME 软键盘的 InputMsgEvent 事件
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        if (EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().unregister(this);
+        }
     }
 
     @Override

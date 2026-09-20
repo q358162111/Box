@@ -539,6 +539,15 @@ public class LivePlayActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        // 修复：原代码未 unregister EventBus，导致 Activity 实例被 EventBus 引用泄漏
+        if (EventBus.getDefault().isRegistered(this)) {
+            if (EventBus.getDefault().isRegistered(this)) EventBus.getDefault().unregister(this);
+        }
+        // 修复：清理所有 mHandler 队列回调，防止 Activity 已销毁后回调触发 NPE 与泄漏
+        if (mHandler != null) {
+            mHandler.removeCallbacksAndMessages(null);
+        }
+        // 释放播放器
         if (mVideoView != null) {
             mVideoView.release();
             mVideoView = null;

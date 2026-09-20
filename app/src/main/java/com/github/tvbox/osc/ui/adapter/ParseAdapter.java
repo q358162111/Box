@@ -24,7 +24,7 @@ public class ParseAdapter extends BaseQuickAdapter<ParseBean, BaseViewHolder> {
         if (item.isDefault()) {
             // takagen99: Added Theme Color
 //            tvParse.setTextColor(mContext.getResources().getColor(R.color.color_theme));
-            tvParse.setTextColor(((BaseActivity) mContext).getThemeColor());
+            tvParse.setTextColor((mContext instanceof BaseActivity ? ((BaseActivity) mContext).getThemeColor() : 0));
         } else {
             tvParse.setTextColor(Color.WHITE);
         }

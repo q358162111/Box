@@ -27,16 +27,20 @@ public class MD5 {
             'a', 'b', 'c', 'd', 'e', 'f'};
     /**
      * 消息摘要.
+     * ThreadLocal<MessageDigest>：MessageDigest 非线程安全，必须每个线程独立实例。
+     * 修复了之前共享 static 实例导致哈希值错乱（高并发下 digest() 内部状态破坏）的严重 bug。
      */
-    private static MessageDigest sDigest;
-
-    static {
-        try {
-            MD5.sDigest = MessageDigest.getInstance("MD5");
-        } catch (NoSuchAlgorithmException e) {
-            Log.e("获取MD5信息摘要失败", e.getMessage());
+    private static final ThreadLocal<MessageDigest> sDigest = new ThreadLocal<MessageDigest>() {
+        @Override
+        protected MessageDigest initialValue() {
+            try {
+                return MessageDigest.getInstance("MD5");
+            } catch (NoSuchAlgorithmException e) {
+                Log.e("获取MD5信息摘要失败", e.getMessage());
+                return null;
+            }
         }
-    }
+    };
 
     /**
      * MD5值计算
@@ -52,14 +56,17 @@ public class MD5 {
      * @return md5值
      */
     public static String encode(String res) {
-        byte[] strTemp = res.getBytes();
-        return encode(strTemp);
+        if (res == null) return null;
+        return encode(res.getBytes());
     }
 
     private static String encode(byte[] bytes) {
+        if (bytes == null) return null;
         try {
-            sDigest.update(bytes);
-            byte[] md = sDigest.digest();
+            MessageDigest digest = sDigest.get();
+            if (digest == null) return null;
+            digest.update(bytes);
+            byte[] md = digest.digest();
             int j = md.length;
             char str[] = new char[j * 2];
             int k = 0;
@@ -67,24 +74,24 @@ public class MD5 {
                 str[k++] = hexDigits[byte0 >>> 4 & 0xf];
                 str[k++] = hexDigits[byte0 & 0xf];
             }
-            String dd = new String(str);
-            return dd;
+            return new String(str);
         } catch (Exception e) {
             return null;
         }
     }
 
     public static String getFileMd5(File f) {
+        if (f == null) return "";
         StringBuffer sb = new StringBuffer("");
+        FileInputStream fis = null;
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
             byte[] buffer = new byte[4096];
-            FileInputStream fis = new FileInputStream(f);
-            int len = 0;
+            fis = new FileInputStream(f);
+            int len;
             while ((len = fis.read(buffer)) != -1) {
                 md.update(buffer, 0, len);
             }
-            fis.close();
             byte b[] = md.digest();
             int d;
             for (int i = 0; i < b.length; i++) {
@@ -100,6 +107,13 @@ public class MD5 {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            if (fis != null) {
+                try {
+                    fis.close();
+                } catch (IOException ignored) {
+                }
+            }
         }
         return sb.toString();
     }
@@ -108,28 +122,29 @@ public class MD5 {
      * MD5加码 生成32位md5码
      */
     public static String string2MD5(String inStr) {
-        if (sDigest == null) {
-            Log.e("MD5", "MD5信息摘要初始化失败");
-            return null;
-        } else if (TextUtils.isEmpty(inStr)) {
+        if (TextUtils.isEmpty(inStr)) {
             Log.e("MD5", "参数strSource不能为空");
             return null;
         }
-        char[] charArray = inStr.toCharArray();
-        byte[] byteArray = new byte[charArray.length];
-
-        for (int i = 0; i < charArray.length; i++)
-            byteArray[i] = (byte) charArray[i];
-        byte[] md5Bytes = sDigest.digest(byteArray);
-        StringBuilder hexValue = new StringBuilder();
-        for (byte md5Byte : md5Bytes) {
-            int val = ((int) md5Byte) & 0xff;
-            if (val < 16)
-                hexValue.append("0");
-            hexValue.append(Integer.toHexString(val));
+        try {
+            MessageDigest digest = sDigest.get();
+            if (digest == null) {
+                Log.e("MD5", "MD5信息摘要初始化失败");
+                return null;
+            }
+            byte[] byteArray = inStr.getBytes();
+            byte[] md5Bytes = digest.digest(byteArray);
+            StringBuilder hexValue = new StringBuilder();
+            for (byte md5Byte : md5Bytes) {
+                int val = ((int) md5Byte) & 0xff;
+                if (val < 16)
+                    hexValue.append("0");
+                hexValue.append(Integer.toHexString(val));
+            }
+            return hexValue.toString();
+        } catch (Exception e) {
+            return null;
         }
-        return hexValue.toString();
-
     }
 
     /**
@@ -139,19 +154,21 @@ public class MD5 {
      * @return 加密后的字符串，不支持此类字符集合返回null
      */
     public static String encrypt(final String strSource) {
-        if (sDigest == null) {
-            Log.e("MD5", "MD5信息摘要初始化失败");
-            return null;
-        } else if (TextUtils.isEmpty(strSource)) {
+        if (TextUtils.isEmpty(strSource)) {
             Log.e("MD5", "参数strSource不能为空");
             return null;
         }
         try {
-            byte[] md5Bytes = sDigest.digest(strSource
-                    .getBytes("utf-8"));
+            MessageDigest digest = sDigest.get();
+            if (digest == null) {
+                Log.e("MD5", "MD5信息摘要初始化失败");
+                return null;
+            }
+            byte[] md5Bytes = digest.digest(strSource.getBytes("utf-8"));
             byte[] encryptBytes = Base64.encode(md5Bytes, Base64.DEFAULT);
             String strEncrypt = new String(encryptBytes, "utf-8");
-            return strEncrypt.substring(0, strEncrypt.length() - 1); // 截断Base64产生的换行符
+            // 截断Base64产生的换行符（若长度>0再截，否则 index=0 会抛 StringIndexOutOfBoundsException）
+            return strEncrypt.length() > 0 ? strEncrypt.substring(0, strEncrypt.length() - 1) : strEncrypt;
         } catch (UnsupportedEncodingException e) {
             Log.e("MD5", "加密模块暂不支持此字符集合" + e);
         }

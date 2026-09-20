@@ -77,30 +77,45 @@ public class FormatASS implements TimedTextFileFormat {
                     if (line.equalsIgnoreCase("[Script info]")) {
                         //its the script info section section
                         lineCounter++;
-                        line = br.readLine().trim();
+                        line = br.readLine();
+                        if (line == null) break;
+                        line = line.trim();
                         //Each line is scanned for useful info until a new section is detected
-                        while (!line.startsWith("[")) {
+                        while (line != null && !line.startsWith("[")) {
                             if (line.startsWith("Title:")) { //标题信息非必要
-                                String[] titleArr = line.split(":");
+                                String[] titleArr = line.split(":", 2);
                                 //We have found the title
                                 tto.title = titleArr.length > 1 ? titleArr[1].trim() : "";
                             } else if (line.startsWith("Original Script:")) { //作者信息非必要
-                                String[] authorArr = line.split(":");
+                                String[] authorArr = line.split(":", 2);
                                 //We have found the author
                                 tto.author = authorArr.length > 1 ? authorArr[1].trim() : "";
                             } else if (line.startsWith("Script Type:")) {
-                                //we have found the version
-                                if (line.split(":")[1].trim().equalsIgnoreCase("v4.00+"))
-                                    isASS = true;
-                                    //we check the type to set isASS or to warn if it comes from an older version than the studied specs
-                                else if (!line.split(":")[1].trim().equalsIgnoreCase("v4.00"))
-                                    tto.warnings += "Script version is older than 4.00, it may produce parsing errors.";
-                            } else if (line.startsWith("Timer:"))
+                                String[] scriptTypeArr = line.split(":", 2);
+                                if (scriptTypeArr.length > 1) {
+                                    //we have found the version
+                                    if (scriptTypeArr[1].trim().equalsIgnoreCase("v4.00+"))
+                                        isASS = true;
+                                        //we check the type to set isASS or to warn if it comes from an older version than the studied specs
+                                    else if (!scriptTypeArr[1].trim().equalsIgnoreCase("v4.00"))
+                                        tto.warnings += "Script version is older than 4.00, it may produce parsing errors.";
+                                }
+                            } else if (line.startsWith("Timer:")) {
                                 //We have found the timer
-                                timer = Float.parseFloat(line.split(":")[1].trim().replace(',', '.'));
+                                String[] timerArr = line.split(":", 2);
+                                if (timerArr.length > 1) {
+                                    try {
+                                        timer = Float.parseFloat(timerArr[1].trim().replace(',', '.'));
+                                    } catch (NumberFormatException nfe) {
+                                        // 保留默认 timer=100
+                                    }
+                                }
+                            }
                             //we go to the next line
                             lineCounter++;
-                            line = br.readLine().trim();
+                            line = br.readLine();
+                            if (line == null) break;
+                            line = line.trim();
                         }
 
                     } else if (line.equalsIgnoreCase("[v4 Styles]")
@@ -114,28 +129,36 @@ public class FormatASS implements TimedTextFileFormat {
                         }
                         lineCounter++;
                         line = br.readLine();
+                        if (line == null) break;
                         //the first line should define the format
                         if (!line.startsWith("Format:")) {
                             //if not, we scan for the format.
                             tto.warnings += "Format: (format definition) expected at line " + line + " for the styles section\n\n";
-                            while (!line.startsWith("Format:")) {
+                            while (line != null && !line.startsWith("Format:")) {
                                 lineCounter++;
                                 line = br.readLine();
                             }
                         }
+                        // 修复：line 不包含 ":" 时 split(":")[1] 抛 ArrayIndexOutOfBoundsException
+                        String[] formatParts = line != null ? line.split(":", 2) : new String[0];
+                        if (formatParts.length < 2) break;
                         // we recover the format's fields
-                        styleFormat = line.split(":")[1].trim().split(",");
+                        styleFormat = formatParts[1].trim().split(",");
                         lineCounter++;
                         line = br.readLine();
+                        if (line == null) break;
                         // we parse each style until we reach a new section
-                        while (!line.startsWith("Style:")) {
+                        while (line != null && !line.startsWith("Style:")) {
                             tto.warnings += "Style: (format definition) expected at line " + line + " for the styles section\n\n";
                             //next line
                             lineCounter++;
                             line = br.readLine();
                         }
+                        if (line == null) break;
                         //we parse the style
-                        style = parseStyleForASS(line.split(":")[1].trim().split(","), styleFormat, lineCounter, isASS, tto.warnings);
+                        String[] styleParts = line.split(":", 2);
+                        if (styleParts.length < 2) break;
+                        style = parseStyleForASS(styleParts[1].trim().split(","), styleFormat, lineCounter, isASS, tto.warnings);
                         //and save the style
                         tto.styling.put(style.iD, style);
 
@@ -143,28 +166,40 @@ public class FormatASS implements TimedTextFileFormat {
                         //its the events specification section
                         lineCounter++;
                         line = br.readLine();
+                        if (line == null) break;
                         tto.warnings += "Only dialogue events are considered, all other events are ignored.\n\n";
                         //the first line should define the format of the dialogues
                         if (!line.startsWith("Format:")) {
                             //if not, we scan for the format.
                             tto.warnings += "Format: (format definition) expected at line " + line + " for the events section\n\n";
-                            while (!line.startsWith("Format:")) {
+                            while (line != null && !line.startsWith("Format:")) {
                                 lineCounter++;
                                 line = br.readLine();
                             }
                         }
+                        // 修复：line 不包含 ":" 时 split(":")[1] 抛 AIOOBE
+                        String[] dialParts = line != null ? line.split(":", 2) : new String[0];
+                        if (dialParts.length < 2) break;
                         // we recover the format's fields
-                        dialogueFormat = line.split(":")[1].trim().split(",");
+                        dialogueFormat = dialParts[1].trim().split(",");
                         //next line
                         lineCounter++;
                         line = br.readLine();
+                        if (line == null) break;
                         // we parse each style until we reach a new section
-                        while (!line.startsWith("[")) {
+                        while (line != null && !line.startsWith("[")) {
                             //we check it is a dialogue
                             //WARNING: all other events are ignored.
                             if (line.startsWith("Dialogue:")) {
+                                // 修复：line 不包含 ":" 时 split(":", 2)[1] 抛 AIOOBE
+                                String[] dialogueParts = line.split(":", 2);
+                                if (dialogueParts.length < 2) {
+                                    lineCounter++;
+                                    line = br.readLine();
+                                    continue;
+                                }
                                 //we parse the dialogue
-                                caption = parseDialogueForASS(line.split(":", 2)[1].trim().split(",", 10), dialogueFormat, timer, tto);
+                                caption = parseDialogueForASS(dialogueParts[1].trim().split(",", 10), dialogueFormat, timer, tto);
                                 //and save the caption
                                 int key = caption.start.mseconds;
                                 //in case the key is already there, we increase it by a millisecond, since no duplicates are allowed
@@ -192,6 +227,9 @@ public class FormatASS implements TimedTextFileFormat {
 
         } catch (NullPointerException e) {
             tto.warnings += "unexpected end of file, maybe last caption is not complete.\n\n";
+        } catch (Exception e) {
+            // 捕获 AIOOBE 等其他解析异常，避免整个字幕加载失败
+            tto.warnings += "Parse error: " + e.getClass().getSimpleName() + ": " + e.getMessage() + "\n\n";
         } finally {
             //we close the reader
             is.close();

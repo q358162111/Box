@@ -1110,7 +1110,7 @@ public class DetailActivity extends BaseActivity {
         OkGo.getInstance().cancelTag("detail");
         OkGo.getInstance().cancelTag("quick_search");
         OkGo.getInstance().cancelTag("pushVod");
-        EventBus.getDefault().unregister(this);
+        if (EventBus.getDefault().isRegistered(this)) EventBus.getDefault().unregister(this);
         if (!showPreview) Thunder.stop(true);
     }
 

@@ -45,8 +45,8 @@ public class LiveEpgAdapter extends BaseQuickAdapter<Epginfo, BaseViewHolder> {
             // takagen99: Added Theme Color
 //            textview.setTextColor(mContext.getResources().getColor(R.color.color_theme));
 //            timeview.setTextColor(mContext.getResources().getColor(R.color.color_theme));
-            textview.setTextColor(((BaseActivity) mContext).getThemeColor());
-            timeview.setTextColor(((BaseActivity) mContext).getThemeColor());
+            textview.setTextColor((mContext instanceof BaseActivity ? ((BaseActivity) mContext).getThemeColor() : 0));
+            timeview.setTextColor((mContext instanceof BaseActivity ? ((BaseActivity) mContext).getThemeColor() : 0));
         } else {
             textview.setTextColor(mContext.getResources().getColor(R.color.color_FFFFFF));
             timeview.setTextColor(mContext.getResources().getColor(R.color.color_FFFFFF));
@@ -81,8 +81,8 @@ public class LiveEpgAdapter extends BaseQuickAdapter<Epginfo, BaseViewHolder> {
                 // takagen99: Added Theme Color
 //                textview.setTextColor(mContext.getResources().getColor(R.color.color_theme));
 //                timeview.setTextColor(mContext.getResources().getColor(R.color.color_theme));
-                textview.setTextColor(((BaseActivity) mContext).getThemeColor());
-                timeview.setTextColor(((BaseActivity) mContext).getThemeColor());
+                textview.setTextColor((mContext instanceof BaseActivity ? ((BaseActivity) mContext).getThemeColor() : 0));
+                timeview.setTextColor((mContext instanceof BaseActivity ? ((BaseActivity) mContext).getThemeColor() : 0));
                 textview.setFreezesText(true);
                 timeview.setFreezesText(true);
                 shiyi.setText("直播中");
@@ -95,8 +95,8 @@ public class LiveEpgAdapter extends BaseQuickAdapter<Epginfo, BaseViewHolder> {
                 // takagen99: Added Theme Color
 //                textview.setTextColor(mContext.getResources().getColor(R.color.color_theme));
 //                timeview.setTextColor(mContext.getResources().getColor(R.color.color_theme));
-                textview.setTextColor(((BaseActivity) mContext).getThemeColor());
-                timeview.setTextColor(((BaseActivity) mContext).getThemeColor());
+                textview.setTextColor((mContext instanceof BaseActivity ? ((BaseActivity) mContext).getThemeColor() : 0));
+                timeview.setTextColor((mContext instanceof BaseActivity ? ((BaseActivity) mContext).getThemeColor() : 0));
                 textview.setFreezesText(true);
                 timeview.setFreezesText(true);
                 shiyi.setText("回看中");

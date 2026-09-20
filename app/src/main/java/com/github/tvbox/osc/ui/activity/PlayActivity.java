@@ -1286,7 +1286,7 @@ public class PlayActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        EventBus.getDefault().unregister(this);
+        if (EventBus.getDefault().isRegistered(this)) EventBus.getDefault().unregister(this);
         if(executorService!=null){
             executorService.shutdownNow();
             executorService = null;

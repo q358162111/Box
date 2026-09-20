@@ -74,16 +74,17 @@ public class HawkUtils {
 
     public static void nextIJKCodec() {
         List<IJKCode> ijkCodes = ApiConfig.get().getIjkCodes();
+        if (ijkCodes == null || ijkCodes.isEmpty()) return; // 空列表时直接返回，避免 IOOBE
         String ijkCodec = getIJKCodec();
         int index = 0;
         for (int i = 0; i < ijkCodes.size(); i++) {
             IJKCode ijkCode = ijkCodes.get(i);
-            if (ijkCode.getName().equals(ijkCodec)) {
+            if (ijkCode != null && ijkCode.getName().equals(ijkCodec)) {
                 index = i;
                 break;
             }
         }
-        ijkCodes.get(index).selected(false);
+        if (index < ijkCodes.size()) ijkCodes.get(index).selected(false);
         index++;
         index %= ijkCodes.size();
         ijkCodes.get(index).selected(true);

@@ -27,7 +27,7 @@ public class LivePasswordDialog extends BaseDialog {
 
     public LivePasswordDialog(@NonNull @NotNull Context context) {
         super(context);
-        setOwnerActivity((Activity) context);
+        if (context instanceof Activity) setOwnerActivity((Activity) context); else { /* Context is not Activity, dialog window will use default token */ };
         setContentView(R.layout.dialog_live_password);
         inputPassword = findViewById(R.id.input);
         findViewById(R.id.inputSubmit).setOnClickListener(new View.OnClickListener() {

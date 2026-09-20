@@ -2,7 +2,8 @@ package com.github.tvbox.osc.util;
 
 import android.app.Activity;
 
-import java.util.Stack;
+import java.util.Iterator;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @author pj567
@@ -10,7 +11,11 @@ import java.util.Stack;
  * @description:
  */
 public class AppManager {
-    private static Stack<Activity> activityStack;
+    /**
+     * 改用 CopyOnWriteArrayList，避免 Stack 在并发环境下迭代/修改报 ConcurrentModificationException
+     * 同时避免 Vector/Stack 的方法级锁带来的额外开销与不一致的同步语义
+     */
+    private static final CopyOnWriteArrayList<Activity> activityList = new CopyOnWriteArrayList<>();
 
     private AppManager() {
     }
@@ -27,42 +32,40 @@ public class AppManager {
      * 添加Activity到堆栈
      */
     public void addActivity(Activity activity) {
-        if (activityStack == null) {
-            activityStack = new Stack<Activity>();
+        if (activity != null) {
+            activityList.add(activity);
         }
-        activityStack.add(activity);
     }
 
     /**
      * 是否有activity
      */
     public boolean isActivity() {
-        if (activityStack != null) {
-            return !activityStack.isEmpty();
-        }
-        return false;
+        return !activityList.isEmpty();
     }
 
     /**
      * 获取当前Activity（堆栈中最后一个压入的）
      */
     public Activity currentActivity() {
-        Activity activity = activityStack.lastElement();
-        return activity;
+        if (activityList.isEmpty()) return null;
+        return activityList.get(activityList.size() - 1);
     }
 
     /**
      * 结束当前Activity（堆栈中最后一个压入的）
      */
     public void finishActivity() {
-        Activity activity = activityStack.lastElement();
-        if (!activity.isFinishing()) {
+        Activity activity = currentActivity();
+        if (activity != null && !activity.isFinishing()) {
             activity.finish();
         }
     }
 
     public void finishActivity(Activity activity) {
-        activityStack.remove(activity);
+        if (activity != null) {
+            activityList.remove(activity);
+        }
     }
 
 
@@ -70,8 +73,9 @@ public class AppManager {
      * 结束指定类名的Activity
      */
     public void finishActivity(Class<?> cls) {
-        for (Activity activity : activityStack) {
-            if (activity.getClass().equals(cls)) {
+        if (cls == null) return;
+        for (Activity activity : activityList) {
+            if (activity != null && activity.getClass().equals(cls)) {
                 if (!activity.isFinishing()) {
                     activity.finish();
                 }
@@ -80,13 +84,20 @@ public class AppManager {
         }
     }
 
+    /**
+     * 回到指定类名的Activity（中间栈顶 Activity 全部 finish）
+     */
     public void backActivity(Class<?> cls) {
-        while (!activityStack.empty()) {
-            Activity activity = activityStack.pop();
+        if (cls == null) return;
+        // 倒序遍历：从栈顶往栈底找，找到目标 Activity 后将其上面的 Activity 全部 finish
+        // 目标 Activity 保留在栈中
+        for (int i = activityList.size() - 1; i >= 0; i--) {
+            Activity activity = activityList.get(i);
+            if (activity == null) continue;
             if (activity.getClass().equals(cls)) {
-                activityStack.push(activity);
-                break;
-            } else {
+                return;
+            }
+            if (!activity.isFinishing()) {
                 activity.finish();
             }
         }
@@ -96,28 +107,24 @@ public class AppManager {
      * 结束所有Activity
      */
     public void finishAllActivity() {
-        if (activityStack != null && activityStack.size() > 0) {
-            for (int i = 0, size = activityStack.size(); i < size; i++) {
-                Activity activity = activityStack.get(i);
-                if (null != activityStack.get(i)) {
-                    if (!activity.isFinishing()) {
-                        activity.finish();
-                    }
-                }
+        Iterator<Activity> it = activityList.iterator();
+        while (it.hasNext()) {
+            Activity activity = it.next();
+            if (activity != null && !activity.isFinishing()) {
+                activity.finish();
             }
-            activityStack.clear();
         }
+        activityList.clear();
     }
 
     /**
      * 获取指定的Activity
      */
     public Activity getActivity(Class<?> cls) {
-        if (activityStack != null) {
-            for (Activity activity : activityStack) {
-                if (activity.getClass().equals(cls)) {
-                    return activity;
-                }
+        if (cls == null) return null;
+        for (Activity activity : activityList) {
+            if (activity != null && activity.getClass().equals(cls)) {
+                return activity;
             }
         }
         return null;
@@ -129,7 +136,7 @@ public class AppManager {
             android.os.Process.killProcess(android.os.Process.myPid());
             System.exit(code);
         } catch (Exception e) {
-            activityStack.clear();
+            activityList.clear();
             e.printStackTrace();
         }
     }

@@ -16,26 +16,30 @@ import java.util.List;
  */
 
 public class HomePageAdapter extends FragmentPagerAdapter {
-    public FragmentManager fragmentManager;
-    public List<BaseLazyFragment> list;
+    private final FragmentManager fragmentManager;
+    private List<BaseLazyFragment> list;
 
     public HomePageAdapter(FragmentManager fm) {
-        super(fm);
+        super(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
+        this.fragmentManager = fm;
+        this.list = null;
     }
 
     public HomePageAdapter(FragmentManager fm, List<BaseLazyFragment> list) {
-        super(fm);
+        super(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
         this.fragmentManager = fm;
         this.list = list;
     }
 
     public void clear() {
+        if (list == null) return;
         list.clear();
         notifyDataSetChanged();
     }
 
     @Override
     public Fragment getItem(int position) {
+        if (list == null) return null;
         return list.get(position);
     }
 
@@ -44,17 +48,6 @@ public class HomePageAdapter extends FragmentPagerAdapter {
         return list != null ? list.size() : 0;
     }
 
-    @Override
-    public Fragment instantiateItem(ViewGroup container, int position) {
-        Fragment fragment = (Fragment) super.instantiateItem(container, position);
-        fragmentManager.beginTransaction().show(fragment).commitAllowingStateLoss();
-        return fragment;
-    }
-
-    @Override
-    public void destroyItem(ViewGroup container, int position, Object object) {
-        // super.destroyItem(container, position, object);
-        Fragment fragment = list.get(position);
-        fragmentManager.beginTransaction().hide(fragment).commitAllowingStateLoss();
-    }
+    // 不再重写 instantiateItem/destroyItem，避免与 FragmentPagerAdapter 默认实现冲突
+    // 此前重写 hide/show 但不调用 super.destroyItem，导致 Fragment 状态错乱
 }

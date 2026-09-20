@@ -671,7 +671,7 @@ public class HomeActivity extends BaseActivity {
     private void doExit() {
         // 如果两次返回间隔小于 2000 毫秒，则退出应用
         if (System.currentTimeMillis() - mExitTime < 2000) {
-            EventBus.getDefault().unregister(this);
+            if (EventBus.getDefault().isRegistered(this)) EventBus.getDefault().unregister(this);
             AppManager.getInstance().appExit(0);
             ControlManager.get().stopServer();
             finish();
@@ -843,7 +843,7 @@ public class HomeActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        EventBus.getDefault().unregister(this);
+        if (EventBus.getDefault().isRegistered(this)) EventBus.getDefault().unregister(this);
         AppManager.getInstance().appExit(0);
         ControlManager.get().stopServer();
     }

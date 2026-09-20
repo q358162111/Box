@@ -89,13 +89,30 @@ public class FormatSCC implements TimedTextFileFormat {
                     if (!line.isEmpty()) {
                         // we separate the time code from the VANC data
                         String[] data = line.split("\t");
-                        Time currentTime = new Time("h:m:s:f/fps", data[0]
-                                + "/29.97");
+                        // 修复：行内不含 \t 时 data.length < 2，原代码访问 data[1] 抛 AIOOBE
+                        if (data.length < 2) {
+                            line = br.readLine();
+                            continue;
+                        }
+                        Time currentTime;
+                        try {
+                            currentTime = new Time("h:m:s:f/fps", data[0] + "/29.97");
+                        } catch (Exception timeEx) {
+                            line = br.readLine();
+                            continue;
+                        }
                         // we separate the words
                         data = data[1].split(" ");
                         for (int j = 0; j < data.length; j++) {
+                            if (data[j].isEmpty()) continue;
                             // we get its hex value stored in a short
-                            int word = Integer.parseInt(data[j], 16);
+                            int word;
+                            try {
+                                word = Integer.parseInt(data[j], 16);
+                            } catch (NumberFormatException nfe) {
+                                // 非法 hex 跳过该 word，避免 NumberFormatException 中断整个解析
+                                continue;
+                            }
 
                             // odd parity could be checked here
 

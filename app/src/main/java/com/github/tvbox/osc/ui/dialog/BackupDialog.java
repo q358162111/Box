@@ -34,8 +34,15 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class BackupDialog extends BaseDialog {
+
+    /**
+     * 备份/恢复涉及 SharedPreferences commit、文件 IO、JSON 序列化、Room 备份，必须放在后台线程
+     */
+    private final ExecutorService ioExecutor = Executors.newSingleThreadExecutor();
 
     public BackupDialog(@NonNull @NotNull Context context) {
         super(context);
@@ -48,18 +55,26 @@ public class BackupDialog extends BaseDialog {
             @Override
             public void onItemChildClick(BaseQuickAdapter adapter, View view, int position) {
                 if (view.getId() == R.id.tvName) {
-                    restore((String) adapter.getItem(position));
+                    ioExecutor.execute(() -> restore((String) adapter.getItem(position)));
                 } else if (view.getId() == R.id.tvDel) {
-                    delete((String) adapter.getItem(position));
-                    adapter.setNewData(allBackup());
+                    final String name = (String) adapter.getItem(position);
+                    ioExecutor.execute(() -> {
+                        delete(name);
+                        final List<String> list = allBackup();
+                        view.post(() -> adapter.setNewData(list));
+                    });
                 }
             }
         });
         findViewById(R.id.backupNow).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                backup();
-                adapter.setNewData(allBackup());
+                // 修复：原代码在主线程执行文件 IO + SP.commit + JSON 序列化
+                ioExecutor.execute(() -> {
+                    backup();
+                    final List<String> list = allBackup();
+                    v.post(() -> adapter.setNewData(list));
+                });
             }
         });
         findViewById(R.id.storagePermission).setOnClickListener(new View.OnClickListener() {
@@ -74,7 +89,12 @@ public class BackupDialog extends BaseDialog {
                                 @Override
                                 public void onGranted(List<String> permissions, boolean all) {
                                     if (all) {
-                                        adapter.setNewData(allBackup());
+                                        // 修复：原代码在主线程执行文件 IO
+                                        ioExecutor.execute(() -> {
+                                            final List<String> list = allBackup();
+                                            // callback 线程：把结果切回主线程更新 UI
+                                            new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> adapter.setNewData(list));
+                                        });
                                         Toast.makeText(getContext(), HomeActivity.getRes().getString(R.string.set_permission_ok), Toast.LENGTH_SHORT).show();
                                     }
                                 }
@@ -83,7 +103,7 @@ public class BackupDialog extends BaseDialog {
                                 public void onDenied(List<String> permissions, boolean never) {
                                     if (never) {
                                         Toast.makeText(getContext(), HomeActivity.getRes().getString(R.string.set_permission_fail2), Toast.LENGTH_SHORT).show();
-                                        XXPermissions.startPermissionActivity((Activity) getContext(), permissions);
+                                        if (getContext() instanceof Activity) XXPermissions.startPermissionActivity((Activity) getContext(), permissions); else { Toast.makeText(getContext(), "无法定位 Activity，请重试", Toast.LENGTH_SHORT).show(); }
                                     } else {
                                         Toast.makeText(getContext(), HomeActivity.getRes().getString(R.string.set_permission_fail1), Toast.LENGTH_SHORT).show();
                                     }

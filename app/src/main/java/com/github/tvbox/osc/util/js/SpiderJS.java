@@ -33,29 +33,45 @@ public class SpiderJS extends Spider {
     private final String js;
     private JSObject jsObject;
 
-    public QuickJSContext runtime;
-    public ExecutorService executor;
+    private volatile QuickJSContext runtime;
+    private volatile ExecutorService executor;
 
     public SpiderJS(String key, String js, Class<?> cls) throws Exception {
         this.js = js;
         this.executor = Executors.newSingleThreadExecutor();
         this.key = "J" + MD5.encode(key);
-        initjs(cls);
+        try {
+            initjs(cls);
+        } catch (Throwable initError) {
+            destroy();
+            throw initError instanceof Exception ? (Exception) initError : new Exception(initError);
+        }
     }
-    
+
     public void destroy() {
-        submit(() -> {
-            executor.shutdownNow();
-            runtime.destroy();
-        });
+        // 先 destroy QuickJSContext，再 shutdown executor；否则 destroy 会被正在执行的 JS 调用竞争
+        QuickJSContext ctx = this.runtime;
+        ExecutorService exec = this.executor;
+        this.runtime = null;
+        this.executor = null;
+        this.jsObject = null;
+        try {
+            if (ctx != null) ctx.destroy();
+        } catch (Throwable ignored) {
+        }
+        if (exec != null) exec.shutdownNow();
     }
     
     private void submit(Runnable runnable) {
-        executor.submit(runnable);
+        ExecutorService exec = this.executor;
+        if (exec == null || exec.isShutdown()) return;
+        exec.submit(runnable);
     }
 
     private <T> Future<T> submit(Callable<T> callable) {
-        return executor.submit(callable);
+        ExecutorService exec = this.executor;
+        if (exec == null || exec.isShutdown()) return null;
+        return exec.submit(callable);
     }
 
     private Object call(String func, Object... args) throws Exception {
@@ -202,8 +218,12 @@ public class SpiderJS extends Spider {
         return submit(() -> {
             try {
                 JSObject o = new JSUtils<String>().toObj(runtime, params);
+                if (jsObject == null) return new Object[0];
                 JSFunction jsFunction = jsObject.getJSFunction("proxy");
-                JSONArray opt = new JSONArray(jsFunction.call(null, new Object[]{o}).toString());
+                if (jsFunction == null) return new Object[0];
+                Object callResult = jsFunction.call(null, new Object[]{o});
+                if (callResult == null) return new Object[0];
+                JSONArray opt = new JSONArray(callResult.toString());
                 Object[] result = new Object[3];
                 result[0] = opt.opt(0);
                 result[1] = opt.opt(1);
@@ -216,8 +236,10 @@ public class SpiderJS extends Spider {
                         b[i] = (byte) json.optInt(i);
                     }
                     baos = new ByteArrayInputStream(b);
+                } else if (obj != null) {
+                    baos = new ByteArrayInputStream(obj.toString().getBytes());
                 } else {
-                    baos = new ByteArrayInputStream(opt.opt(2).toString().getBytes());
+                    baos = new ByteArrayInputStream(new byte[0]);
                 }
                 result[2] = baos;
                 return result;

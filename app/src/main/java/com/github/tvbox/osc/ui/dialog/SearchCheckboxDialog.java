@@ -36,7 +36,7 @@ public class SearchCheckboxDialog extends BaseDialog{
     public SearchCheckboxDialog(@NonNull @NotNull Context context, List<SourceBean> sourceList, HashMap<String, String> checkedSources) {
         super(context);
         if (context instanceof Activity) {
-            setOwnerActivity((Activity) context);
+            if (context instanceof Activity) setOwnerActivity((Activity) context); else { /* Context is not Activity, dialog window will use default token */ };
         }
         setCanceledOnTouchOutside(false);
         setCancelable(true);

@@ -30,7 +30,9 @@ public class ResetDialog extends BaseDialog {
         tvYes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // 修复：原代码点击 Yes 后未 dismiss，对话框仍覆盖在界面上
                 DefaultConfig.resetApp(tvYes.getContext());
+                ResetDialog.this.dismiss();
             }
         });
         tvNo.setOnClickListener(new View.OnClickListener() {

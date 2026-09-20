@@ -109,7 +109,7 @@ public class DefaultSubtitleEngine implements SubtitleEngine {
 
     @Override
     public void setSubtitleDelay(Integer milliseconds) {
-        if (milliseconds == 0) {
+        if (milliseconds == null || milliseconds == 0) {
             return;
         }
         if (mSubtitles == null || mSubtitles.size() == 0) {
@@ -135,7 +135,7 @@ public class DefaultSubtitleEngine implements SubtitleEngine {
         mSubtitles = thisSubtitles;
     }
 
-    private static String playSubtitleCacheKey;
+    private String playSubtitleCacheKey;
     public void setPlaySubtitleCacheKey(String cacheKey) {
         playSubtitleCacheKey = cacheKey;
     }

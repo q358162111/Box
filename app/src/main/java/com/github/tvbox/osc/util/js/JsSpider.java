@@ -12,6 +12,7 @@ import com.github.tvbox.osc.util.MD5;
 //import com.whl.quickjs.android.QuickJSLoader;
 import com.whl.quickjs.wrapper.Function;
 import com.whl.quickjs.wrapper.JSArray;
+import com.whl.quickjs.wrapper.JSFunction;
 
 import com.whl.quickjs.wrapper.JSCallFunction;
 import com.whl.quickjs.wrapper.JSObject;
@@ -221,10 +222,16 @@ public class JsSpider extends Spider {
 
     @Override
     public void destroy() {
-        submit(() -> {
+        // 先 destroy QuickJSContext 再 shutdown executor，确保正在执行的 JS 调用被打断后 ctx 仍可安全释放
+        try {
+            if (ctx != null) ctx.destroy();
+        } catch (Throwable ignored) {
+        }
+        if (executor != null) {
             executor.shutdownNow();
-            ctx.destroy();
-        });
+        }
+        ctx = null;
+        jsObject = null;
     }
 
     private static final String SPIDER_STRING_CODE = "import * as spider from '%s'\n\n" +
@@ -238,9 +245,10 @@ public class JsSpider extends Spider {
             "    }\n" +
             "}";
     private void initializeJS() throws Exception {
-        submit(() -> {
-            if (ctx == null) createCtx();
-            if (dex != null) createDex();
+        try {
+            submit(() -> {
+                if (ctx == null) createCtx();
+                if (dex != null) createDex();
 
             String content = FileUtils.loadModule(api);            
             if (TextUtils.isEmpty(content)) {return null;}
@@ -267,11 +275,18 @@ public class JsSpider extends Spider {
                 //ctx.evaluate("globalThis." + key + " = __JS_SPIDER__;");                
             }
             jsObject = (JSObject) ctx.get(ctx.getGlobalObject(), key);
-            return null;
-        }).get();
+                return null;
+            }).get();
+        } catch (Throwable initError) {
+            // 构造中途失败时释放已分配的资源，避免 executor 线程泄漏
+            destroy();
+            throw initError instanceof Exception ? (Exception) initError : new Exception(initError);
+        }
     }
 
     public static byte[] byteFF(byte[] bytes) {
+        // 长度校验：原代码对 < 5 字节输入会抛 NegativeArraySizeException / ArrayIndexOutOfBoundsException
+        if (bytes == null || bytes.length < 5) return new byte[0];
         byte[] newBt = new byte[bytes.length - 4];
         newBt[0] = 1;
         System.arraycopy(bytes, 5, newBt, 1, bytes.length - 5);
@@ -390,7 +405,9 @@ public class JsSpider extends Spider {
 
     private Object[] proxy1(Map<String, String> params) {
         JSObject object = new JSUtils<String>().toObj(ctx, params);
-        JSONArray array = ((JSArray) jsObject.getJSFunction("proxy").call(object)).toJsonArray();
+        JSFunction proxyFn = jsObject.getJSFunction("proxy");
+        if (proxyFn == null) return new Object[0];
+        JSONArray array = ((JSArray) proxyFn.call(object)).toJsonArray();
         //Object[] result = new Object[3];
         boolean headerAvailable = array.length() > 3 && array.opt(3) != null;
         Object[] result = new Object[4];
