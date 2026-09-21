@@ -74,7 +74,12 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomAd
                 getWindowManager().getDefaultDisplay().getMetrics(dm);
                 int screenWidth = dm.widthPixels;
                 int screenHeight = dm.heightPixels;
-                screenRatio = (float) Math.max(screenWidth, screenHeight) / (float) Math.min(screenWidth, screenHeight);
+                // 防止 0/0 产生 NaN；折叠屏多窗口切换时 width/height 可能短暂为 0
+                if (screenWidth > 0 && screenHeight > 0) {
+                    screenRatio = (float) Math.max(screenWidth, screenHeight) / (float) Math.min(screenWidth, screenHeight);
+                } else {
+                    screenRatio = 1.0f;
+                }
             }
         } catch (Throwable th) {
             th.printStackTrace();

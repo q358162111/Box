@@ -230,6 +230,15 @@ public abstract class BaseLazyFragment extends Fragment implements CustomAdapt {
     public void onDestroyView() {
         super.onDestroyView();
         isViewCreated = false;
+        // 在 onDestroyView 解绑 rootView 父容器，防止自定义 ViewPager 持有 Fragment 引用
+        if (rootView != null && rootView.getParent() instanceof ViewGroup) {
+            try {
+                ((ViewGroup) rootView.getParent()).removeView(rootView);
+            } catch (Throwable ignore) {
+            }
+        }
+        // 释放 LoadSir 监听器引用，避免持有外部资源
+        mLoadService = null;
     }
 
     @SuppressWarnings("unchecked")
@@ -249,13 +258,14 @@ public abstract class BaseLazyFragment extends Fragment implements CustomAdapt {
     protected abstract void init();
 
     protected void setLoadSir(View view) {
-        //    if (mLoadService == null) {
-        mLoadService = LoadSir.getDefault().register(view, new Callback.OnReloadListener() {
-            @Override
-            public void onReload(View v) {
-            }
-        });
-        //    }
+        // 防止重复注册导致 LoadSir 内部状态错乱
+        if (mLoadService == null) {
+            mLoadService = LoadSir.getDefault().register(view, new Callback.OnReloadListener() {
+                @Override
+                public void onReload(View v) {
+                }
+            });
+        }
     }
 
     protected void showLoading() {

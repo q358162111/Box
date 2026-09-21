@@ -123,9 +123,12 @@ public class Path {
     }
 
     public static File local(String path) {
-        File file1 = new File(path.replace("file:/", ""));
-        File file2 = new File(path.replace("file:/", rootPath()));
-        return file2.exists() ? file2 : file1.exists() ? file1 : new File(path);
+        if (path == null) return new File("");
+        if (path.startsWith("file://")) path = path.substring(7);
+        else if (path.startsWith("file:/")) path = path.substring(6);
+        File file1 = new File(path);
+        File file2 = new File(rootPath(), path);
+        return file2.exists() ? file2 : file1.exists() ? file1 : file1;
     }
 
     public static String asset(String fileName) {
@@ -153,11 +156,13 @@ public class Path {
     }
 
     public static String read(InputStream is) {
-        try {
-            byte[] data = new byte[is.available()];
-            is.read(data);
-            is.close();
-            return new String(data, StandardCharsets.UTF_8);
+        if (is == null) return "";
+        try (InputStream input = is) {
+            java.io.ByteArrayOutputStream bos = new java.io.ByteArrayOutputStream();
+            byte[] buffer = new byte[8192];
+            int n;
+            while ((n = input.read(buffer)) != -1) bos.write(buffer, 0, n);
+            return bos.toString(StandardCharsets.UTF_8);
         } catch (IOException e) {
             e.printStackTrace();
             return "";
@@ -211,16 +216,31 @@ public class Path {
 
     public static void clear(File dir) {
         if (dir == null) return;
+        String absPath = dir.getAbsolutePath();
+        // 安全保护：禁止删除根目录或外置存储根目录
+        if ("/".equals(absPath)) return;
+        try {
+            String externalRoot = Environment.getExternalStorageDirectory().getAbsolutePath();
+            if (absPath.equals(externalRoot)) return;
+        } catch (Exception ignored) {
+        }
         if (dir.isDirectory()) for (File file : list(dir)) clear(file);
         if (dir.delete()) Log.d(TAG, "Deleted:" + dir.getAbsolutePath());
     }
 
     public static void unzip(File target, File path) {
+        if (target == null || path == null) return;
         try (ZipFile zip = new ZipFile(target.getAbsolutePath())) {
+            String canonicalDest = path.getCanonicalPath();
             Enumeration<?> entries = zip.entries();
             while (entries.hasMoreElements()) {
                 ZipEntry entry = (ZipEntry) entries.nextElement();
                 File out = new File(path, entry.getName());
+                // 防止 Zip Slip：拒绝 ../ 路径写入目标目录之外
+                String canonicalOut = out.getCanonicalPath();
+                if (!canonicalOut.startsWith(canonicalDest + File.separator) && !canonicalOut.equals(canonicalDest)) {
+                    throw new IOException("Zip Slip detected: " + entry.getName());
+                }
                 if (entry.isDirectory()) out.mkdirs();
                 else copy(zip.getInputStream(entry), out);
             }
@@ -230,8 +250,10 @@ public class Path {
     }
 
     public static File chmod(File file) {
+        if (file == null) return null;
         try {
-            Process process = Runtime.getRuntime().exec("chmod 777 " + file);
+            // 使用参数数组形式避免 shell 解析，防止路径中含有空格或特殊字符导致命令注入
+            Process process = Runtime.getRuntime().exec(new String[]{"chmod", "777", file.getAbsolutePath()});
             process.waitFor();
             return file;
         } catch (Exception e) {

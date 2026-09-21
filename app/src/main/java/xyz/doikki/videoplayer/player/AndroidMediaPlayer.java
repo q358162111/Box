@@ -184,12 +184,20 @@ public class AndroidMediaPlayer extends AbstractPlayer implements MediaPlayer.On
 
     @Override
     public void setVolume(float v1, float v2) {
-        mMediaPlayer.setVolume(v1, v2);
+        try {
+            mMediaPlayer.setVolume(v1, v2);
+        } catch (IllegalStateException e) {
+            mPlayerEventListener.onError(-1, PlayerHelper.getRootCauseMessage(e));
+        }
     }
 
     @Override
     public void setLooping(boolean isLooping) {
-        mMediaPlayer.setLooping(isLooping);
+        try {
+            mMediaPlayer.setLooping(isLooping);
+        } catch (IllegalStateException e) {
+            mPlayerEventListener.onError(-1, PlayerHelper.getRootCauseMessage(e));
+        }
     }
 
     @Override
@@ -255,7 +263,7 @@ public class AndroidMediaPlayer extends AbstractPlayer implements MediaPlayer.On
 
     @Override
     public void onBufferingUpdate(MediaPlayer mp, int percent) {
-        mBufferedPercent = percent;
+        mBufferedPercent = Math.max(0, Math.min(100, percent));
     }
 
     @Override

@@ -174,6 +174,10 @@ public class BaseVideoView<P extends AbstractPlayer> extends FrameLayout
     }
 
     public void setmHandler(Handler mHandler) {
+        // 清理旧 Handler 的待处理消息，避免旧消息 target 持有 Activity
+        if (this.mHandler != null) {
+            this.mHandler.removeCallbacksAndMessages(null);
+        }
         this.mHandler = mHandler;
     }
 
@@ -372,6 +376,13 @@ public class BaseVideoView<P extends AbstractPlayer> extends FrameLayout
      * 释放播放器
      */
     public void release() {
+        // 防止全屏状态未退出导致 mPlayerContainer 仍挂在 DecorView 上，造成 Activity 泄漏
+        if (mIsFullScreen) {
+            stopFullScreen();
+        }
+        if (mIsTinyScreen) {
+            stopTinyScreen();
+        }
         if (!isInIdleState()) {
             //释放播放器
             if (mMediaPlayer != null) {
@@ -391,6 +402,7 @@ public class BaseVideoView<P extends AbstractPlayer> extends FrameLayout
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+                mAssetFileDescriptor = null;
             }
             //关闭AudioFocus监听
             if (mAudioFocusHelper != null) {
@@ -398,13 +410,23 @@ public class BaseVideoView<P extends AbstractPlayer> extends FrameLayout
                 mAudioFocusHelper = null;
             }
             //关闭屏幕常亮
-            mPlayerContainer.setKeepScreenOn(false);
+            if (mPlayerContainer != null) {
+                mPlayerContainer.setKeepScreenOn(false);
+            }
             //保存播放进度
             saveProgress();
             //重置播放进度
             mCurrentPosition = 0;
+            //清空监听器列表，避免持有外部 Activity
+            if (mOnStateChangeListeners != null) {
+                mOnStateChangeListeners.clear();
+            }
             //切换转态
             setPlayState(STATE_IDLE);
+        }
+        // 清理 Handler 待处理消息，避免外部 Handler 持有本 View
+        if (mHandler != null) {
+            mHandler.removeCallbacksAndMessages(null);
         }
     }
 
@@ -545,7 +567,14 @@ public class BaseVideoView<P extends AbstractPlayer> extends FrameLayout
      * 停止播放
      */
     public void stopPlay() {
-        mMediaPlayer.stop();
+        if (mMediaPlayer != null && isInPlaybackState()) {
+            try {
+                mMediaPlayer.stop();
+                setPlayState(STATE_IDLE);
+            } catch (IllegalStateException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /**
@@ -575,7 +604,8 @@ public class BaseVideoView<P extends AbstractPlayer> extends FrameLayout
      */
     @Override
     public void onError(int code, String msg) {
-        mPlayerContainer.setKeepScreenOn(false);
+        if (mMediaPlayer == null) return;
+        if (mPlayerContainer != null) mPlayerContainer.setKeepScreenOn(false);
         setPlayState(STATE_ERROR);
 
         if (mHandler != null) {
@@ -923,14 +953,18 @@ public class BaseVideoView<P extends AbstractPlayer> extends FrameLayout
      * 设置控制器，传null表示移除控制器
      */
     public void setVideoController(@Nullable BaseVideoController mediaController) {
-        mPlayerContainer.removeView(mVideoController);
+        if (mVideoController != null && mPlayerContainer != null) {
+            mPlayerContainer.removeView(mVideoController);
+        }
         mVideoController = mediaController;
         if (mediaController != null) {
             mediaController.setMediaPlayer(this);
             LayoutParams params = new LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.MATCH_PARENT);
-            mPlayerContainer.addView(mVideoController, params);
+            if (mPlayerContainer != null) {
+                mPlayerContainer.addView(mVideoController, params);
+            }
         }
     }
 

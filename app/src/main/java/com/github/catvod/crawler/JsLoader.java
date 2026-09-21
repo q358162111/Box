@@ -109,27 +109,19 @@ public class JsLoader {
                 }
             }
         }
-        try {
-            Response response = OkGo.<File>get(jar).execute();
+        try (Response response = OkGo.<File>get(jar).execute()) {
             // 校验 HTTP 状态码，避免把 404/500 错误页写入缓存损坏 jar
             if (!response.isSuccessful() || response.body() == null) {
                 cache.delete();
                 return classes.get(key);
             }
-            InputStream is = response.body().byteStream();
-            OutputStream os = new FileOutputStream(cache);
-            try {
-                byte[] buffer = new byte[2048];
+            try (InputStream is = response.body().byteStream();
+                 OutputStream os = new FileOutputStream(cache)) {
+                byte[] buffer = new byte[8192];
                 int length;
-                while ((length = is.read(buffer)) > 0) {
+                // != -1 比 > 0 更可靠，避免 length 恰好为 0 时丢失后续数据
+                while ((length = is.read(buffer)) != -1) {
                     os.write(buffer, 0, length);
-                }
-            } finally {
-                try {
-                    is.close();
-                    os.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
                 }
             }
             loadClassLoader(cache.getAbsolutePath(), key);
@@ -142,7 +134,6 @@ public class JsLoader {
         }
         return null;
     }
-    private volatile String recentJarKey = "";
 
 
     public Spider getSpider(String key, String api, String ext, String jar) {

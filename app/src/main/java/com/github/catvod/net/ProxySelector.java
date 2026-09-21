@@ -16,8 +16,8 @@ import java.util.List;
 
 public class ProxySelector extends java.net.ProxySelector {
 
-    private List<String> hosts;
-    private Proxy proxy;
+    private volatile List<String> hosts;
+    private volatile Proxy proxy;
 
     public void setHosts(List<String> hosts) {
         this.hosts = hosts;
@@ -29,13 +29,19 @@ public class ProxySelector extends java.net.ProxySelector {
 
     @Override
     public List<Proxy> select(URI uri) {
-        if (proxy == null || hosts == null || hosts.isEmpty() || uri.getHost() == null || "127.0.0.1".equals(uri.getHost())) return Collections.singletonList(Proxy.NO_PROXY);
-        for (String host : hosts) if (Util.containOrMatch(uri.getHost(), host)) return Collections.singletonList(proxy);
+        if (proxy == null || hosts == null || hosts.isEmpty() || uri.getHost() == null) return Collections.singletonList(Proxy.NO_PROXY);
+        String host = uri.getHost();
+        // 同时豁免 127.0.0.1、127.x.x.x、localhost、::1 等 loopback，避免本机服务无法访问
+        if ("127.0.0.1".equals(host) || host.startsWith("127.") || "localhost".equalsIgnoreCase(host) || "::1".equals(host))
+            return Collections.singletonList(Proxy.NO_PROXY);
+        for (String h : hosts) if (Util.containOrMatch(host, h)) return Collections.singletonList(proxy);
         return Collections.singletonList(Proxy.NO_PROXY);
     }
 
     @Override
     public void connectFailed(URI uri, SocketAddress socketAddress, IOException e) {
+        // 输出日志便于代理问题定位
+        android.util.Log.w("ProxySelector", "connect failed: " + uri, e);
     }
 
     private Proxy getProxy(String proxy) {
@@ -49,10 +55,15 @@ public class ProxySelector extends java.net.ProxySelector {
     }
 
     private void setAuthenticator(String userInfo) {
+        String[] parts = userInfo.split(":", 2);
+        if (parts.length != 2) return;
+        final String user = parts[0];
+        final char[] password = parts[1].toCharArray();
         Authenticator.setDefault(new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(userInfo.split(":")[0], userInfo.split(":")[1].toCharArray());
+                // 每次返回克隆数组，避免密码常驻内存且能被 GC 清理
+                return new PasswordAuthentication(user, password.clone());
             }
         });
     }

@@ -759,20 +759,16 @@ public class ApiConfig {
     }
 	
     public Object[] proxyLocal(Map<String,String> param) {
-        //SourceBean sourceBean = ApiConfig.get().getHomeSourceBean();
+        if (param == null) return null;
         if ("js".equals(param.get("do"))) {
             return jsLoader.proxyInvoke(param);
-        //}else {
-          //  if (sourceBean.getApi().contains(".py")) {
-             //   return pyLoader.proxyInvoke(param);
-            //}else {
-                //return jarLoader.proxyInvoke(param);
-            //}
-	//}
-    }
-    SourceBean sourceBean = ApiConfig.get().getHomeSourceBean();
-    String apiString = sourceBean.getApi();
-        return apiString.contains(".py") ? pyLoader.proxyInvoke(param) : jarLoader.proxyInvoke(param);
+        }
+        SourceBean sourceBean = getHomeSourceBean();
+        if (sourceBean == null) return null;
+        String apiString = sourceBean.getApi();
+        return apiString != null && apiString.contains(".py")
+                ? pyLoader.proxyInvoke(param)
+                : jarLoader.proxyInvoke(param);
     }
 
     public JSONObject jsonExt(String key, LinkedHashMap<String, String> jxs, String url) {
@@ -878,7 +874,9 @@ public class ApiConfig {
     }
 
     String clanContentFix(String lanLink, String content) {
-        String fix = lanLink.substring(0, lanLink.indexOf("/file/") + 6);
+        int idx = lanLink.indexOf("/file/");
+        if (idx < 0) return content;
+        String fix = lanLink.substring(0, idx + 6);
         return content.replace("clan://", fix);
     }
 

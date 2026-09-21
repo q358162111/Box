@@ -73,7 +73,8 @@ public class Util {
     }
 
     public static String basic(Uri uri) {
-        return "Basic " + base64(uri.getUserInfo());
+        String info = uri.getUserInfo();
+        return info == null ? "" : "Basic " + base64(info);
     }
 
     public static String md5(String src) {
@@ -91,13 +92,12 @@ public class Util {
     }
 
     public static String md5(File file) {
-        try {
+        if (file == null || !file.exists()) return "";
+        try (FileInputStream fis = new FileInputStream(file)) {
             MessageDigest digest = MessageDigest.getInstance("MD5");
-            FileInputStream fis = new FileInputStream(file);
             byte[] byteArray = new byte[1024];
             int count;
             while ((count = fis.read(byteArray)) != -1) digest.update(byteArray, 0, count);
-            fis.close();
             StringBuilder sb = new StringBuilder();
             for (byte b : digest.digest()) sb.append(Integer.toString((b & 0xff) + 0x100, 16).substring(1));
             return sb.toString();
@@ -107,7 +107,9 @@ public class Util {
     }
 
     public static boolean equals(String name, String md5) {
-        return md5(Path.jar(name)).equalsIgnoreCase(md5);
+        if (md5 == null || md5.isEmpty()) return false;
+        String actual = md5(Path.jar(name));
+        return actual != null && !actual.isEmpty() && actual.equalsIgnoreCase(md5);
     }
 
     public static boolean containOrMatch(String text, String regex) {
@@ -148,6 +150,9 @@ public class Util {
     public static String size(long size) {
         if (size <= 0) return "";
         int group = (int) (Math.log10(size) / Math.log10(1024));
+        // 防止 size 过大导致数组越界
+        if (group >= UNITS.length) group = UNITS.length - 1;
+        if (group < 0) group = 0;
         return "[" + new DecimalFormat("###0.#").format(size / Math.pow(1024, group)) + " " + UNITS[group] + "] ";
     }
 }

@@ -23,6 +23,8 @@ import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 import okhttp3.dnsoverhttps.DnsOverHttps;
 
 public class OkHttp {
@@ -43,8 +45,9 @@ public class OkHttp {
     }
 
     public static Dns dns() {
-//        return get().dns != null ? get().dns : Dns.SYSTEM; // 由于 setDoh(Doh doh)没有被调用导致这里选择的是 Dns.SYSTEM
-        return get().dns != null ? get().dns : OkGoHelper.dnsOverHttps;
+        if (get().dns != null) return get().dns;
+        if (OkGoHelper.dnsOverHttps != null) return OkGoHelper.dnsOverHttps;
+        return Dns.SYSTEM;
     }
 
     public void setDoh(Doh doh) {
@@ -82,8 +85,11 @@ public class OkHttp {
     }
 
     public static String string(String url) {
-        try {
-            return url.startsWith("http") ? newCall(url).execute().body().string() : "";
+        if (url == null || !url.startsWith("http")) return "";
+        // 注意：该方法同步阻塞网络，必须在工作线程调用，禁止在主线程调用以免触发 NetworkOnMainThreadException
+        try (Response response = newCall(url).execute()) {
+            ResponseBody body = response.body();
+            return body != null ? body.string() : "";
         } catch (Exception e) {
             return "";
         }

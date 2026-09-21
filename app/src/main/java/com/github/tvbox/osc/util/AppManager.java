@@ -58,6 +58,8 @@ public class AppManager {
     public void finishActivity() {
         Activity activity = currentActivity();
         if (activity != null && !activity.isFinishing()) {
+            // 先从列表移除，避免 finish 后 isFinishing 检查与 onDestroy 的 finishActivity(this) 出现竞态
+            activityList.remove(activity);
             activity.finish();
         }
     }

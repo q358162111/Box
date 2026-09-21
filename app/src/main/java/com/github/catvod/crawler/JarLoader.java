@@ -126,29 +126,27 @@ public class JarLoader {
                 }
             }
         }
-        try {
-            Response response = OkGo.<File>get(jar).execute();
-            assert response.body() != null;
-            InputStream is = response.body().byteStream();
-            OutputStream os = new FileOutputStream(cache);
-            try {
-                byte[] buffer = new byte[2048];
+        try (Response response = OkGo.<File>get(jar).execute()) {
+            // release 构建中 assert 会被禁用，显式校验避免 NPE
+            if (!response.isSuccessful() || response.body() == null) {
+                cache.delete();
+                return null;
+            }
+            try (InputStream is = response.body().byteStream();
+                 OutputStream os = new FileOutputStream(cache)) {
+                byte[] buffer = new byte[8192];
                 int length;
-                while ((length = is.read(buffer)) > 0) {
+                // != -1 比 > 0 更可靠，避免 length 恰好为 0 时丢失后续数据
+                while ((length = is.read(buffer)) != -1) {
                     os.write(buffer, 0, length);
-                }
-            } finally {
-                try {
-                    is.close();
-                    os.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
                 }
             }
             loadClassLoader(cache.getAbsolutePath(), key);
             return classLoaders.get(key);
         } catch (Throwable e) {
             e.printStackTrace();
+            // 下载失败时清理半成品，避免损坏文件残留
+            cache.delete();
         }
         return null;
     }
@@ -159,6 +157,11 @@ public class JarLoader {
             return spiders.get(key);
         }
         String clsKey = cls.replace("csp_", "");
+        // 仅允许字母数字下划线，防止加载任意类
+        if (!clsKey.matches("[A-Za-z0-9_]+")) {
+            Log.w("JarLoader", "echo-getSpider 非法的 clsKey: " + clsKey);
+            return new SpiderNull();
+        }
         String jarUrl = "";
         String jarMd5 = "";
         String jarKey;
@@ -171,7 +174,11 @@ public class JarLoader {
             jarMd5 = urls.length > 1 ? urls[1].trim() : "";
         }
         recentJarKey = jarKey;
-        assert jarKey != null;
+        // release 构建中 assert 会被禁用，使用显式校验
+        if (jarKey == null) {
+            Log.w("JarLoader", "echo-getSpider jarKey 为空，返回 SpiderNull");
+            return new SpiderNull();
+        }
         DexClassLoader classLoader = jarKey.equals("main")? classLoaders.get("main"):loadJarInternal(jarUrl, jarMd5, jarKey);
         if (classLoader == null) return new SpiderNull();
         try {

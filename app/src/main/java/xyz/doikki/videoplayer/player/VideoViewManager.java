@@ -26,25 +26,36 @@ public class VideoViewManager {
     /**
      * VideoViewManager实例
      */
-    private static VideoViewManager sInstance;
+    private static volatile VideoViewManager sInstance;
 
     /**
      * VideoViewConfig实例
      */
-    private static VideoViewConfig sConfig;
+    private static volatile VideoViewConfig sConfig;
 
     private VideoViewManager() {
         mPlayOnMobileNetwork = getConfig().mPlayOnMobileNetwork;
     }
 
     /**
-     * 设置VideoViewConfig
+     * 设置VideoViewConfig；只接受第一次非空配置，后续 null 入参保留已有配置
      */
     public static void setConfig(VideoViewConfig config) {
+        if (config == null) return; // null 仅用于内部 lazy init，不修改已设置配置
         if (sConfig == null) {
             synchronized (VideoViewConfig.class) {
                 if (sConfig == null) {
-                    sConfig = config == null ? VideoViewConfig.newBuilder().build() : config;
+                    sConfig = config;
+                }
+            }
+        }
+    }
+
+    private static void ensureDefaultConfig() {
+        if (sConfig == null) {
+            synchronized (VideoViewConfig.class) {
+                if (sConfig == null) {
+                    sConfig = VideoViewConfig.newBuilder().build();
                 }
             }
         }
@@ -54,7 +65,7 @@ public class VideoViewManager {
      * 获取VideoViewConfig
      */
     public static VideoViewConfig getConfig() {
-        setConfig(null);
+        ensureDefaultConfig();
         return sConfig;
     }
 
@@ -81,6 +92,21 @@ public class VideoViewManager {
             }
         }
         return sInstance;
+    }
+
+    /**
+     * 低内存时释放所有 VideoView，避免 OOM
+     */
+    public void releaseAllVideoViews() {
+        synchronized (mVideoViews) {
+            for (VideoView v : mVideoViews.values()) {
+                try {
+                    if (v != null) v.release();
+                } catch (Throwable ignore) {
+                }
+            }
+            mVideoViews.clear();
+        }
     }
 
     /**

@@ -122,6 +122,7 @@ public class Spider {
     }
 
     public static Dns safeDns() {
-        return OkGoHelper.dnsOverHttps;
+        // 防止 OkGoHelper.dnsOverHttps 未初始化时返回 null 导致 NPE
+        return OkGoHelper.dnsOverHttps != null ? OkGoHelper.dnsOverHttps : Dns.SYSTEM;
     }
 }

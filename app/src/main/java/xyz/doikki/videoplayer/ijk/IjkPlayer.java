@@ -30,7 +30,7 @@ public class IjkPlayer extends AbstractPlayer implements IMediaPlayer.OnErrorLis
     protected final Context mAppContext;
 
     public IjkPlayer(Context context) {
-        mAppContext = context;
+        mAppContext = context.getApplicationContext();
     }
 
     @Override
@@ -60,7 +60,7 @@ public class IjkPlayer extends AbstractPlayer implements IMediaPlayer.OnErrorLis
                 RawDataSourceProvider rawDataSourceProvider = RawDataSourceProvider.create(mAppContext, uri);
                 mMediaPlayer.setDataSource(rawDataSourceProvider);
             } else {
-                mMediaPlayer.setDataSource(mAppContext, uri);
+                mMediaPlayer.setDataSource(mAppContext, uri, headers);
             }
         } catch (Exception e) {
             mPlayerEventListener.onError(-1, PlayerHelper.getRootCauseMessage(e));
@@ -114,6 +114,11 @@ public class IjkPlayer extends AbstractPlayer implements IMediaPlayer.OnErrorLis
 
     @Override
     public void reset() {
+        try {
+            mMediaPlayer.setSurface(null);
+            mMediaPlayer.setDisplay(null);
+        } catch (Throwable ignore) {
+        }
         mMediaPlayer.reset();
         mMediaPlayer.setOnVideoSizeChangedListener(this);
         setOptions();
@@ -141,11 +146,13 @@ public class IjkPlayer extends AbstractPlayer implements IMediaPlayer.OnErrorLis
         mMediaPlayer.setOnBufferingUpdateListener(null);
         mMediaPlayer.setOnPreparedListener(null);
         mMediaPlayer.setOnVideoSizeChangedListener(null);
+        mMediaPlayer.setOnNativeInvokeListener(null);
+        final IjkMediaPlayer mp = mMediaPlayer;
         new Thread() {
             @Override
             public void run() {
                 try {
-                    mMediaPlayer.release();
+                    mp.release();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -180,12 +187,20 @@ public class IjkPlayer extends AbstractPlayer implements IMediaPlayer.OnErrorLis
 
     @Override
     public void setVolume(float v1, float v2) {
-        mMediaPlayer.setVolume(v1, v2);
+        try {
+            mMediaPlayer.setVolume(v1, v2);
+        } catch (IllegalStateException e) {
+            mPlayerEventListener.onError(-1, PlayerHelper.getRootCauseMessage(e));
+        }
     }
 
     @Override
     public void setLooping(boolean isLooping) {
-        mMediaPlayer.setLooping(isLooping);
+        try {
+            mMediaPlayer.setLooping(isLooping);
+        } catch (IllegalStateException e) {
+            mPlayerEventListener.onError(-1, PlayerHelper.getRootCauseMessage(e));
+        }
     }
 
     @Override
@@ -222,7 +237,7 @@ public class IjkPlayer extends AbstractPlayer implements IMediaPlayer.OnErrorLis
 
     @Override
     public void onBufferingUpdate(IMediaPlayer mp, int percent) {
-        mBufferedPercent = percent;
+        mBufferedPercent = Math.max(0, Math.min(100, percent));
     }
 
     @Override

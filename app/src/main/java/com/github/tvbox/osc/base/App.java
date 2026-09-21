@@ -174,6 +174,18 @@ public class App extends MultiDexApplication {
         super.onTerminate();
         //JsLoader.load();
         JsLoader.destroy();
+        // 注意：onTerminate 在 Android 上并不保证被调用，仅在模拟器/部分定制 ROM 上触发
+        stopWebserver();
+    }
+
+    public static void stopWebserver() {
+        if (server != null) {
+            try {
+                server.shutdown();
+            } catch (Throwable ignore) {
+            }
+            server = null;
+        }
     }
 
     public void setDashData(String data) {
