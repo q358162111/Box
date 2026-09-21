@@ -6,7 +6,6 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
-import android.graphics.drawable.Icon;
 import android.os.Build;
 import android.os.IBinder;
 import android.widget.RemoteViews;
@@ -14,8 +13,6 @@ import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
-import androidx.core.graphics.drawable.IconCompat;
-import com.blankj.utilcode.util.LogUtils;
 import com.github.tvbox.osc.R;
 import com.github.tvbox.osc.base.App;
 import com.github.tvbox.osc.event.RefreshEvent;
@@ -24,20 +21,26 @@ import com.github.tvbox.osc.ui.activity.DetailActivity;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-import org.json.JSONObject;
+
+import java.lang.ref.WeakReference;
 
 public class PlayService extends Service {
 	static String videoInfo = "TVBox&&第一集";
-    private static MyVideoView videoView;
+	// 使用弱引用避免 Service 生命周期内强持有 VideoView（其持有 Activity Context）导致 Activity 泄漏
+    private static WeakReference<MyVideoView> videoViewRef;
 
     public static void start(MyVideoView controller,String currentVideoInfo) {
         videoInfo = currentVideoInfo;
-        PlayService.videoView = controller;
+        PlayService.videoViewRef = new WeakReference<>(controller);
         ContextCompat.startForegroundService(App.getInstance(), new Intent(App.getInstance(), PlayService.class));
     }
 
     public static void stop() {
         App.getInstance().stopService(new Intent(App.getInstance(), PlayService.class));
+    }
+
+    private static MyVideoView peekVideoView() {
+        return videoViewRef != null ? videoViewRef.get() : null;
     }
 
 
@@ -58,7 +61,8 @@ public class PlayService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
     	startForeground(NOTIFICATION_ID, buildNotification());
-        videoView.start();
+        MyVideoView videoView = peekVideoView();
+        if (videoView != null) videoView.start();
         return START_NOT_STICKY;
     }
     
@@ -74,9 +78,15 @@ public class PlayService extends Service {
     
     private Notification buildNotification(){
         RemoteViews remoteViews = new RemoteViews(getPackageName(), R.layout.notification_player);
-        remoteViews.setTextViewText(R.id.tv_title, videoInfo.split("&&")[0]);
-        remoteViews.setTextViewText(R.id.tv_subtitle, "正在播放: "+videoInfo.split("&&")[1]);
-        remoteViews.setImageViewResource(R.id.iv_play_pause,videoView.isPlaying()?R.drawable.ic_notify_pause:R.drawable.ic_notify_play);
+        // 防止 videoInfo 不含 "&&" 时数组越界导致前台服务启动失败
+        String[] parts = videoInfo == null ? new String[0] : videoInfo.split("&&");
+        String title = parts.length > 0 ? parts[0] : "";
+        String subtitle = parts.length > 1 ? parts[1] : "";
+        remoteViews.setTextViewText(R.id.tv_title, title);
+        remoteViews.setTextViewText(R.id.tv_subtitle, "正在播放: "+ subtitle);
+        MyVideoView videoView = peekVideoView();
+        remoteViews.setImageViewResource(R.id.iv_play_pause,
+                videoView != null && videoView.isPlaying() ? R.drawable.ic_notify_pause : R.drawable.ic_notify_play);
 
         // 创建通知栏操作
         remoteViews.setOnClickPendingIntent(R.id.iv_previous, getPendingIntent(DetailActivity.BROADCAST_ACTION_PREV));
@@ -94,7 +104,7 @@ public class PlayService extends Service {
     }
 
     private NotificationCompat.Action buildNotificationAction(int iconResId, String title, PendingIntent intent) {
-    	final IconCompat icon = IconCompat.createWithResource(App.getInstance(), iconResId);
+    	final androidx.core.graphics.drawable.IconCompat icon = androidx.core.graphics.drawable.IconCompat.createWithResource(App.getInstance(), iconResId);
         // 创建通知栏操作
         return new NotificationCompat.Action.Builder(icon, title, intent).build();
     }
@@ -104,7 +114,8 @@ public class PlayService extends Service {
         return PendingIntent.getActivity(this, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
     }
     public static PendingIntent getPendingIntent(int actionCode) {
-        return PendingIntent.getBroadcast(App.getInstance(), actionCode, new Intent(DetailActivity.BROADCAST_ACTION).putExtra("action", actionCode).setPackage(App.getInstance().getPackageName()),PendingIntent.FLAG_UPDATE_CURRENT);
+        // Android 12+ 要求 PendingIntent 必须显式声明 FLAG_IMMUTABLE，否则抛 IllegalArgumentException
+        return PendingIntent.getBroadcast(App.getInstance(), actionCode, new Intent(DetailActivity.BROADCAST_ACTION).putExtra("action", actionCode).setPackage(App.getInstance().getPackageName()),PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
     }
 
     @Override

@@ -121,19 +121,21 @@ public final class ExoMediaSourceHelper {
             setHeaders(headers);
         }
         if (errorCode == PlaybackException.ERROR_CODE_PARSING_CONTAINER_UNSUPPORTED) {
-            MediaItem.Builder builder = new MediaItem.Builder().setUri(uri);
-            builder.setMimeType(MimeTypes.APPLICATION_M3U8);
+            // 删除未使用的局部 builder；该分支同样应用 headers
+            if (mHttpDataSourceFactory != null) {
+                setHeaders(headers);
+            }
             return new DefaultMediaSourceFactory(getDataSourceFactory(), getExtractorsFactory()).createMediaSource(getMediaItem(uri, errorCode));
         }
         switch (contentType) {
             case C.TYPE_DASH:
                 return new DashMediaSource.Factory(factory).createMediaSource(MediaItem.fromUri(contentUri));
             case C.TYPE_HLS:
-                return new HlsMediaSource.Factory(mHttpDataSourceFactory)
+                // 统一使用 factory（支持缓存与统一 OkHttp 配置），不再直接引用 mHttpDataSourceFactory
+                return new HlsMediaSource.Factory(factory)
                         .setAllowChunklessPreparation(true)
                         .setExtractorFactory(new MyHlsExtractorFactory())
                         .createMediaSource(MediaItem.fromUri(contentUri));
-            //return new HlsMediaSource.Factory(factory).createMediaSource(MediaItem.fromUri(contentUri));
             default:
             case C.TYPE_OTHER:
                 return new ProgressiveMediaSource.Factory(factory).createMediaSource(MediaItem.fromUri(contentUri));
@@ -142,7 +144,7 @@ public final class ExoMediaSourceHelper {
 
     @SuppressLint("UnsafeOptInUsageError")
     private int inferContentType(String fileName) {
-        fileName = fileName.toLowerCase();
+        fileName = fileName.toLowerCase(java.util.Locale.US);
         if (fileName.contains(".mpd") || fileName.contains("type=mpd")) {
             return C.TYPE_DASH;
         } else if (fileName.contains("m3u8")) {
@@ -188,10 +190,14 @@ public final class ExoMediaSourceHelper {
     @SuppressLint("UnsafeOptInUsageError")
     private DataSource.Factory getHttpDataSourceFactory() {
         if (mHttpDataSourceFactory == null) {
-            mHttpDataSourceFactory = new OkHttpDataSource.Factory(mOkClient)
+            // mOkClient 可能尚未通过 setOkClient 设置，为 null 时会导致后续请求 NPE
+            OkHttpClient client = mOkClient != null ? mOkClient : new OkHttpClient();
+            mHttpDataSourceFactory = new OkHttpDataSource.Factory(client)
                     .setUserAgent(mUserAgent)/*
                     .setAllowCrossProtocolRedirects(true)*/;
-            mHttpDataSourceFactoryNoProxy = mHttpDataSourceFactory;
+            if (mHttpDataSourceFactoryNoProxy == null) {
+                mHttpDataSourceFactoryNoProxy = mHttpDataSourceFactory;
+            }
         }
         return mHttpDataSourceFactory;
     }
@@ -199,25 +205,26 @@ public final class ExoMediaSourceHelper {
     @SuppressLint("UnsafeOptInUsageError")
     private void setHeaders(Map<String, String> headers) {
         if (headers != null && headers.size() > 0) {
+            // 拷贝一份再操作，避免破坏调用方持有的 Map（重试时同一 Map 会被重复传入）
+            Map<String, String> copy = new java.util.HashMap<>(headers);
             //如果发现用户通过header传递了UA，则强行将HttpDataSourceFactory里面的userAgent字段替换成用户的
-            if (headers.containsKey("User-Agent")) {
-                String value = headers.remove("User-Agent");
+            if (copy.containsKey("User-Agent")) {
+                String value = copy.remove("User-Agent");
                 if (!TextUtils.isEmpty(value)) {
                     try {
                         Field userAgentField = mHttpDataSourceFactory.getClass().getDeclaredField("userAgent");
                         userAgentField.setAccessible(true);
                         userAgentField.set(mHttpDataSourceFactory, value.trim());
                     } catch (Exception e) {
-                        //ignore
+                        android.util.Log.w("ExoMediaSourceHelper", "set custom User-Agent failed (reflection)", e);
                     }
                 }
             }
-            for (String k : headers.keySet()) {
-                String v = headers.get(k);
-                if (v != null)
-                    headers.put(k, v.trim());
+            for (Map.Entry<String, String> entry : copy.entrySet()) {
+                String v = entry.getValue();
+                if (v != null) entry.setValue(v.trim());
             }
-            mHttpDataSourceFactory.setDefaultRequestProperties(headers);
+            mHttpDataSourceFactory.setDefaultRequestProperties(copy);
         }
     }
 
@@ -227,10 +234,14 @@ public final class ExoMediaSourceHelper {
 
     public void setSocksProxy(String server, int port) {
         Proxy proxy = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(server, port));
-        mHttpDataSourceFactory = new OkHttpDataSource.Factory(mOkClient.newBuilder().proxy(proxy).build())
+        // 确保 client 已就绪
+        getHttpDataSourceFactory();
+        mHttpDataSourceFactory = new OkHttpDataSource.Factory((mOkClient != null ? mOkClient : new OkHttpClient()).newBuilder().proxy(proxy).build())
                 .setUserAgent(mUserAgent);
     }
     public void clearSocksProxy() {
+        // 先确保已有可用工厂，避免在首次 getHttpDataSourceFactory 之前调用时把工厂置 null
+        getHttpDataSourceFactory();
         mHttpDataSourceFactory = mHttpDataSourceFactoryNoProxy;
     }
 }

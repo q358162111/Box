@@ -184,6 +184,11 @@ public class ControlWrapper implements MediaPlayerControl, IVideoController {
         if (activity == null || activity.isFinishing())
             return;
         int[] size = getVideoSize();
+        // 播放器未初始化/已释放时 getVideoSize 可能返回 null 或空数组
+        if (size == null || size.length < 2) {
+            toggleFullScreen(activity);
+            return;
+        }
         int width = size[0];
         int height = size[1];
         if (isFullScreen()) {

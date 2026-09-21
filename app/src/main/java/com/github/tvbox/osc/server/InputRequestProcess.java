@@ -17,6 +17,11 @@ public class InputRequestProcess implements RequestProcess {
         this.remoteServer = remoteServer;
     }
 
+    private String trimParam(Map<String, String> params, String key) {
+        String v = params.get(key);
+        return v == null ? "" : v.trim();
+    }
+
     @Override
     public boolean isRequest(NanoHTTPD.IHTTPSession session, String fileName) {
         if (session.getMethod() == NanoHTTPD.Method.POST) {
@@ -38,33 +43,43 @@ public class InputRequestProcess implements RequestProcess {
 
                     switch (action) {
                         case "search": {
-                            mDataReceiver.onTextReceived(params.get("word").trim());
+                            String word = trimParam(params, "word");
+                            if (!word.isEmpty()) mDataReceiver.onTextReceived(word);
                             break;
                         }
                         case "api": {
-                            mDataReceiver.onApiReceived(params.get("url").trim());
+                            String url = trimParam(params, "url");
+                            if (!url.isEmpty()) mDataReceiver.onApiReceived(url);
                             break;
                         }
                         case "live": {
-                            mDataReceiver.onLiveReceived(params.get("url").trim());
+                            String url = trimParam(params, "url");
+                            if (!url.isEmpty()) mDataReceiver.onLiveReceived(url);
                             break;
                         }
                         case "epg": {
-                            mDataReceiver.onEpgReceived(params.get("url").trim());
+                            String url = trimParam(params, "url");
+                            if (!url.isEmpty()) mDataReceiver.onEpgReceived(url);
                             break;
                         }
                         case "proxys": {
-                            mDataReceiver.onProxysReceived(params.get("url").trim());
+                            String url = trimParam(params, "url");
+                            if (!url.isEmpty()) mDataReceiver.onProxysReceived(url);
                             break;
                         }
                         case "push": {
-                            // 暂未实现
-                            mDataReceiver.onPushReceived(params.get("url").trim());
+                            String url = trimParam(params, "url");
+                            if (!url.isEmpty()) mDataReceiver.onPushReceived(url);
                             break;
                         }
                         case "mirror": {
                             //推送当前电影、电视剧……
-                            mDataReceiver.onMirrorReceived(params.get("id").trim(), params.get("sourceKey").trim());
+                            String id = trimParam(params, "id");
+                            String sourceKey = trimParam(params, "sourceKey");
+                            if (id.isEmpty() || sourceKey.isEmpty()) {
+                                return RemoteServer.createPlainTextResponse(NanoHTTPD.Response.Status.BAD_REQUEST, "missing id/sourceKey");
+                            }
+                            mDataReceiver.onMirrorReceived(id, sourceKey);
                             return RemoteServer.createPlainTextResponse(NanoHTTPD.Response.Status.OK, "mirrored");
                         }
                     }

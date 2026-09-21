@@ -123,6 +123,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import master.flame.danmaku.danmaku.model.BaseDanmaku;
@@ -1205,8 +1206,11 @@ public class PlayFragment extends BaseLazyFragment {
             return;
         }
         mVodInfo.playIndex++;
-        mVodInfo.playGroup += mVodInfo.playIndex / mVodInfo.playGroupCount;
-        mVodInfo.playIndex = mVodInfo.playIndex %  mVodInfo.playGroupCount;
+        // playGroupCount 来自外部数据，为 0 时除零崩溃
+        if (mVodInfo.playGroupCount > 0) {
+            mVodInfo.playGroup += mVodInfo.playIndex / mVodInfo.playGroupCount;
+            mVodInfo.playIndex = mVodInfo.playIndex %  mVodInfo.playGroupCount;
+        }
         play(false);
     }
 
@@ -1265,22 +1269,30 @@ public class PlayFragment extends BaseLazyFragment {
     }
 
     void autoRetryFromLoadFoundVideoUrls() {
+        if (loadFoundVideoUrls == null) return;
         String videoUrl = loadFoundVideoUrls.poll();
-        HashMap<String, String> header = loadFoundVideoUrlsHeader.get(videoUrl);
+        HashMap<String, String> header = videoUrl != null && loadFoundVideoUrlsHeader != null
+                ? loadFoundVideoUrlsHeader.get(videoUrl) : null;
         playUrl(videoUrl, header);
     }
 
     void initParseLoadFound() {
         loadFoundCount.set(0);
-        loadFoundVideoUrls = new LinkedList<String>();
-        loadFoundVideoUrlsHeader = new HashMap<String, HashMap<String, String>>();
+        // WebView IO 线程 add 与主线程 poll 并发访问，必须使用线程安全容器
+        loadFoundVideoUrls = new java.util.concurrent.ConcurrentLinkedQueue<String>();
+        loadFoundVideoUrlsHeader = new java.util.concurrent.ConcurrentHashMap<String, HashMap<String, String>>();
     }
     public void setPlayTitle(boolean show)
     {
         if(show){
             String playTitleInfo= "";
-            if(mVodInfo!=null){
-                playTitleInfo = mVodInfo.name + " " + mVodInfo.seriesMap.get(mVodInfo.playFlag).get(mVodInfo.playIndex).name;
+            if(mVodInfo!=null && mVodInfo.seriesMap!=null){
+                List<VodInfo.VodSeries> series = mVodInfo.seriesMap.get(mVodInfo.playFlag);
+                if (series != null && mVodInfo.playIndex >= 0 && mVodInfo.playIndex < series.size()) {
+                    playTitleInfo = mVodInfo.name + " " + series.get(mVodInfo.playIndex).name;
+                } else {
+                    playTitleInfo = mVodInfo.name;
+                }
             }
             mController.setTitle(playTitleInfo);
         }else {
@@ -1289,7 +1301,14 @@ public class PlayFragment extends BaseLazyFragment {
     }
     public void play(boolean reset) {
     	if (mVodInfo == null) return;
-        VodInfo.VodSeries vs = mVodInfo.seriesMap.get(mVodInfo.playFlag).get(mVodInfo.getplayIndex());
+        // 播放列表 key 来自网络数据，可能不匹配导致 NPE
+        List<VodInfo.VodSeries> seriesList = mVodInfo.seriesMap == null ? null : mVodInfo.seriesMap.get(mVodInfo.playFlag);
+        if (seriesList == null || seriesList.isEmpty()
+                || mVodInfo.getplayIndex() < 0 || mVodInfo.getplayIndex() >= seriesList.size()) {
+            errorWithRetry("播放列表为空", true);
+            return;
+        }
+        VodInfo.VodSeries vs = seriesList.get(mVodInfo.getplayIndex());
         EventBus.getDefault().post(new RefreshEvent(RefreshEvent.TYPE_REFRESH, mVodInfo.getplayIndex()));
         EventBus.getDefault().post(new RefreshEvent(RefreshEvent.TYPE_REFRESH_NOTIFY, mVodInfo.name + "&&" + vs.name));
         String playTitleInfo = mVodInfo.name + " : " + vs.name;
@@ -1413,10 +1432,11 @@ public class PlayFragment extends BaseLazyFragment {
         mHandler.removeMessages(100);
         stopLoadWebView(false);
         OkGo.getInstance().cancelTag("json_jx");
-        if (parseThreadPool != null) {
+        ExecutorService pool = parseThreadPool;
+        parseThreadPool = null;
+        if (pool != null) {
             try {
-                parseThreadPool.shutdown();
-                parseThreadPool = null;
+                pool.shutdownNow();
             } catch (Throwable th) {
                 th.printStackTrace();
             }
@@ -1424,6 +1444,18 @@ public class PlayFragment extends BaseLazyFragment {
     }
 
     ExecutorService parseThreadPool;
+
+    /**
+     * 线程池可能在 stopParse 中被并发置空/关闭，提交任务时做防护
+     */
+    void safeParseExecute(Runnable task) {
+        ExecutorService pool = parseThreadPool;
+        if (pool == null || pool.isShutdown()) return;
+        try {
+            pool.execute(task);
+        } catch (RejectedExecutionException ignored) {
+        }
+    }
 
     private void doParse(ParseBean pb) {
         stopParse();
@@ -1533,7 +1565,7 @@ public class PlayFragment extends BaseLazyFragment {
                     jxs.put(p.getName(), p.mixUrl());
                 }
             }
-            parseThreadPool.execute(new Runnable() {
+            safeParseExecute(new Runnable() {
                 @Override
                 public void run() {
                     JSONObject rs = ApiConfig.get().jsonExt(pb.getUrl(), jxs, webUrl);
@@ -1601,7 +1633,7 @@ public class PlayFragment extends BaseLazyFragment {
             }
         }
         String finalExtendName = extendName;
-        parseThreadPool.execute(new Runnable() {
+        safeParseExecute(new Runnable() {
             @Override
             public void run() {
                 if(isSuper){
@@ -1627,7 +1659,7 @@ public class PlayFragment extends BaseLazyFragment {
                                     loadWebView(mixParseUrl);
                                 }
                             });
-                            parseThreadPool.execute(new Runnable() {
+                            safeParseExecute(new Runnable() {
                                 @Override
                                 public void run() {
                                     JSONObject res = SuperParse.doJsonJx(webUrl);
@@ -1717,8 +1749,9 @@ public class PlayFragment extends BaseLazyFragment {
     private WebView mSysWebView;
     private SysWebClient mSysWebClient;
     private final Map<String, Boolean> loadedUrls = new HashMap<>();
-    private LinkedList<String> loadFoundVideoUrls = new LinkedList<>();
-    private HashMap<String, HashMap<String, String>> loadFoundVideoUrlsHeader = new HashMap<>();
+    // WebView IO 线程 add 与主线程 poll 并发访问，使用线程安全容器
+    private java.util.concurrent.ConcurrentLinkedQueue<String> loadFoundVideoUrls = new java.util.concurrent.ConcurrentLinkedQueue<>();
+    private java.util.concurrent.ConcurrentHashMap<String, HashMap<String, String>> loadFoundVideoUrlsHeader = new java.util.concurrent.ConcurrentHashMap<>();
     private final AtomicInteger loadFoundCount = new AtomicInteger(0);
 
     void loadWebView(String url) {
@@ -1809,6 +1842,10 @@ public class PlayFragment extends BaseLazyFragment {
                 if (mXwalkWebView != null) {
                     mXwalkWebView.stopLoading();
                     mXwalkWebView.loadUrl("about:blank");
+                    // 先从视图树移除再销毁，避免 WebView 销毁后仍被 attach 导致崩溃
+                    if (mXwalkWebView.getParent() instanceof android.view.ViewGroup) {
+                        ((android.view.ViewGroup) mXwalkWebView.getParent()).removeView(mXwalkWebView);
+                    }
                     if (destroy) {
 //                        mXwalkWebView.clearCache(true);
                         mXwalkWebView.removeAllViews();
@@ -1819,6 +1856,10 @@ public class PlayFragment extends BaseLazyFragment {
                 if (mSysWebView != null) {
                     mSysWebView.stopLoading();
                     mSysWebView.loadUrl("about:blank");
+                    // 先从视图树移除再销毁，避免 WebView 销毁后仍被 attach 导致崩溃
+                    if (mSysWebView.getParent() instanceof android.view.ViewGroup) {
+                        ((android.view.ViewGroup) mSysWebView.getParent()).removeView(mSysWebView);
+                    }
                     if (destroy) {
 //                        mSysWebView.clearCache(true);
                         mSysWebView.removeAllViews();
@@ -1835,7 +1876,7 @@ public class PlayFragment extends BaseLazyFragment {
             if (url.contains("url=http") || url.contains(".html")) {
                 return false;
             }
-            if (sourceBean.getType() == 3) {
+            if (sourceBean != null && sourceBean.getType() == 3) {
                 Spider sp = ApiConfig.get().getCSP(sourceBean);
                 if (sp != null && sp.manualVideoCheck()) {
                     return sp.isVideoFormat(url);

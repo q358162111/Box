@@ -225,6 +225,8 @@ public abstract class GestureVideoController extends BaseVideoController impleme
     protected void slideToChangePosition(float deltaX) {
         deltaX = -deltaX;
         int width = getMeasuredWidth();
+        // View 尚未完成测量时避免除零导致瞬间跳转
+        if (width <= 0) return;
         int duration = (int) mControlWrapper.getDuration();
         int currentPosition = (int) mControlWrapper.getCurrentPosition();
         int position = (int) (deltaX / width * 120000 + currentPosition);
@@ -245,6 +247,8 @@ public abstract class GestureVideoController extends BaseVideoController impleme
         Window window = activity.getWindow();
         WindowManager.LayoutParams attributes = window.getAttributes();
         int height = getMeasuredHeight();
+        // View 尚未完成测量时避免除零
+        if (height <= 0) return;
         if (mBrightness == -1.0f) mBrightness = 0.5f;
         float brightness = deltaY * 2 / height + mBrightness;
         if (brightness < 0) {
@@ -265,6 +269,8 @@ public abstract class GestureVideoController extends BaseVideoController impleme
     protected void slideToChangeVolume(float deltaY) {
         int streamMaxVolume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
         int height = getMeasuredHeight();
+        // View 尚未完成测量时避免除零
+        if (height <= 0) return;
         float deltaV = deltaY * 2 / height * streamMaxVolume;
         float index = mStreamVolume + deltaV;
         if (index > streamMaxVolume) index = streamMaxVolume;
@@ -281,22 +287,22 @@ public abstract class GestureVideoController extends BaseVideoController impleme
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        //滑动结束时事件处理
-        if (!mGestureDetector.onTouchEvent(event)) {
-            int action = event.getAction();
-            switch (action) {
-                case MotionEvent.ACTION_UP:
-                    stopSlide();
-                    if (mSeekPosition >= 0) {
-                        mControlWrapper.seekTo(mSeekPosition);
-                        mSeekPosition = -1;
-                    }
-                    break;
-                case MotionEvent.ACTION_CANCEL:
-                    stopSlide();
+        mGestureDetector.onTouchEvent(event);
+        //滑动结束时事件处理：不依赖 GestureDetector 返回值，
+        //否则快速甩手（fling）时 ACTION_UP 被判定为 fling 导致 seek 丢失、手势面板不收起
+        int action = event.getAction();
+        switch (action) {
+            case MotionEvent.ACTION_UP:
+                stopSlide();
+                if (mSeekPosition >= 0) {
+                    mControlWrapper.seekTo(mSeekPosition);
                     mSeekPosition = -1;
-                    break;
-            }
+                }
+                break;
+            case MotionEvent.ACTION_CANCEL:
+                stopSlide();
+                mSeekPosition = -1;
+                break;
         }
         return super.onTouchEvent(event);
     }

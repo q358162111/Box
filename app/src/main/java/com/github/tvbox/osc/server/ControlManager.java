@@ -44,14 +44,20 @@ public class ControlManager {
     }
 
     public static void init(Context context) {
-        mContext = context;
+        // 强制使用 Application Context，防止误传 Activity Context 造成泄漏
+        mContext = context != null ? context.getApplicationContext() : null;
     }
 
     public String getAddress(boolean local) {
-        return local ? mServer.getLoadAddress() : mServer.getServerAddress();
+        RemoteServer server = mServer;
+        if (server == null) {
+            // 服务器尚未启动或全部端口被占用时返回本机兜底地址，避免 NPE
+            return "http://127.0.0.1:" + RemoteServer.serverPort + "/";
+        }
+        return local ? server.getLoadAddress() : server.getServerAddress();
     }
 
-    public void startServer() {
+    public synchronized void startServer() {
         if (mServer != null) {
             return;
         }

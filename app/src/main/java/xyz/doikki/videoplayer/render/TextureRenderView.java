@@ -68,11 +68,15 @@ public class TextureRenderView extends TextureView implements IRenderView, Textu
 
     @Override
     public void release() {
-        if (mSurface != null)
+        if (mSurface != null) {
             mSurface.release();
-
-        if (mSurfaceTexture != null)
+            mSurface = null;
+        }
+        if (mSurfaceTexture != null) {
             mSurfaceTexture.release();
+            mSurfaceTexture = null;
+        }
+        mMediaPlayer = null;
     }
 
     @Override
@@ -83,7 +87,9 @@ public class TextureRenderView extends TextureView implements IRenderView, Textu
 
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int width, int height) {
-        if (mSurfaceTexture != null) {
+        if (mSurfaceTexture != null && mSurface != null) {
+            // 复用缓存的纹理时，需释放系统新传入的纹理避免泄漏
+            surfaceTexture.release();
             setSurfaceTexture(mSurfaceTexture);
         } else {
             mSurfaceTexture = surfaceTexture;

@@ -66,6 +66,10 @@ public class ExoMediaPlayer extends AbstractPlayer implements Player.Listener {
     @SuppressLint("UnsafeOptInUsageError")
     @Override
     public void initPlayer() {
+        // 防止重复初始化导致旧 ExoPlayer 实例（含内部线程、codec）泄漏
+        if (mMediaPlayer != null) {
+            release();
+        }
         if (mRenderersFactory == null) {
             mRenderersFactory = HawkUtils.createExoRendererActualValue(mAppContext);
         }
@@ -109,6 +113,8 @@ public class ExoMediaPlayer extends AbstractPlayer implements Player.Listener {
         this.headers = headers;
         mMediaSource = mMediaSourceHelper.getMediaSource(path, headers);
         errorCode = -1;
+        // 换源时重置重试计数，避免新视频继承上次的失败状态而跳过代理重试
+        retriedTimes = 0;
     }
 
     @Override
@@ -191,10 +197,12 @@ public class ExoMediaPlayer extends AbstractPlayer implements Player.Listener {
             mMediaPlayer.release();
             mMediaPlayer = null;
         }
+        mMediaSource = null;
         lastTotalRxBytes = 0;
         lastTimeStamp = 0;
         mIsPreparing = false;
         mSpeedPlaybackParameters = null;
+        retriedTimes = 0;
     }
 
     @Override
@@ -217,7 +225,7 @@ public class ExoMediaPlayer extends AbstractPlayer implements Player.Listener {
     }
 
     public void setPlayerView(PlayerView view) {
-        if (mMediaPlayer != null) {
+        if (mMediaPlayer != null && view != null) {
             view.setPlayer(mMediaPlayer);
         }
     }
@@ -319,7 +327,7 @@ public class ExoMediaPlayer extends AbstractPlayer implements Player.Listener {
     @Override
     public void onPlayerError(@NonNull PlaybackException error) {
         errorCode = error.errorCode;
-        Log.e("tag--", "" + error.errorCode);
+        Log.e("ExoMediaPlayer", "playback error: " + error.errorCode);
         String proxyServer = Hawk.get(HawkConfig.PROXY_SERVER, "");
         if ("".equals(proxyServer)) {
             if (retriedTimes == 0) {

@@ -88,19 +88,34 @@ public class UserFragment extends BaseLazyFragment implements View.OnClickListen
 
         super.onFragmentResume();
         if (Hawk.get(HawkConfig.HOME_REC, 0) == 2) {
-            List<VodInfo> allVodRecord = RoomDataManger.getAllVodRecord(20);
-            List<Movie.Video> vodList = new ArrayList<>();
-            for (VodInfo vodInfo : allVodRecord) {
-                Movie.Video vod = new Movie.Video();
-                vod.id = vodInfo.id;
-                vod.sourceKey = vodInfo.sourceKey;
-                vod.name = vodInfo.name;
-                vod.pic = vodInfo.pic;
-                if (vodInfo.playNote != null && !vodInfo.playNote.isEmpty())
-                    vod.note = "上次看到" + vodInfo.playNote;
-                vodList.add(vod);
-            }
-            homeHotVodAdapter.setNewData(vodList);
+            // 数据库查询移到后台线程，避免阻塞主线程（TV 设备性能弱）
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    List<VodInfo> allVodRecord = RoomDataManger.getAllVodRecord(20);
+                    List<Movie.Video> vodList = new ArrayList<>();
+                    for (VodInfo vodInfo : allVodRecord) {
+                        Movie.Video vod = new Movie.Video();
+                        vod.id = vodInfo.id;
+                        vod.sourceKey = vodInfo.sourceKey;
+                        vod.name = vodInfo.name;
+                        vod.pic = vodInfo.pic;
+                        if (vodInfo.playNote != null && !vodInfo.playNote.isEmpty())
+                            vod.note = "上次看到" + vodInfo.playNote;
+                        vodList.add(vod);
+                    }
+                    final List<Movie.Video> data = vodList;
+                    if (mActivity == null) return;
+                    mActivity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (homeHotVodAdapter != null) {
+                                homeHotVodAdapter.setNewData(data);
+                            }
+                        }
+                    });
+                }
+            }).start();
         }
     }
 
@@ -161,8 +176,18 @@ public class UserFragment extends BaseLazyFragment implements View.OnClickListen
                 // takagen99: CHeck if in Delete Mode
                 if ((vod.id != null && !vod.id.isEmpty()) && (Hawk.get(HawkConfig.HOME_REC, 0) == 2) && HawkConfig.hotVodDelete) {
                     homeHotVodAdapter.remove(position);
-                    VodInfo vodInfo = RoomDataManger.getVodInfo(vod.sourceKey, vod.id);
-                    RoomDataManger.deleteVodRecord(vod.sourceKey, vodInfo);
+                    final String sourceKey = vod.sourceKey;
+                    final String vodId = vod.id;
+                    // 删除记录移到后台线程执行
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            VodInfo vodInfo = RoomDataManger.getVodInfo(sourceKey, vodId);
+                            if (vodInfo != null) {
+                                RoomDataManger.deleteVodRecord(sourceKey, vodInfo);
+                            }
+                        }
+                    }).start();
                     Toast.makeText(mContext, getString(R.string.hm_hist_del), Toast.LENGTH_SHORT).show();
                 } else if (vod.id != null && !vod.id.isEmpty()) {
                     Bundle bundle = new Bundle();
@@ -328,7 +353,7 @@ public class UserFragment extends BaseLazyFragment implements View.OnClickListen
                 result.add(vod);
             }
         } catch (Throwable th) {
-
+            android.util.Log.w("UserFragment", "loadHots parse error", th);
         }
         return result;
     }
@@ -377,5 +402,9 @@ public class UserFragment extends BaseLazyFragment implements View.OnClickListen
     public void onDestroy() {
         super.onDestroy();
         EventBus.getDefault().unregister(this);
+        // 清理静态 View/Adapter 引用，防止持有已销毁 Activity 的 View 树导致内存泄漏
+        homeHotVodAdapter = null;
+        tvHotListForGrid = null;
+        tvHotListForLine = null;
     }
 }

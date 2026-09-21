@@ -1,5 +1,6 @@
 package com.github.tvbox.osc.ui.fragment;
 
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -622,12 +623,19 @@ public class ModelSettingFragment extends BaseLazyFragment {
             @Override
             public void onClick(View v) {
                 FastClickCheckUtil.check(v);
-                if (!ApiConfig.get().wallpaper.isEmpty())
-                    Toast.makeText(mContext, getString(R.string.mn_wall_load), Toast.LENGTH_SHORT).show();
+                if (ApiConfig.get().wallpaper == null || ApiConfig.get().wallpaper.isEmpty()) {
+                    Toast.makeText(mContext, "壁纸地址为空", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                Toast.makeText(mContext, getString(R.string.mn_wall_load), Toast.LENGTH_SHORT).show();
                 OkGo.<File>get(ApiConfig.get().wallpaper).execute(new FileCallback(requireActivity().getFilesDir().getAbsolutePath(), "wp") {
                     @Override
                     public void onSuccess(Response<File> response) {
-                        ((BaseActivity) requireActivity()).changeWallpaper(true);
+                        if (!isAdded()) return;
+                        Activity act = requireActivity();
+                        if (act instanceof BaseActivity) {
+                            ((BaseActivity) act).changeWallpaper(true);
+                        }
                     }
 
                     @Override
@@ -647,10 +655,13 @@ public class ModelSettingFragment extends BaseLazyFragment {
             @Override
             public void onClick(View v) {
                 FastClickCheckUtil.check(v);
-                File wp = new File(requireActivity().getFilesDir().getAbsolutePath() + "/wp");
+                Activity act = requireActivity();
+                File wp = new File(act.getFilesDir().getAbsolutePath() + "/wp");
                 if (wp.exists())
                     wp.delete();
-                ((BaseActivity) requireActivity()).changeWallpaper(true);
+                if (act instanceof BaseActivity) {
+                    ((BaseActivity) act).changeWallpaper(true);
+                }
             }
         });
         // Select Search Display Results ( Text or Picture ) -------------

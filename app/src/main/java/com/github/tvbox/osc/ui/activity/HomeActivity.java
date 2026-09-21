@@ -627,7 +627,9 @@ public class HomeActivity extends BaseActivity {
         // 如果处于 VOD 删除模式，则退出该模式并刷新界面
         if (HawkConfig.hotVodDelete) {
             HawkConfig.hotVodDelete = false;
-            UserFragment.homeHotVodAdapter.notifyDataSetChanged();
+            if (UserFragment.homeHotVodAdapter != null) {
+                UserFragment.homeHotVodAdapter.notifyDataSetChanged();
+            }
             return;
         }
 
@@ -657,7 +659,7 @@ public class HomeActivity extends BaseActivity {
                 doExit();
                 return;
             }
-        } else if (baseLazyFragment instanceof UserFragment && UserFragment.tvHotListForGrid.canScrollVertically(-1)) {
+        } else if (baseLazyFragment instanceof UserFragment && UserFragment.tvHotListForGrid != null && UserFragment.tvHotListForGrid.canScrollVertically(-1)) {
             // 如果 UserFragment 列表可以向上滚动，则滚动到顶部
             UserFragment.tvHotListForGrid.scrollToPosition(0);
             this.mGridView.setSelection(0);

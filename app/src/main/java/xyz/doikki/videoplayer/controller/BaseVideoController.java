@@ -316,7 +316,9 @@ public abstract class BaseVideoController extends FrameLayout
         public void run() {
             int pos = setProgress();
             if (mControlWrapper.isPlaying()) {
-                postDelayed(this, (long) ((1000 - pos % 1000) / mControlWrapper.getSpeed()));
+                float speed = mControlWrapper.getSpeed();
+                if (speed <= 0) speed = 1f; // 防止 speed 为 0 时除零导致延迟 Infinity 进度不再刷新
+                postDelayed(this, (long) ((1000 - pos % 1000) / speed));
             } else {
                 mIsStartProgress = false;
             }
@@ -341,7 +343,40 @@ public abstract class BaseVideoController extends FrameLayout
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         checkCutout();
+        // attach 时 RootWindowInsets 可能尚未分发，刘海检测失败会误缓存为 false，延迟重试一次
+        if (mAdaptCutout && mHasCutout == null) {
+            post(new Runnable() {
+                @Override
+                public void run() {
+                    if (mHasCutout == null) checkCutout();
+                }
+            });
+        }
     }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        // 清理延迟消息与方向传感器监听，防止 View 移除后传感器持续耗电
+        removeCallbacks(mFadeOut);
+        removeCallbacks(mShowProgress);
+        removeCallbacks(mEnableOrientationTask);
+        mIsStartProgress = false;
+        if (mOrientationHelper != null) {
+            mOrientationHelper.disable();
+            mOrientationHelper.setOnOrientationChangeListener(null);
+        }
+    }
+
+    //延迟开启方向传感器的 Runnable（可被移除，避免匿名 Runnable 泄漏）
+    private final Runnable mEnableOrientationTask = new Runnable() {
+        @Override
+        public void run() {
+            if (mOrientationHelper != null) {
+                mOrientationHelper.enable();
+            }
+        }
+    };
 
     /**
      * 检查是否需要适配刘海
@@ -433,15 +468,11 @@ public abstract class BaseVideoController extends FrameLayout
     @Override
     public void onWindowFocusChanged(boolean hasWindowFocus) {
         super.onWindowFocusChanged(hasWindowFocus);
-        if (mControlWrapper.isPlaying()
+        if (mControlWrapper != null && mControlWrapper.isPlaying()
                 && (mEnableOrientation || mControlWrapper.isFullScreen())) {
             if (hasWindowFocus) {
-                postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        mOrientationHelper.enable();
-                    }
-                }, 800);
+                removeCallbacks(mEnableOrientationTask);
+                postDelayed(mEnableOrientationTask, 800);
             } else {
                 mOrientationHelper.disable();
             }

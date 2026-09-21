@@ -33,11 +33,24 @@ public class RawRequestProcess implements RequestProcess {
 
     @Override
     public NanoHTTPD.Response doResponse(NanoHTTPD.IHTTPSession session, String fileName, Map<String, String> params, Map<String, String> files) {
-        InputStream inputStream = mContext.getResources().openRawResource(this.resourceId);
+        InputStream inputStream = null;
         try {
-            return RemoteServer.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, mimeType + "; charset=utf-8", inputStream, (long) inputStream.available());
+            inputStream = mContext.getResources().openRawResource(this.resourceId);
+            // available() 对资源文件不可靠，改为完整读入内存后再返回
+            java.io.ByteArrayOutputStream bos = new java.io.ByteArrayOutputStream();
+            byte[] buffer = new byte[8192];
+            int len;
+            while ((len = inputStream.read(buffer)) != -1) {
+                bos.write(buffer, 0, len);
+            }
+            byte[] data = bos.toByteArray();
+            return RemoteServer.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, mimeType + "; charset=utf-8", new java.io.ByteArrayInputStream(data), (long) data.length);
         } catch (IOException IOExc) {
             return RemoteServer.createPlainTextResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR, "SERVER INTERNAL ERROR: IOException: " + IOExc.getMessage());
+        } finally {
+            if (inputStream != null) {
+                try { inputStream.close(); } catch (IOException ignored) { }
+            }
         }
     }
 }

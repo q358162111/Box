@@ -53,7 +53,7 @@ import fi.iki.elonen.NanoHTTPD;
  */
 public class RemoteServer extends NanoHTTPD {
     private Context mContext;
-    public static int serverPort = 9978;
+    public static volatile int serverPort = 9978;
     private boolean isStarted = false;
     private DataReceiver mDataReceiver;
     private ArrayList < RequestProcess > getRequestList = new ArrayList < > ();
@@ -73,9 +73,21 @@ public class RemoteServer extends NanoHTTPD {
      * 校验目标路径未逃逸出存储根目录，防止局域网请求通过 ../ 进行路径穿越
      */
     private boolean isPathSafe(File file) {
+        return isPathSafe(file, false);
+    }
+
+    /**
+     * 校验目标路径未逃逸出存储根目录，防止局域网请求通过 ../ 进行路径穿越
+     *
+     * @param disallowRoot 为 true 时额外禁止操作存储根目录本身（用于删除等破坏性操作）
+     */
+    private boolean isPathSafe(File file, boolean disallowRoot) {
         try {
             String root = Environment.getExternalStorageDirectory().getCanonicalPath();
             String canonical = file.getCanonicalPath();
+            if (disallowRoot && (canonical.equals(root) || root.equals(canonical + "/"))) {
+                return false;
+            }
             return canonical.equals(root) || canonical.startsWith(root + File.separator);
         } catch (IOException e) {
             return false;
@@ -188,10 +200,14 @@ public class RemoteServer extends NanoHTTPD {
                     }
                 } else if (fileName.equals("/dns-query")) {
                     String name = session.getParms().get("name");
-                    byte[] rs = null;
+                    if (name == null || name.isEmpty()) {
+                        return createPlainTextResponse(Response.Status.BAD_REQUEST, "missing name");
+                    }
+                    byte[] rs;
                     try {
                         rs = OkGoHelper.dnsOverHttps.lookupHttpsForwardSync(name);
                     } catch (Throwable th) {
+                        com.blankj.utilcode.util.LogUtils.e("RemoteServer", "dns lookup failed: " + name, th);
                         rs = new byte[0];
                     }
                     return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/dns-message", new ByteArrayInputStream(rs), rs.length);
@@ -280,9 +296,13 @@ public class RemoteServer extends NanoHTTPD {
                         return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, NanoHTTPD.MIME_PLAINTEXT, "OK");
                     } else if (fileName.equals("/delFolder")) {
                         String path = params.get("path");
+                        if (path == null || path.trim().isEmpty() || path.equals("/") || path.equals(".")) {
+                            return forbidden();
+                        }
                         String root = Environment.getExternalStorageDirectory().getAbsolutePath();
                         File file = new File(root + "/" + path);
-                        if (!isPathSafe(file)) {
+                        // 删除操作禁止作用于存储根目录本身，防止空路径删除整个外部存储
+                        if (!isPathSafe(file, true) || file.equals(new File(root))) {
                             return forbidden();
                         }
                         if (file.exists()) {
@@ -291,9 +311,12 @@ public class RemoteServer extends NanoHTTPD {
                         return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, NanoHTTPD.MIME_PLAINTEXT, "OK");
                     } else if (fileName.equals("/delFile")) {
                         String path = params.get("path");
+                        if (path == null || path.trim().isEmpty() || path.equals("/") || path.equals(".")) {
+                            return forbidden();
+                        }
                         String root = Environment.getExternalStorageDirectory().getAbsolutePath();
                         File file = new File(root + "/" + path);
-                        if (!isPathSafe(file)) {
+                        if (!isPathSafe(file, true)) {
                             return forbidden();
                         }
                         if (file.exists()) {
@@ -302,7 +325,9 @@ public class RemoteServer extends NanoHTTPD {
                         return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, NanoHTTPD.MIME_PLAINTEXT, "OK");
                     }
                 } catch (Throwable th) {
-                    return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, NanoHTTPD.MIME_PLAINTEXT, "OK");
+                    // 记录真实错误并返回失败状态，不再伪装成功
+                    com.blankj.utilcode.util.LogUtils.e("RemoteServer", "file op failed: " + fileName, th);
+                    return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR, NanoHTTPD.MIME_PLAINTEXT, "ERROR: " + th.getMessage());
                 }
             }
         }

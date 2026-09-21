@@ -536,13 +536,14 @@ public class VodController extends BaseController {
             @Override
             public void onClick(View view) {
                 FastClickCheckUtil.check(view);
-                listener.openVideo();
+                if (listener != null) listener.openVideo();
             }
         });
         // Button : Play PREV --------------------------------------------
         mPreBtn.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (listener == null) return;
                 listener.playPre();
                 hideBottom();
             }
@@ -561,6 +562,7 @@ public class VodController extends BaseController {
         mNextBtn.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (listener == null) return;
                 listener.playNext(false);
                 hideBottom();
             }
@@ -623,6 +625,7 @@ public class VodController extends BaseController {
         mPlayerRetry.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (listener == null) return;
                 listener.replay(false);
                 hideBottom();
             }
@@ -631,6 +634,7 @@ public class VodController extends BaseController {
         mPlayerRetry.setOnLongClickListener(new OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
+                if (listener == null) return true;
                 listener.replay(true);
                 hideBottom();
                 return true;

@@ -155,8 +155,12 @@ public class GridFragment extends BaseLazyFragment {
     public boolean restoreView() {
         if (mGrids.empty()) return false;
         this.showSuccess();
-        ((ViewGroup) mGridView.getParent()).removeView(this.mGridView); // 重父窗口移除当前控件
+        // mGridView 可能尚未挂载（视图未创建时触发返回键）
+        if (mGridView != null && mGridView.getParent() instanceof ViewGroup) {
+            ((ViewGroup) mGridView.getParent()).removeView(this.mGridView); // 重父窗口移除当前控件
+        }
         GridInfo info = mGrids.pop();// 还原上次保存的控件
+        if (info == null) return false;
         this.sortData.id = info.sortID;
         this.mGridView = info.mGridView;
         this.gridAdapter = info.gridAdapter;
@@ -164,9 +168,10 @@ public class GridFragment extends BaseLazyFragment {
         this.maxPage = info.maxPage;
         this.isLoad = info.isLoad;
         this.focusedView = info.focusedView;
-        this.mGridView.setVisibility(View.VISIBLE);
-//        if(this.focusedView != null){ this.focusedView.requestFocus(); }
-        if (mGridView != null) mGridView.requestFocus();
+        if (mGridView != null) {
+            this.mGridView.setVisibility(View.VISIBLE);
+            mGridView.requestFocus();
+        }
         return true;
     }
 
