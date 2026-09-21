@@ -1,8 +1,10 @@
 package com.undcover.freedom.pyramid;
 
+import android.app.Application;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.widget.Toast;
 
 
@@ -12,12 +14,16 @@ import android.widget.Toast;
 public class PyToast {
     private static Toast innerToast;
     private static Context mContext;
-    private static PyToast sInstance;
+    private static volatile PyToast sInstance;
     private static final Handler MAIN_HANDLER = new Handler(Looper.getMainLooper());
 
 
     public static void init(Context context) {
-        mContext = context;
+        // 强制使用 Application Context，避免 Activity Context 长期持有导致 Activity 泄漏
+        mContext = context != null ? context.getApplicationContext() : null;
+        if (mContext != null && !(mContext instanceof Application)) {
+            Log.w("PyToast", "init() 期望 Application Context，自动转 applicationContext");
+        }
     }
 
     /**
@@ -47,25 +53,34 @@ public class PyToast {
      * @param duration
      */
     public static void showCancelableToast(String msg, int duration) {
-        if (mContext == null) return;
+        final Context ctx = mContext;
+        if (ctx == null || msg == null) return;
         MAIN_HANDLER.post(new Runnable() {
             @Override
             public void run() {
                 if (innerToast != null) {
                     innerToast.cancel();
                 }
-                innerToast = Toast.makeText(mContext, msg, duration);
+                innerToast = Toast.makeText(ctx, msg, duration);
                 innerToast.show();
             }
         });
     }
 
     public static void showMessage(String msg, int duration) {
-        if (mContext == null) return;
+        final Context ctx = mContext;
+        if (ctx == null || msg == null) return;
         MAIN_HANDLER.post(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(mContext, msg, duration).show();
+                // 复用同一 Toast 实例，避免连续 showMessage 时被排队延迟
+                if (innerToast == null) {
+                    innerToast = Toast.makeText(ctx, msg, duration);
+                } else {
+                    innerToast.setText(msg);
+                    innerToast.setDuration(duration);
+                }
+                innerToast.show();
             }
         });
     }

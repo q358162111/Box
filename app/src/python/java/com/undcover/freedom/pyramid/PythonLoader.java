@@ -172,9 +172,13 @@ public class PythonLoader {
     public void getPort() {
         if (port <= 0) {
             for (int i = 9978; i < 10000; i++) {
-                if (OkHttpUtil.string("http://127.0.0.1:" + i + "/proxy?do=ck&api=python", null).equals("ok")) {
-                    port = i;
-                    return;
+                try {
+                    if (OkHttpUtil.string("http://127.0.0.1:" + i + "/proxy?do=ck&api=python", null).equals("ok")) {
+                        port = i;
+                        return;
+                    }
+                } catch (Exception e) {
+                    // 单个端口探测失败不影响后续探测
                 }
             }
         }
@@ -182,7 +186,8 @@ public class PythonLoader {
 
     public String localProxyUrl() {
         getPort();
-        return "http://127.0.0.1:" + port + "/proxy";
+        // 防止 port 探测失败时返回 -1
+        return port > 0 ? "http://127.0.0.1:" + port + "/proxy" : null;
     }
 
     public Map<String, String> str2map(String header) {
@@ -222,6 +227,8 @@ public class PythonLoader {
             if (response == null || response.body() == null) {
                 return new ByteArrayInputStream(new byte[0]);
             }
+            // 注意：调用方负责关闭返回值，这里取走 InputStream 后调用方用完需自行关闭 Response
+            // byteStream() 会持有 Response，调用方不可多次读取 InputStream
             return response.body().byteStream();
         }
     }

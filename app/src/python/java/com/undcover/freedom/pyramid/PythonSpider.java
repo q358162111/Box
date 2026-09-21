@@ -51,7 +51,15 @@ public class PythonSpider extends Spider {
             return;
         }
         app = PythonLoader.getInstance().pyApp;
+        if (app == null) {
+            PyToast.showCancelableToast(name + "Python 引擎未初始化");
+            return;
+        }
         PyObject retValue = app.callAttr("downloadPlugin", cachePath, url);
+        if (retValue == null) {
+            PyToast.showCancelableToast(name + "下载插件返回为空");
+            return;
+        }
         Uri uri = Uri.parse(url);
         String extInfo = uri.getQueryParameter("extend");
         if (null == extInfo) extInfo = "";
@@ -60,20 +68,32 @@ public class PythonSpider extends Spider {
         File file = new File(path);
         if (file.exists()) {
             pySpider = app.callAttr("loadFromDisk", path);
+            if (pySpider == null) {
+                PyToast.showCancelableToast(name + "加载插件失败");
+                return;
+            }
 
             List<PyObject> poList = app.callAttr("getDependence", pySpider).asList();
-            for (PyObject po : poList) {
-                String api = po.toString();
-                Log.i("PyLoader", "echo-init api: " +api);
-                String depUrl = PythonLoader.getInstance().getUrlByApi(api);
-                if (!depUrl.isEmpty()) {
-                    Log.i("PyLoader", "echo-init depUrl: " +depUrl);
-                    String tmpPath = app.callAttr("downloadPlugin", cachePath, depUrl).toString();
-                    if (!new File(tmpPath).exists()) {
-                        PyToast.showCancelableToast(api + "加载失败!");
-                        return;
-                    } else {
-                        PyLog.d(api + ": 加载插件依赖成功！");
+            if (poList != null) {
+                for (PyObject po : poList) {
+                    if (po == null) continue;
+                    String api = po.toString();
+                    Log.i("PyLoader", "echo-init api: " +api);
+                    String depUrl = PythonLoader.getInstance().getUrlByApi(api);
+                    if (!depUrl.isEmpty()) {
+                        Log.i("PyLoader", "echo-init depUrl: " +depUrl);
+                        PyObject depRet = app.callAttr("downloadPlugin", cachePath, depUrl);
+                        if (depRet == null) {
+                            PyToast.showCancelableToast(api + "下载依赖返回为空");
+                            return;
+                        }
+                        String tmpPath = depRet.toString();
+                        if (!new File(tmpPath).exists()) {
+                            PyToast.showCancelableToast(api + "加载失败!");
+                            return;
+                        } else {
+                            PyLog.d(api + ": 加载插件依赖成功！");
+                        }
                     }
                 }
             }
@@ -145,16 +165,28 @@ public class PythonSpider extends Spider {
     }
 
     public Object[] proxyLocal(Map<String,String> params) {
+        if (app == null || pySpider == null) {
+            Log.w("PyLoader", "echo-proxyLocal: app/pySpider 未初始化");
+            return new Object[]{0, "", new ByteArrayInputStream(new byte[0]), null};
+        }
         Log.i("PyLoader","echo-proxyLocal:param"+params.toString());
-        List<PyObject> list = app.callAttr("localProxy", pySpider, map2json(params).toString()).asList();
-        boolean base64 = list.size() > 4 && list.get(4).toInt() == 1;
+        List<PyObject> list;
+        try {
+            list = app.callAttr("localProxy", pySpider, map2json(params).toString()).asList();
+        } catch (Exception e) {
+            Log.e("PyLoader", "echo-proxyLocal 调用失败", e);
+            return new Object[]{0, "", new ByteArrayInputStream(new byte[0]), null};
+        }
+        if (list == null || list.isEmpty()) {
+            return new Object[]{0, "", new ByteArrayInputStream(new byte[0]), null};
+        }
+        boolean base64 = list.size() > 4 && list.get(4) != null && list.get(4).toInt() == 1;
         boolean headerAvailable = list.size() > 3 && list.get(3) != null;
         Object[] result = new Object[4];
-        result[0] = list.get(0).toInt();
-        result[1] = list.get(1).toString();
-        result[2] = getStream(list.get(2), base64);
+        result[0] = list.size() > 0 && list.get(0) != null ? list.get(0).toInt() : 0;
+        result[1] = list.size() > 1 && list.get(1) != null ? list.get(1).toString() : "";
+        result[2] = getStream(list.size() > 2 ? list.get(2) : null, base64);
         result[3] = headerAvailable ? getHeader(list.get(3)) : null;
-//        result[3] = null;
         return result;
     }
 
@@ -177,15 +209,28 @@ public class PythonSpider extends Spider {
         String typeStr = o.type().toString();
         if (typeStr.contains("bytes")) return new ByteArrayInputStream(o.toJava(byte[].class));
         String content = o.toString();
-        if (base64 && content.contains("base64,")) {
-            String[] parts = content.split("base64,", 2);
-            if (parts.length > 1) content = parts[1];
+        if (base64) {
+            if (content.contains("base64,")) {
+                String[] parts = content.split("base64,", 2);
+                if (parts.length > 1) content = parts[1];
+            }
+            try {
+                return new ByteArrayInputStream(decode(content));
+            } catch (Exception e) {
+                // base64 解码失败时返回空流，避免崩溃
+                Log.e("PyLoader", "base64 decode failed", e);
+                return new ByteArrayInputStream(new byte[0]);
+            }
         }
-        return new ByteArrayInputStream(base64 ? decode(content) : content.getBytes());
+        return new ByteArrayInputStream(content.getBytes());
     }
 
     public String replaceLocalUrl(String content) {
-        return content.replace("http://127.0.0.1:UndCover/proxy", PythonLoader.getInstance().localProxyUrl());
+        if (content == null) return null;
+        String proxy = PythonLoader.getInstance().localProxyUrl();
+        // 防止 localProxyUrl 返回 null 导致 NPE
+        if (proxy == null) return content;
+        return content.replace("http://127.0.0.1:UndCover/proxy", proxy);
     }
 
     /**
