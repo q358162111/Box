@@ -245,12 +245,6 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomAd
         }
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        AppManager.getInstance().finishActivity(this);
-    }
-
     public void jumpActivity(Class<? extends BaseActivity> clazz) {
         Intent intent = new Intent(mContext, clazz);
         startActivity(intent);
@@ -338,8 +332,9 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomAd
                 int imageWidth = opts.outWidth;
                 int picHeight = 720;
                 int picWidth = 1080;
-                int scaleX = imageWidth / picWidth;
-                int scaleY = imageHeight / picHeight;
+                // 防御：imageWidth/Height 为 0 时除零 + 防御 picWidth/Height 为 0 时除零
+                int scaleX = (imageWidth > 0 && picWidth > 0) ? imageWidth / picWidth : 0;
+                int scaleY = (imageHeight > 0 && picHeight > 0) ? imageHeight / picHeight : 0;
                 int scale = Math.max(Math.max(scaleX, scaleY), 1);
                 opts.inJustDecodeBounds = false;
                 // 采样率
@@ -357,5 +352,35 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomAd
         } else {
             getWindow().setBackgroundDrawableResource(R.drawable.app_bg);
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        // 防御：BaseActivity 派生类通常持有 Handler、未注销 BroadcastReceiver 等；
+        // 这里通过反射遍历 mHandler 字段并清理（仅深度防御）。
+        try {
+            java.lang.reflect.Field handlerField = findField(this.getClass(), "mHandler");
+            if (handlerField != null) {
+                handlerField.setAccessible(true);
+                Object handler = handlerField.get(this);
+                if (handler instanceof android.os.Handler) {
+                    ((android.os.Handler) handler).removeCallbacksAndMessages(null);
+                }
+            }
+        } catch (Throwable ignored) {
+        }
+        super.onDestroy();
+        AppManager.getInstance().finishActivity(this);
+    }
+
+    private static java.lang.reflect.Field findField(Class<?> cls, String name) {
+        while (cls != null && cls != Object.class) {
+            try {
+                return cls.getDeclaredField(name);
+            } catch (NoSuchFieldException ignored) {
+                cls = cls.getSuperclass();
+            }
+        }
+        return null;
     }
 }
