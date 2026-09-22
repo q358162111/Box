@@ -70,7 +70,8 @@ public class FormatSCC implements TimedTextFileFormat {
 
             lineCounter++;
             // the file must start with the type declaration
-            if (!br.readLine().trim().equalsIgnoreCase("Scenarist_SCC V1.0")) {
+            String firstLine = br.readLine();
+            if (firstLine == null || !firstLine.trim().equalsIgnoreCase("Scenarist_SCC V1.0")) {
                 // this is a fatal parsing error.
                 throw new FatalParsingException(
                         "The fist line should define the file type: \"Scenarist_SCC V1.0\"");
@@ -416,10 +417,17 @@ public class FormatSCC implements TimedTextFileFormat {
                     int key = newCaption.start.mseconds;
                     // in case the key is already there, we increase it by a
                     // millisecond, since no duplicates are allowed
-                    while (tto.captions.containsKey(key))
+                    // 防御：限制最多 1000 次重试，避免极端异常数据导致死循环
+                    int collisionTries = 0;
+                    while (tto.captions.containsKey(key) && collisionTries < 1000) {
                         key++;
-                    // we save the caption
-                    tto.captions.put(newCaption.start.mseconds, newCaption);
+                        collisionTries++;
+                    }
+                    if (collisionTries < 1000) {
+                        tto.captions.put(key, newCaption);
+                    } else {
+                        tto.warnings += "too many duplicate start times, dropping caption\n\n";
+                    }
                 }
                 tto.cleanUnusedStyles();
             }

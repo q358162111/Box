@@ -271,7 +271,15 @@ public class FastSearchActivity extends BaseActivity {
     private void fenci() {
         if (!quickSearchWord.isEmpty()) return; // 如果经有分词了，不再进行二次分词
         // 分词
-        OkGo.<String>get("https://api.yesapi.cn/?service=App.Scws.GetWords&text=" + searchTitle + "&app_key=CEE4B8A091578B252AC4C92FB4E893C3&sign=CB7602F3AC922808AF5D475D8DA33302")
+        // 防御：searchTitle 含 "&" "?" "#" 等字符时未 URL 编码会导致 URL 注入/服务端解析错乱
+        // 使用 URLEncoder 对用户输入进行 UTF-8 编码后再拼接
+        String encodedTitle = "";
+        try {
+            encodedTitle = java.net.URLEncoder.encode(searchTitle, "UTF-8");
+        } catch (java.io.UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        OkGo.<String>get("https://api.yesapi.cn/?service=App.Scws.GetWords&text=" + encodedTitle + "&app_key=CEE4B8A091578B252AC4C92FB4E893C3&sign=CB7602F3AC922808AF5D475D8DA33302")
                 .tag("fenci")
                 .execute(new AbsCallback<String>() {
                     @Override

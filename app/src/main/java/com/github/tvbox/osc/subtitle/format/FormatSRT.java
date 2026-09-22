@@ -82,7 +82,12 @@ public class FormatSRT implements TimedTextFileFormat {
                         //we go to next line, here the begin and end time should be found
                         try {
                             lineCounter++;
-                            line = br.readLine().trim();
+                            line = br.readLine();
+                            // 防御：readLine 返回 null（EOF）时 trim 抛 NPE
+                            if (line == null) throw new Exception("unexpected EOF at time line");
+                            line = line.trim();
+                            // 防御：长度 < 29（SRT 标准 "00:00:00,000 --> 00:00:00,000" 最少 29）直接判定为格式错误
+                            if (line.length() < 29) throw new Exception("time line too short: " + line.length());
                             String start = line.substring(0, 12);
                             String end = line.substring(line.length() - 12);
                             Time time = new Time("hh:mm:ss,ms", start);
@@ -97,25 +102,39 @@ public class FormatSRT implements TimedTextFileFormat {
                     if (allGood) {
                         //we go to next line where the caption text starts
                         lineCounter++;
-                        line = br.readLine().trim();
-                        String text = "";
+                        line = br.readLine();
+                        if (line == null) line = "";
+                        line = line.trim();
+                        // 用 StringBuilder 替代 += 拼接避免 O(n²)
+                        StringBuilder textBuilder = new StringBuilder();
                         while (!line.isEmpty()) {
-                            text += line + "<br />";
-                            line = br.readLine().trim();
+                            textBuilder.append(line).append("<br />");
+                            line = br.readLine();
+                            if (line == null) break;
+                            line = line.trim();
                             lineCounter++;
                         }
-                        caption.content = text;
+                        caption.content = textBuilder.toString();
                         int key = caption.start.mseconds;
                         //in case the key is already there, we increase it by a millisecond, since no duplicates are allowed
-                        while (tto.captions.containsKey(key)) key++;
-                        if (key != caption.start.mseconds)
+                        int collisionTries = 0;
+                        while (tto.captions.containsKey(key) && collisionTries < 1000) {
+                            key++;
+                            collisionTries++;
+                        }
+                        if (collisionTries >= 1000) {
+                            tto.warnings += "too many duplicate start times, skipping caption at line " + lineCounter;
+                        } else if (key != caption.start.mseconds) {
                             tto.warnings += "caption with same start time found...\n\n";
+                        }
                         //we add the caption.
                         tto.captions.put(key, caption);
                     }
                     //we go to next blank
-                    while (!line.isEmpty()) {
-                        line = br.readLine().trim();
+                    while (line != null && !line.isEmpty()) {
+                        line = br.readLine();
+                        if (line == null) break;
+                        line = line.trim();
                         lineCounter++;
                     }
                     caption = new Subtitle();
@@ -194,11 +213,34 @@ public class FormatSRT implements TimedTextFileFormat {
         //add line breaks
         lines = text.split("<br />");
         //clean XML
+        // 替换原 replaceAll("\\<.*?\\>", "")：非贪婪正则 + 长字符串易引发灾难性回溯。
+        // 改为按字符扫描手工剥离 <...> 标签。
         for (int i = 0; i < lines.length; i++) {
-            //this will destroy all remaining XML tags
-            lines[i] = lines[i].replaceAll("\\<.*?\\>", "");
+            lines[i] = stripXmlTags(lines[i]);
         }
         return lines;
+    }
+
+    /**
+     * 手工剥离字符串中所有 <...> 形式的标签，避免非贪婪正则回溯。
+     */
+    private static String stripXmlTags(String input) {
+        if (input == null || input.isEmpty()) return input;
+        StringBuilder sb = new StringBuilder(input.length());
+        int len = input.length();
+        int i = 0;
+        while (i < len) {
+            char c = input.charAt(i);
+            if (c == '<') {
+                int close = input.indexOf('>', i + 1);
+                if (close < 0) break; // 未闭合，丢弃剩余
+                i = close + 1;
+            } else {
+                sb.append(c);
+                i++;
+            }
+        }
+        return sb.toString();
     }
 
 }

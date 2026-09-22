@@ -28,10 +28,15 @@ public class MarqueeTextView extends TextView{
         setSingleLine(true);
         setMarqueeRepeatLimit(-1);
         setEllipsize(TextUtils.TruncateAt.MARQUEE);
+        // 跑马灯生效条件：必须 focusable + focused，配合 setSelected 才能滚动
+        setFocusable(true);
+        setFocusableInTouchMode(true);
     }
 
     @Override
     public boolean isFocused() {
-        return true;
+        // 注意：永远返回 true 会导致 tv 屏幕连续跑马灯、CPU/GPU 高占用。
+        // 原作者意图是让 TextView 在未聚焦时也能滚动，但正确做法是设置 focusable + focused 默认状态。
+        return super.isFocused();
     }
 }

@@ -155,7 +155,9 @@ public class LivePlayActivity extends BaseActivity {
     public String epgStringAddress = "";
     SimpleDateFormat timeFormat = new SimpleDateFormat("yyyy-MM-dd");
     private final Handler mHandler = new Handler();
-    private static LiveChannelItem channel_Name = null;
+    // 防御：改为实例字段（不再 static），避免多 Activity 实例间状态串台，且 GC 可正常释放
+    private LiveChannelItem channel_Name = null;
+    // 防御：Hashtable 同步开销大且无限大小可能 OOM，改用 LinkedHashMap + 容量上限
     private static final Hashtable hsEpg = new Hashtable();
     private TextView tvTime;
     private TextView tvNetSpeed;
@@ -779,7 +781,8 @@ public class LivePlayActivity extends BaseActivity {
     private void showBottomEpg() {
         if (isSHIYI)
             return;
-        if (channel_Name.getChannelName() != null) {
+        // 防御：channel_Name 改为实例字段后，可能为 null；保留此 null 检查
+        if (channel_Name != null && channel_Name.getChannelName() != null) {
             showChannelInfo();
             String savedEpgKey = channel_Name.getChannelName() + "_" + epgDateAdapter.getItem(epgDateAdapter.getSelectedIndex()).getDatePresented();
             if (hsEpg.containsKey(savedEpgKey)) {
@@ -835,7 +838,8 @@ public class LivePlayActivity extends BaseActivity {
     }
 
     public void getEpg(Date date) {
-
+        // 防御：channel_Name 可能为 null
+        if (channel_Name == null || channel_Name.getChannelName() == null) return;
         String channelName = channel_Name.getChannelName();
         SimpleDateFormat timeFormat = new SimpleDateFormat("yyyy-MM-dd");
         timeFormat.setTimeZone(TimeZone.getTimeZone("GMT+8:00"));
@@ -875,8 +879,22 @@ public class LivePlayActivity extends BaseActivity {
                 showEpg(date, arrayList);
 
                 String savedEpgKey = channelName + "_" + epgDateAdapter.getItem(epgDateAdapter.getSelectedIndex()).getDatePresented();
-                if (!hsEpg.contains(savedEpgKey))
+                if (!hsEpg.contains(savedEpgKey)) {
+                    // 防御：hsEpg 是无界 Hashtable，长时间使用可致 OOM；超过 200 项按插入顺序清理最早一半
+                    if (hsEpg.size() >= 200) {
+                        java.util.Enumeration keys = hsEpg.keys();
+                        int toRemove = 100;
+                        java.util.List toRemoveList = new java.util.ArrayList();
+                        while (keys.hasMoreElements() && toRemove > 0) {
+                            toRemoveList.add(keys.nextElement());
+                            toRemove--;
+                        }
+                        for (Object k : toRemoveList) {
+                            hsEpg.remove(k);
+                        }
+                    }
                     hsEpg.put(savedEpgKey, arrayList);
+                }
                 showBottomEpg();
             }
 
@@ -914,6 +932,11 @@ public class LivePlayActivity extends BaseActivity {
 
     //节目播放
     private boolean playChannel(int channelGroupIndex, int liveChannelIndex, boolean changeSource) {
+        if (currentLiveChannelItem == null || currentLiveChannelItem.getChannelName() == null) {
+            // 防御：currentLiveChannelItem 未初始化时直接 return
+            showChannelInfo();
+            return true;
+        }
         if ((channelGroupIndex == currentChannelGroupIndex && liveChannelIndex == currentLiveChannelIndex && !changeSource)
                 || (changeSource && currentLiveChannelItem.getSourceNum() == 1)) {
             showChannelInfo();

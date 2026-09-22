@@ -87,13 +87,31 @@ public final class PlayerUtils {
      * 是否存在NavigationBar
      */
     public static boolean hasNavigationBar(Context context) {
+        if (context == null) return false;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            Display display = getWindowManager(context).getDefaultDisplay();
-            Point size = new Point();
-            Point realSize = new Point();
-            display.getSize(size);
-            display.getRealSize(realSize);
-            return realSize.x != size.x || realSize.y != size.y;
+            WindowManager wm = getWindowManager(context);
+            if (wm == null) return false;
+            // 修复：API 30+ getDefaultDisplay() 已 deprecated，但通过 WindowMetrics 计算更准确
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    android.view.WindowMetrics metrics = wm.getCurrentWindowMetrics();
+                    android.graphics.Rect display = wm.getMaximumWindowMetrics().getBounds();
+                    int realW = display.width();
+                    int realH = display.height();
+                    int actW = metrics.getBounds().width();
+                    int actH = metrics.getBounds().height();
+                    return realW != actW || realH != actH;
+                } else {
+                    Display display = wm.getDefaultDisplay();
+                    Point size = new Point();
+                    Point realSize = new Point();
+                    display.getSize(size);
+                    display.getRealSize(realSize);
+                    return realSize.x != size.x || realSize.y != size.y;
+                }
+            } catch (Throwable th) {
+                return false;
+            }
         } else {
             boolean menu = ViewConfiguration.get(context).hasPermanentMenuKey();
             boolean back = KeyCharacterMap.deviceHasKey(KeyEvent.KEYCODE_BACK);

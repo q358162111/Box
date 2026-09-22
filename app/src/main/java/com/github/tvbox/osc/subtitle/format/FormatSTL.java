@@ -143,7 +143,10 @@ public class FormatSTL implements TimedTextFileFormat {
                     tto.warnings += "Unexpected subtitle number at TTI block " + i + ". Parsing proceeds...\n\n";
                 //EBN : Extension Block Number 3
                 int ebn = ttiBlock[3];
-				additionalText = ebn != -1;
+				// 修复：EBN 是 byte（0..255），永远不会等于 -1。原条件恒为 true，会让 additionalText
+                // 永远为真，导致后续 subtitle 永远不再累加 subtitleNumber，整部字幕只产生一个 Caption。
+                // 按 STL 规范：EBN = 0xff 表示"无扩展块"，其他值表示有后续扩展块。
+                additionalText = ebn != 0xff;
 
                 //CS : Cumulative Status 4
                 //TCI : Time Code In 5..8
@@ -284,7 +287,8 @@ public class FormatSTL implements TimedTextFileFormat {
             //we clean XML, span would be implemented here
             int pos = 16;
             for (int i = 0; i < lines.length; i++)
-                lines[i] = lines[i].replaceAll("\\<.*?\\>", "");
+                // 替换原 replaceAll("\\<.*?\\>", "")：避免非贪婪正则回溯
+                lines[i] = stripXmlTags(lines[i]);
             //we code the style
             if (currentC.style != null) {
                 Style style = currentC.style;
@@ -362,6 +366,9 @@ public class FormatSTL implements TimedTextFileFormat {
         String color = "white";
         Style style;
         String text = "";
+        if (textField == null || textField.length == 0) {
+            return;
+        }
 
         //we go around the field in pair of bytes to decode them
         for (int i = 0; i < textField.length; i++) {
@@ -618,6 +625,28 @@ public class FormatSTL implements TimedTextFileFormat {
         tto.styling.put(style.iD, style);
 
 
+    }
+
+    /**
+     * 手工剥离字符串中所有 <...> 形式的标签，避免非贪婪正则回溯。
+     */
+    private static String stripXmlTags(String input) {
+        if (input == null || input.isEmpty()) return input;
+        StringBuilder sb = new StringBuilder(input.length());
+        int len = input.length();
+        int i = 0;
+        while (i < len) {
+            char c = input.charAt(i);
+            if (c == '<') {
+                int close = input.indexOf('>', i + 1);
+                if (close < 0) break;
+                i = close + 1;
+            } else {
+                sb.append(c);
+                i++;
+            }
+        }
+        return sb.toString();
     }
 
 }

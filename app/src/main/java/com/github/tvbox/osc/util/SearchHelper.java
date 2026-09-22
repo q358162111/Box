@@ -78,10 +78,15 @@ public class SearchHelper {
 
     public static List<String> splitWords(String text) {
         List<String> result = new ArrayList<>();
+        // 防御：text 为 null 时直接返回，避免下游 NPE
+        if (text == null) return result;
         result.add(text);
         String[] parts = text.split("\\W+");
         if (parts.length > 1) {
-            result.addAll(Arrays.asList(parts));
+            // 防御：split 后可能产生首尾空串，过滤掉以减少下游无效搜索
+            for (String p : parts) {
+                if (p != null && !p.isEmpty()) result.add(p);
+            }
         }
         return result;
     }

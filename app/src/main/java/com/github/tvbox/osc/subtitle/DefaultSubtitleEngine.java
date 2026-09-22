@@ -89,11 +89,17 @@ public class DefaultSubtitleEngine implements SubtitleEngine {
                     if (!cacheDir.exists()) {
                         cacheDir.mkdirs();
                     }
-                    String subtitleFile = subtitleFileCacheDir + subtitleLoadSuccessResult.fileName;
-                    File cacheSubtitleFile = new File(subtitleFile);
-                    boolean writeResult = FileUtils.writeSimple(subtitleLoadSuccessResult.content.getBytes(), cacheSubtitleFile);
-                    if (writeResult && playSubtitleCacheKey != null) {
-                        CacheManager.save(MD5.string2MD5(getPlaySubtitleCacheKey()), subtitleFile);
+                    // 防御目录穿越：仅取 fileName 的 basename 部分，且要求仅包含安全字符
+                    String safeFileName = sanitizeFileName(subtitleLoadSuccessResult.fileName);
+                    if (safeFileName == null) {
+                        Log.w(TAG, "onSuccess: illegal subtitle fileName, skip cache write.");
+                    } else {
+                        String subtitleFile = subtitleFileCacheDir + safeFileName;
+                        File cacheSubtitleFile = new File(subtitleFile);
+                        boolean writeResult = FileUtils.writeSimple(subtitleLoadSuccessResult.content.getBytes(), cacheSubtitleFile);
+                        if (writeResult && playSubtitleCacheKey != null) {
+                            CacheManager.save(MD5.string2MD5(getPlaySubtitleCacheKey()), subtitleFile);
+                        }
                     }
                 } else {
                     CacheManager.save(MD5.string2MD5(getPlaySubtitleCacheKey()), path);
@@ -133,6 +139,20 @@ public class DefaultSubtitleEngine implements SubtitleEngine {
             subtitle.end = end;
         }
         mSubtitles = thisSubtitles;
+    }
+
+    /**
+     * 规范化字幕缓存文件名：仅取 basename 部分，且只接受字母/数字/点/下划线/短横线。
+     * 防止远程字幕 URL 中的目录穿越或特殊字符污染本地文件路径。
+     */
+    private static String sanitizeFileName(String raw) {
+        if (TextUtils.isEmpty(raw)) return null;
+        int slash = Math.max(raw.lastIndexOf('/'), raw.lastIndexOf('\\'));
+        String name = slash >= 0 ? raw.substring(slash + 1) : raw;
+        if (name.isEmpty() || name.contains("..") || !name.matches("[A-Za-z0-9._\\-]+")) {
+            return null;
+        }
+        return name;
     }
 
     private String playSubtitleCacheKey;
@@ -214,6 +234,10 @@ public class DefaultSubtitleEngine implements SubtitleEngine {
                                     delay = subtitle.end.mseconds - position;
                                 }
 
+                                // 防御：负 delay 会让 sendEmptyMessageDelayed 立即触发下一轮，
+                                // 导致 Handler 自递归空转、消息队列膨胀直至 ANR
+                                if (delay <= 0) delay = REFRESH_INTERVAL;
+
                                 if (mWorkHandler != null) {
                                     mWorkHandler.sendEmptyMessageDelayed(MSG_REFRESH, delay);
                                 }
@@ -229,8 +253,10 @@ public class DefaultSubtitleEngine implements SubtitleEngine {
                         if (subtitle != null) {
                             delay = subtitle.end.mseconds - position;
                         }
-
                     }
+
+                    // 防御：负 delay 自递归
+                    if (delay <= 0) delay = REFRESH_INTERVAL;
                     if (mWorkHandler != null) {
                         mWorkHandler.sendEmptyMessageDelayed(MSG_REFRESH, delay);
                     }
@@ -244,7 +270,8 @@ public class DefaultSubtitleEngine implements SubtitleEngine {
 
     private void stopWorkThread() {
         if (mHandlerThread != null) {
-            mHandlerThread.quit();
+            // quitSafely 优于 quit：会处理完队列中已派发的消息再退出，避免正在执行的 find() 中途被终止
+            mHandlerThread.quitSafely();
             mHandlerThread = null;
         }
         if (mWorkHandler != null) {

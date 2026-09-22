@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 public class SuperParse {
-    public static HashMap<String, ArrayList<String>> flagWebJx = new HashMap<>();
+    public static volatile HashMap<String, ArrayList<String>> flagWebJx = new HashMap<>();
     /**
      * 修复：原 static configs/jsonJx/webJx 在多线程并发 parse() 时相互覆盖，导致解析错乱/丢解析器。
      * 双检锁 + volatile 保证可见性与安全发布。
@@ -143,13 +143,38 @@ public class SuperParse {
     }
 
     private static String mixUrl(String url, String ext) {
-        if (ext.trim().length() > 0) {
+        if (ext != null && ext.trim().length() > 0) {
             int idx = url.indexOf("?");
             if (idx > 0) {
                 return url.substring(0, idx + 1) + "cat_ext=" + Base64.encodeToString(ext.getBytes(), Base64.DEFAULT | Base64.URL_SAFE | Base64.NO_WRAP) + "&" + url.substring(idx + 1);
             }
         }
         return url;
+    }
+
+    /**
+     * 简单 HTML/JS 字符串字面量转义，防止 XSS：
+     * - 替换 < > & " ' 为实体或反斜杠转义
+     * - 处理 \n \r 等控制字符
+     */
+    private static String htmlEscape(String input) {
+        if (input == null) return "";
+        StringBuilder sb = new StringBuilder(input.length());
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            switch (c) {
+                case '<': sb.append("\\u003C"); break;
+                case '>': sb.append("\\u003E"); break;
+                case '&': sb.append("\\u0026"); break;
+                case '"': sb.append("\\\""); break;
+                case '\'': sb.append("\\u0027"); break;
+                case '\\': sb.append("\\\\"); break;
+                case '\n': sb.append("\\n"); break;
+                case '\r': sb.append("\\r"); break;
+                default: sb.append(c);
+            }
+        }
+        return sb.toString();
     }
 
     public static Object[] loadHtml(String flag, String url) {
@@ -184,14 +209,17 @@ public class SuperParse {
                 ArrayList<String> jxUrls = flagWebJx.get(flag);
                 for (int i = 0; i < jxUrls.size(); i++) {
                     jxs.append("\"");
-                    jxs.append(jxUrls.get(i));
+                    // 防御：jx URL 中若含 "</script>" 或 ""</iframe>" 等子串可能跳出 JS 字符串字面量导致 XSS，
+                    // 故对其进行 JSON 兼容的转义：\ " 控制字符、HTML 特殊字符。
+                    jxs.append(htmlEscape(jxUrls.get(i)));
                     jxs.append("\"");
                     if (i < jxUrls.size() - 1) {
                         jxs.append(",");
                     }
                 }
             }
-            html = html.replace("#url#", url).replace("#jxs#", jxs.toString());
+            // 防御：url 中可能含 "</script>" 等控制字符，统一 HTML 转义。
+            html = html.replace("#url#", htmlEscape(url)).replace("#jxs#", jxs.toString());
             Object[] result = new Object[3];
             result[0] = 200;
             result[1] = "text/html; charset=\"UTF-8\"";

@@ -55,6 +55,8 @@ public class JsonParallel {
                                 // 获取请求头，并从中取出实际url
                                 HashMap<String, String> reqHeaders = JsonParallel.getReqHeader(parseUrl);
                                 String realUrl = reqHeaders.remove("url");
+                                // 防御：realUrl null 时 Headers.of() 抛 NPE
+                                if (realUrl == null) realUrl = "";
                                 Headers headers = Headers.of(reqHeaders);
                                 Request request = new Request.Builder()
                                         .url(realUrl + url)
@@ -65,7 +67,12 @@ public class JsonParallel {
                                 call = client.newCall(request);
                                 calls.add(call);
                                 Response response = call.execute();
-                                String json = response.body().string();
+                                // 防御：response.body() 可能为 null
+                                String json = response.body() != null ? response.body().string() : null;
+                                // 防御：null body 跳过
+                                if (json == null || json.isEmpty()) {
+                                    return null;
+                                }
 
                                 JSONObject taskResult = Utils.jsonParse(url, json);
                                 if (taskResult == null) {
@@ -161,24 +168,30 @@ public class JsonParallel {
 
     public static HashMap<String, String> getReqHeader(String url) {
         HashMap<String, String> reqHeaders = new HashMap<>();
+        if (url == null) url = "";
         reqHeaders.put("url", url);
         if (url.contains("cat_ext")) {
             try {
                 int start = url.indexOf("cat_ext=");
+                if (start < 0) return reqHeaders;
                 int end = url.indexOf("&", start);
                 if (end < 0) {
                     end = url.length();
                 }
+                // 防御：start + 8 超过 end 时 substring 抛 IOOBE
+                if (start + 8 > end) return reqHeaders;
                 String ext = url.substring(start + 8, end);
                 ext = new String(Base64.decode(ext, Base64.DEFAULT | Base64.URL_SAFE | Base64.NO_WRAP));
                 String newUrl = url.substring(0, start) + (end < url.length() ? url.substring(end + 1) : "");
                 JSONObject jsonObject = new JSONObject(ext);
                 if (jsonObject.has("header")) {
                     JSONObject headerJson = jsonObject.optJSONObject("header");
-                    Iterator<String> keys = headerJson.keys();
-                    while (keys.hasNext()) {
-                        String key = keys.next();
-                        reqHeaders.put(key, headerJson.optString(key, ""));
+                    if (headerJson != null) {
+                        Iterator<String> keys = headerJson.keys();
+                        while (keys.hasNext()) {
+                            String key = keys.next();
+                            reqHeaders.put(key, headerJson.optString(key, ""));
+                        }
                     }
                 }
                 reqHeaders.put("url", newUrl);

@@ -177,8 +177,10 @@ public class SubtitleLoader {
                 filePath = uri.getPath();
             }
             if (!filePath.contains(".") && remoteSubtitlePath.contains("#")) {
-                filePath = remoteSubtitlePath.split("#")[1];
-                filePath = URLDecoder.decode(filePath);
+                String[] parts = remoteSubtitlePath.split("#", 2);
+                if (parts.length > 1) {
+                    filePath = URLDecoder.decode(parts[1]);
+                }
             }
             SubtitleLoadSuccessResult subtitleLoadSuccessResult = new SubtitleLoadSuccessResult();
             subtitleLoadSuccessResult.timedTextObject = loadAndParse(is, filePath);
@@ -206,12 +208,17 @@ public class SubtitleLoader {
             return null;
         }
         byte[] bytes = FileUtils.readSimple(file);
+        if (bytes == null || bytes.length == 0) {
+            return null;
+        }
         UniversalDetector detector = new UniversalDetector(null);
         detector.handleData(bytes, 0, bytes.length);
         detector.dataEnd();
         String encoding = detector.getDetectedCharset();
+        // 防御：encoding 为 null 时 getBytes("null") 会抛 NFE，统一 fallback 到 UTF-8
+        if (TextUtils.isEmpty(encoding)) encoding = "UTF-8";
         String content = new String(bytes, encoding);
-        InputStream is = new ByteArrayInputStream(content.getBytes());
+        InputStream is = new ByteArrayInputStream(content.getBytes(Charset.forName(encoding)));
         String filePath = file.getPath();
         SubtitleLoadSuccessResult subtitleLoadSuccessResult = new SubtitleLoadSuccessResult();
         subtitleLoadSuccessResult.timedTextObject = loadAndParse(is, filePath);

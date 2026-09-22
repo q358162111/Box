@@ -356,7 +356,9 @@ public class FormatASS implements TimedTextFileFormat {
             line += ",,0000,0000,0000,,";
 
             //we add the caption text with \N as line breaks  and clean of XML
-            line += current.content.replaceAll("<br />", "�N").replaceAll("\\<.*?\\>", "").replace('�', '\\');
+            line += current.content.replace("<br />", "�N").replace('�', '\\');
+                // strip off <...> xml tags without regex backtracking
+                line = stripXmlTags(line);
             //and we add the caption line
             file.add(index++, line);
         }
@@ -524,7 +526,7 @@ public class FormatASS implements TimedTextFileFormat {
         //all information from fields 10 onwards are the caption text therefore needn't be split
         String captionText = line[9];
         //text is cleaned before being inserted into the caption
-        newCaption.content = captionText.replaceAll("\\{.*?\\}", "").replace("\n", "<br />").replace("\\N", "<br />");
+        newCaption.content = stripBracedTags(captionText).replace("\n", "<br />").replace("\\N", "<br />");
 
         for (int i = 0; i < dialogueFormat.length; i++) {
             //we go through every format parameter and save the interesting values
@@ -649,6 +651,50 @@ public class FormatASS implements TimedTextFileFormat {
 
             return placement;
         }
+    }
+
+    /**
+     * 手工剥离字符串中所有 {...} 配对标签，避免非贪婪正则回溯。
+     */
+    private static String stripBracedTags(String input) {
+        if (input == null || input.isEmpty()) return input;
+        StringBuilder sb = new StringBuilder(input.length());
+        int len = input.length();
+        int i = 0;
+        while (i < len) {
+            char c = input.charAt(i);
+            if (c == '{') {
+                int close = input.indexOf('}', i + 1);
+                if (close < 0) break;
+                i = close + 1;
+            } else {
+                sb.append(c);
+                i++;
+            }
+        }
+        return sb.toString();
+    }
+
+    /**
+     * 手工剥离字符串中所有 <...> 形式的标签，避免非贪婪正则回溯。
+     */
+    private static String stripXmlTags(String input) {
+        if (input == null || input.isEmpty()) return input;
+        StringBuilder sb = new StringBuilder(input.length());
+        int len = input.length();
+        int i = 0;
+        while (i < len) {
+            char c = input.charAt(i);
+            if (c == '<') {
+                int close = input.indexOf('>', i + 1);
+                if (close < 0) break;
+                i = close + 1;
+            } else {
+                sb.append(c);
+                i++;
+            }
+        }
+        return sb.toString();
     }
 
 }

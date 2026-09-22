@@ -35,37 +35,49 @@ public class Time {
      * @param value  string in the correct format
      */
     public Time(String format, String value) {
-        if (format.equalsIgnoreCase("hh:mm:ss,ms")) {
-            // this type of format:  01:02:22,501 (used in .SRT)
-            int h, m, s, ms;
-            h = Integer.parseInt(value.substring(0, 2));
-            m = Integer.parseInt(value.substring(3, 5));
-            s = Integer.parseInt(value.substring(6, 8));
-            ms = Integer.parseInt(value.substring(9, 12));
+        if (value == null) value = "";
+        try {
+            if (format.equalsIgnoreCase("hh:mm:ss,ms")) {
+                // this type of format:  01:02:22,501 (used in .SRT)
+                // 防御：长度不足 12 直接跳过，避免 StringIndexOutOfBoundsException
+                if (value.length() < 12) return;
+                int h, m, s, ms;
+                h = Integer.parseInt(value.substring(0, 2));
+                m = Integer.parseInt(value.substring(3, 5));
+                s = Integer.parseInt(value.substring(6, 8));
+                ms = Integer.parseInt(value.substring(9, 12));
 
-            mseconds = ms + s * 1000 + m * 60000 + h * 3600000;
+                mseconds = ms + s * 1000 + m * 60000 + h * 3600000;
 
-        } else if (format.equalsIgnoreCase("h:mm:ss.cs")) {
-            // this type of format:  1:02:22.51 (used in .ASS/.SSA)
-            int h, m, s, cs;
-            h = Integer.parseInt(value.substring(0, 1));
-            m = Integer.parseInt(value.substring(2, 4));
-            s = Integer.parseInt(value.substring(5, 7));
-            cs = Integer.parseInt(value.substring(8, 10));
+            } else if (format.equalsIgnoreCase("h:mm:ss.cs")) {
+                // this type of format:  1:02:22.51 (used in .ASS/.SSA)
+                if (value.length() < 10) return;
+                int h, m, s, cs;
+                h = Integer.parseInt(value.substring(0, 1));
+                m = Integer.parseInt(value.substring(2, 4));
+                s = Integer.parseInt(value.substring(5, 7));
+                cs = Integer.parseInt(value.substring(8, 10));
 
-            mseconds = cs * 10 + s * 1000 + m * 60000 + h * 3600000;
-        } else if (format.equalsIgnoreCase("h:m:s:f/fps")) {
-            int h, m, s, f;
-            float fps;
-            String[] args = value.split("/");
-            fps = Float.parseFloat(args[1]);
-            args = args[0].split(":");
-            h = Integer.parseInt(args[0]);
-            m = Integer.parseInt(args[1]);
-            s = Integer.parseInt(args[2]);
-            f = Integer.parseInt(args[3]);
+                mseconds = cs * 10 + s * 1000 + m * 60000 + h * 3600000;
+            } else if (format.equalsIgnoreCase("h:m:s:f/fps")) {
+                int h, m, s, f;
+                float fps;
+                String[] args = value.split("/");
+                // 防御：split 后长度不足时 throw AIOOBE，先校验
+                if (args.length < 2) return;
+                fps = Float.parseFloat(args[1]);
+                if (fps <= 0) fps = 25f; // 防御：fps <= 0 时除零
+                args = args[0].split(":");
+                if (args.length < 4) return;
+                h = Integer.parseInt(args[0]);
+                m = Integer.parseInt(args[1]);
+                s = Integer.parseInt(args[2]);
+                f = Integer.parseInt(args[3]);
 
-            mseconds = (int) (f * 1000 / fps) + s * 1000 + m * 60000 + h * 3600000;
+                mseconds = (int) (f * 1000 / fps) + s * 1000 + m * 60000 + h * 3600000;
+            }
+        } catch (Exception e) {
+            // 静默失败：将 mseconds 保持默认 0，调用方应负责过滤非法 time
         }
     }
 

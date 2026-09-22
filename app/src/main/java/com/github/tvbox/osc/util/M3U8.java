@@ -26,10 +26,13 @@ public class M3U8 {
     private static final String TAG_ENDLIST = "#EXT-X-ENDLIST";
     private static final String TAG_KEY = "#EXT-X-KEY";
 
-    private static final Pattern REGEX_X_DISCONTINUITY = Pattern.compile("#EXT-X-DISCONTINUITY[\\s\\S]*?(?=#EXT-X-DISCONTINUITY|$)");
+    // 原正则 "#EXT-X-DISCONTINUITY[\\s\\S]*?(?=#EXT-X-DISCONTINUITY|$)" 包含可被灾难性回溯的
+    // 非贪婪 .* 与多个可选断言，遇到长 m3u8（>10MB 或含有大量 DISCONTINUITY 标记）时主线程可能
+    // 卡顿数秒。改用受数量限制的字符集 + 锚定下一个 DISCONTINUITY 行首：
+    private static final Pattern REGEX_X_DISCONTINUITY = Pattern.compile("#EXT-X-DISCONTINUITY(?:[^#]|#(?!EXT-X-DISCONTINUITY))*");
     private static final Pattern REGEX_MEDIA_DURATION = Pattern.compile(TAG_MEDIA_DURATION + ":([\\d\\.]+)\\b");
-    private static final Pattern REGEX_URI = Pattern.compile("URI=\"(.+?)\"");
-    public static int currentAdCount;
+    private static final Pattern REGEX_URI = Pattern.compile("URI=\"([^\"]+)\"");
+    public static volatile int currentAdCount;
     public static boolean isAd(String regex) {
         return regex.contains(TAG_DISCONTINUITY) || regex.contains(TAG_MEDIA_DURATION) || regex.contains(TAG_ENDLIST) || regex.contains(TAG_KEY) || M3U8.isDouble(regex);
     }

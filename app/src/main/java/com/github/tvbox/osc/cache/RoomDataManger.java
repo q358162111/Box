@@ -47,8 +47,19 @@ public class RoomDataManger {
     };
 
     private static Gson getVodInfoGson() {
-        return new GsonBuilder().addSerializationExclusionStrategy(vodInfoStrategy).create();
+        // 缓存 GsonBuilder，单例复用避免每次 new 触发重型反射逻辑
+        if (vodInfoGsonInstance == null) {
+            synchronized (RoomDataManger.class) {
+                if (vodInfoGsonInstance == null) {
+                    vodInfoGsonInstance = new GsonBuilder()
+                            .addSerializationExclusionStrategy(vodInfoStrategy)
+                            .create();
+                }
+            }
+        }
+        return vodInfoGsonInstance;
     }
+    private static volatile Gson vodInfoGsonInstance;
 
     public static void insertVodRecord(String sourceKey, VodInfo vodInfo) {
         VodRecord record = AppDataManager.get().getVodRecordDao().getVodRecord(sourceKey, vodInfo.id);
@@ -94,7 +105,10 @@ public class RoomDataManger {
         Integer index = Hawk.get(HawkConfig.HOME_NUM, 0);
         Integer hisNum = HistoryHelper.getHisNum(index);
         if ( count > hisNum ) {
-            AppDataManager.get().getVodRecordDao().reserver(hisNum);
+            // 防御：hisNum <= 0 时 reserver 子查询为空会导致清空整张历史表
+            if (hisNum > 0) {
+                AppDataManager.get().getVodRecordDao().reserver(hisNum);
+            }
         }
 
         List<VodRecord> recordList = AppDataManager.get().getVodRecordDao().getAll(limit);

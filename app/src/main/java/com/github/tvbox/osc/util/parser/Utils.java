@@ -14,7 +14,13 @@ import java.util.regex.Pattern;
 @TargetApi(Build.VERSION_CODES.KITKAT)
 public class Utils {
 
-    public static final Pattern RULE = Pattern.compile("http((?!http).){12,}?\\.(m3u8|mp4|flv|avi|mkv|rm|wmv|mpg|m4a|mp3)\\?.*|http((?!http).){12,}\\.(m3u8|mp4|flv|avi|mkv|rm|wmv|mpg|m4a|mp3)|http((?!http).)*?video/tos*");
+    // 修复：原正则 "http((?!http).){12,}?\\.(m3u8|mp4|...)\\?.*" 含嵌套否定环视 + 可变次数量词，
+    // 在长 URL（含连续非 'h' 字符）上会指数级回溯，可能造成 ANR。
+    // 改写：去掉环视，使用受控字符集 [\\w./:?=&%#~+-] 替代 ".+?" 配合后续锚点：
+    public static final Pattern RULE = Pattern.compile(
+            "http[s]?://[\\w.\\-]+(?:/|\\?)[^\\s\"'<>]*\\.(?:m3u8|mp4|flv|avi|mkv|rm|wmv|mpg|m4a|mp3)(?:[?#][^\\s\"'<>]*)?"
+                    + "|http[s]?://[\\w.\\-]+(?:/|\\?)[^\\s\"'<>]*video/tos(?:[?#][^\\s\"'<>]*)?"
+    );
     public static final String UaWinChrome = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.54 Safari/537.36";
     public static final String UaMobile = "AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.1 Mobile/15E148 Safari/604.1";
 
@@ -75,13 +81,21 @@ public class Utils {
     }
 
     public static JSONObject jsonParse(String input, String json) throws JSONException {
+        if (json == null) return null;
         JSONObject jsonPlayData = new JSONObject(json);
         String url;
-        if (jsonPlayData.has("data")) {
-            url = jsonPlayData.getJSONObject("data").getString("url");
+        if (jsonPlayData.has("data") && !jsonPlayData.isNull("data")) {
+            // 防御：data 字段可能是 array/null/string 而非 object，统一用 optString 防御
+            JSONObject dataObj = jsonPlayData.optJSONObject("data");
+            if (dataObj == null) {
+                url = jsonPlayData.optString("url", "");
+            } else {
+                url = dataObj.optString("url", "");
+            }
         } else {
-            url = jsonPlayData.getString("url");
+            url = jsonPlayData.optString("url", "");
         }
+        if (url == null || url.isEmpty()) return null;
         if (url.startsWith("//")) {
             url = "https:" + url;
         }

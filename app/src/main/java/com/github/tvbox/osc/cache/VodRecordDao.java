@@ -35,7 +35,8 @@ public interface VodRecordDao {
 
     /**
      * 保留最新指定条数, 其他删除.
-     * @param size 保留条数
+     * 注意：size <= 0 时 NOT IN 子查询为空集，会清空整张表。调用方必须保证 size > 0。
+     * @param size 保留条数，必须大于 0
      * @return
      */
     @Query("DELETE FROM vodRecord where id NOT IN (SELECT id FROM vodRecord ORDER BY updateTime desc LIMIT :size)")

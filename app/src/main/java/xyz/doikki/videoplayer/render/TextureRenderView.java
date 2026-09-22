@@ -107,11 +107,26 @@ public class TextureRenderView extends TextureView implements IRenderView, Textu
 
     @Override
     public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
+        // 修复：原实现返回 false（SurfaceTexture 由系统管理），但同时没有 setSurfaceTexture(null)
+        // 让 Surface 立即从 Player 解绑，导致 SurfaceTexture 与 Player 持有 Surface 继续工作但下次
+        // onSurfaceTextureAvailable 触发时新 Surface 不会创建，表面"成功"播放但实际是新纹理未生效。
+        // 正确做法是返回 false 让系统管理生命周期，并主动释放缓存的 Surface 引用以释放 native buffer。
+        if (mSurface != null) {
+            mSurface.release();
+            mSurface = null;
+        }
         return false;
     }
 
     @Override
     public void onSurfaceTextureUpdated(SurfaceTexture surface) {
 
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        // 兜底：onSurfaceTextureDestroyed 可能不被调用（系统不重建纹理时），detach 时主动 release
+        release();
+        super.onDetachedFromWindow();
     }
 }

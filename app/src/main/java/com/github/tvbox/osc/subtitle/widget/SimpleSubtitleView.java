@@ -89,13 +89,61 @@ public class SimpleSubtitleView extends TextView
             setText(EMPTY_TEXT);
             return;
         }
-        text = text.replaceAll("(?:\\r\\n)", "<br />");
-        text = text.replaceAll("(?:\\r)", "<br />");
-        text = text.replaceAll("(?:\\n)", "<br />");
-        text = text.replaceAll("\\\\N", "<br />");
-        text = text.replaceAll("\\{[\\s\\S]*?\\}", "");
-        text = text.replaceAll("^.*?,.*?,.*?,.*?,.*?,.*?,.*?,.*?,.*?,", "");
+        // 性能与稳定性：原 replaceAll 中的正则 ("\\{[\\s\\S]*?\\}", "^.*?,.*?,.*?,..." 等)
+        // 在长 ASS/SRT 字幕（>10KB）上可能引发灾难性回溯导致主线程卡顿/ANR。
+        // 改为直接字符串替换 + 按字符扫描，避免正则回溯。
+        text = text.replace("\r\n", "<br />");
+        text = text.replace('\r', '\n');
+        text = text.replace("\n", "<br />");
+        text = text.replace("\\N", "<br />");
+        // 移除 ASS override tags {...}
+        text = stripBracedTags(text);
+        // ASS Dialogue 格式：Dialogue: Marked,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text
+        // 仅当行首以 Dialogue: 开头时切掉前 9 个逗号字段，保留最后一段（Text）。
+        text = stripAssDialoguePrefix(text);
         setText(Html.fromHtml(text));
+    }
+
+    /**
+     * 移除字符串中所有 {...} 配对标签，避免正则回溯
+     */
+    private static String stripBracedTags(String input) {
+        if (input == null || input.isEmpty()) return input;
+        StringBuilder sb = new StringBuilder(input.length());
+        int len = input.length();
+        int i = 0;
+        while (i < len) {
+            char c = input.charAt(i);
+            if (c == '{') {
+                int close = input.indexOf('}', i + 1);
+                if (close < 0) {
+                    // 未闭合，丢弃剩余以避免下次 setText 再次扫到一半
+                    break;
+                }
+                i = close + 1;
+            } else {
+                sb.append(c);
+                i++;
+            }
+        }
+        return sb.toString();
+    }
+
+    /**
+     * ASS Dialogue 行前 9 个逗号字段移除：仅匹配行首 "Dialogue:" 前缀
+     */
+    private static String stripAssDialoguePrefix(String input) {
+        if (input == null || input.isEmpty()) return input;
+        if (!input.startsWith("Dialogue:")) return input;
+        int commas = 0;
+        int idx = "Dialogue:".length();
+        int len = input.length();
+        while (idx < len && commas < 9) {
+            if (input.charAt(idx) == ',') commas++;
+            idx++;
+        }
+        if (commas < 9) return input;
+        return input.substring(idx);
     }
 
     @Override

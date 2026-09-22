@@ -84,10 +84,16 @@ public class HawkUtils {
                 break;
             }
         }
-        if (index < ijkCodes.size()) ijkCodes.get(index).selected(false);
-        index++;
-        index %= ijkCodes.size();
-        ijkCodes.get(index).selected(true);
+        // 修复：index % ijkCodes.size() 之前先 ++，保证 length 下取模结果正确
+        int next = (index + 1) % ijkCodes.size();
+        if (index >= 0 && index < ijkCodes.size()) {
+            ijkCodes.get(index).selected(false);
+        }
+        // 防御：get 返回 null 时跳过
+        if (next >= 0 && next < ijkCodes.size()) {
+            IJKCode nextCode = ijkCodes.get(next);
+            if (nextCode != null) nextCode.selected(true);
+        }
     }
 
     public static boolean getIJKCache() {
@@ -146,7 +152,10 @@ public class HawkUtils {
     public static String getExoRendererDesc() {
         App app = App.getInstance();
         String[] array = app.getResources().getStringArray(R.array.media_content_ExoPlayer_renderer);
-        return array[getExoRenderer()];
+        // 防御：getExoRenderer() 在 %= 后必然 < array.length，但仍校验防异常崩溃
+        int r = getExoRenderer();
+        if (r < 0 || r >= array.length) return "";
+        return array[r];
     }
 
     /**
@@ -192,7 +201,10 @@ public class HawkUtils {
     public static String getExoRendererModeDesc() {
         App app = App.getInstance();
         String[] array = app.getResources().getStringArray(R.array.media_content_ExoPlayer_renderer_mode);
-        return array[getExoRendererMode()];
+        // 防御：getExoRendererMode() 异常防护
+        int r = getExoRendererMode();
+        if (r < 0 || r >= array.length) return "";
+        return array[r];
     }
 
     // Vod 播放器首选
@@ -217,7 +229,10 @@ public class HawkUtils {
     public static String getVodPlayerPreferredDesc() {
         App app = App.getInstance();
         String[] array = app.getResources().getStringArray(R.array.media_content_General_VodPlayerPreferred);
-        return array[getVodPlayerPreferred()];
+        // 防御：数组越界
+        int idx = getVodPlayerPreferred();
+        if (idx < 0 || idx >= array.length) return "";
+        return array[idx];
     }
 
     public static String getLastLiveChannelGroup() {

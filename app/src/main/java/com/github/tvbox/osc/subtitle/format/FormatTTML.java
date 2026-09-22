@@ -54,6 +54,18 @@ public class FormatTTML implements TimedTextFileFormat {
         tto.fileName = fileName;
 
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+        // 防御：禁用 DTD 与外部实体，防止 XXE (XML External Entity) 注入攻击读取本地文件或探测内网
+        // TTML 字幕文件中无业务需要 DTD/外部实体，可全部禁用
+        try {
+            dbFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            dbFactory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+            dbFactory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+            dbFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+            dbFactory.setXIncludeAware(false);
+            dbFactory.setExpandEntityReferences(false);
+        } catch (Exception featureEx) {
+            // 部分实现不支持所有特性，忽略后继续（仍保留默认 DTD 解析，需评估部署风险）
+        }
         DocumentBuilder dBuilder;
         try {
             dBuilder = dbFactory.newDocumentBuilder();
@@ -396,18 +408,40 @@ public class FormatTTML implements TimedTextFileFormat {
         } else if (color.startsWith("rgb")) {
             boolean alpha = color.startsWith("rgba");
 			try {
-                values = color.split("\\(")[1].split(",");
+                // 防御：split("\\(") 后长度可能 < 2，先校验
+                String[] outer = color.split("\\(");
+                if (outer.length < 2) {
+                    value = "ffffffff";
+                    tto.warnings += "Unrecoginzed color: " + color + "\n\n";
+                    return value;
+                }
+                values = outer[1].split(",");
+                // 防御：values 长度不足时索引越界，rgb 至少 3 项，rgba 至少 4 项
+                if (values.length < (alpha ? 4 : 3)) {
+                    value = "ffffffff";
+                    tto.warnings += "Unrecoginzed color: " + color + "\n\n";
+                    return value;
+                }
 
                 int r, g, b, a = 255;
-                r = Integer.parseInt(values[0]);
-                g = Integer.parseInt(values[1]);
-                b = Integer.parseInt(values[2].substring(0, 2));
-                if (alpha) a = Integer.parseInt(values[3].substring(0, 2));
+                r = Integer.parseInt(values[0].trim());
+                g = Integer.parseInt(values[1].trim());
+                String blueStr = values[2].trim();
+                // 防御：blue 值含尾巴（如 "255)"）需 strip
+                if (blueStr.endsWith(")")) blueStr = blueStr.substring(0, blueStr.length() - 1);
+                b = Integer.parseInt(blueStr);
+                if (alpha) {
+                    String aStr = values[3].trim();
+                    if (aStr.endsWith(")")) aStr = aStr.substring(0, aStr.length() - 1);
+                    a = Integer.parseInt(aStr);
+                }
 
                 values[0] = Integer.toHexString(r);
                 values[1] = Integer.toHexString(g);
                 values[2] = Integer.toHexString(b);
-                if (alpha) values[2] = Integer.toHexString(a);
+                // 修复原代码 bug：rgba 模式下 values[2] 被错误覆盖为 a 而非 b+alpha；
+                // 正确逻辑应为 values[3] = a + final value += ... + a。
+                if (alpha) values[3] = Integer.toHexString(a);
 
                 for (int i = 0; i < values.length; i++) {
                     if (values[i].length() < 2)

@@ -1,6 +1,5 @@
 package com.github.tvbox.osc.util;
 
-import android.os.Handler;
 import android.view.View;
 
 /**
@@ -25,11 +24,16 @@ public class FastClickCheckUtil {
      * @param mills 点击间隔时间（毫秒）
      */
     public static void check(final View view, int mills) {
+        if (view == null) return;
         view.setClickable(false);
-        new Handler().postDelayed(new Runnable() {
+        // 使用 view.postDelayed：消息队列绑定 View 生命周期，View 被销毁/从 Window 分离后自动不再触发，
+        // 避免匿名 Runnable + 静态 Handler 持有外部 View 导致 Activity 泄漏。
+        view.postDelayed(new Runnable() {
             @Override
             public void run() {
-                view.setClickable(true);
+                if (view.isAttachedToWindow()) {
+                    view.setClickable(true);
+                }
             }
         }, mills);
     }

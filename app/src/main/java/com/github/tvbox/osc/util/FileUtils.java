@@ -402,18 +402,30 @@ public class FileUtils {
     }
 
     public static String read(InputStream is) {
-        try {
-            byte[] data = new byte[is.available()];
-            is.read(data);
-            is.close();
-            return new String(data, StandardCharsets.UTF_8);
+        // 不能依赖 available()：对网络流返回 0，对本地大文件返回整个文件大小可能 OOM。
+        // 改用循环 + 8KB buffer，避免单次分配过大数组。
+        if (is == null) return "";
+        try (InputStream input = is) {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            byte[] buffer = new byte[8192];
+            int len;
+            while ((len = input.read(buffer)) > 0) {
+                bos.write(buffer, 0, len);
+            }
+            return new String(bos.toByteArray(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             e.printStackTrace();
             return "";
         }
     }
     public static File getLocal(String path) {
-        File file1 = new File(path.replace("file:/", ""));
+        if (path == null) return new File("");
+        String stripped = path.replace("file:/", "");
+        // 防御路径遍历：拒绝包含 .. 的相对路径穿越
+        if (stripped.contains("..")) {
+            return new File(stripped);
+        }
+        File file1 = new File(stripped);
         File file2 = new File(path.replace("file:/", Environment.getExternalStorageDirectory().getAbsolutePath()));
         return file2.exists() ? file2 : file1.exists() ? file1 : new File(path);
     }

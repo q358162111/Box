@@ -108,15 +108,25 @@ public class ApiConfig {
             Pattern pattern = getPattern("[A-Za-z0]{8}\\*\\*");
             Matcher matcher = pattern.matcher(content);
             if (matcher.find()) {
-                content = content.substring(content.indexOf(matcher.group()) + 10);
-                content = new String(Base64.decode(content, Base64.DEFAULT));
+                // 校验 indexOf 避免 substring(-1 + 10) 抛 StringIndexOutOfBoundsException
+                int idx = content.indexOf(matcher.group());
+                if (idx >= 0) {
+                    content = content.substring(idx + 10);
+                    content = new String(Base64.decode(content, Base64.DEFAULT));
+                }
             }
             if (content.startsWith("2423")) {
-                String data = content.substring(content.indexOf("2324") + 4, content.length() - 26);
-                content = new String(AES.toBytes(content)).toLowerCase();
-                String key = AES.rightPadding(content.substring(content.indexOf("$#") + 2, content.indexOf("#$")), "0", 16);
-                String iv = AES.rightPadding(content.substring(content.length() - 13), "0", 16);
-                json = AES.CBC(data, key, iv);
+                int idx2324 = content.indexOf("2324");
+                int idxDoc = content.indexOf("$#");
+                int idxHash = content.indexOf("#$");
+                // 长度/位置全部校验，避免越界或负数下标
+                if (idx2324 >= 0 && content.length() >= 26 && idxDoc >= 0 && idxHash > idxDoc) {
+                    String data = content.substring(idx2324 + 4, content.length() - 26);
+                    content = new String(AES.toBytes(content)).toLowerCase();
+                    String key = AES.rightPadding(content.substring(idxDoc + 2, idxHash), "0", 16);
+                    String iv = AES.rightPadding(content.length() >= 13 ? content.substring(content.length() - 13) : content, "0", 16);
+                    json = AES.CBC(data, key, iv);
+                }
             } else if (configKey != null && !AES.isJson(content)) {
                 json = AES.ECB(content, configKey);
             } else {
@@ -133,7 +143,10 @@ public class ApiConfig {
         Pattern pattern = getPattern("[A-Za-z0]{8}\\*\\*");
         Matcher matcher = pattern.matcher(body);
         if (matcher.find()) {
-            body = body.substring(body.indexOf(matcher.group()) + 10);
+            // 校验 indexOf 避免 substring(-1 + 10) 越界
+            int idx = body.indexOf(matcher.group());
+            if (idx < 0) return "".getBytes();
+            body = body.substring(idx + 10);
             return Base64.decode(body, Base64.DEFAULT);
         }
         return "".getBytes();
@@ -346,7 +359,7 @@ public class ApiConfig {
         parseJson(apiUrl, sb.toString());
     }
 
-    private static  String jarCache ="true";
+    private static volatile String jarCache = "true";
     private void parseJson(String apiUrl, String jsonStr) {
 //        pyLoader.setConfig(jsonStr);
         JsonObject infoJson = new Gson().fromJson(jsonStr, JsonObject.class);
@@ -356,7 +369,7 @@ public class ApiConfig {
         // wallpaper
         wallpaper = DefaultConfig.safeJsonString(infoJson, "wallpaper", "");
         // 直播播放请求头
-        livePlayHeaders = infoJson.getAsJsonArray("livePlayHeaders");
+        livePlayHeaders = infoJson.has("livePlayHeaders") ? infoJson.getAsJsonArray("livePlayHeaders") : new JsonArray();
         // 远端站点源
         SourceBean firstSite = null;
         // 重新解析配置时清空旧源，避免新旧配置站点混杂
@@ -365,13 +378,17 @@ public class ApiConfig {
         // sites 字段缺失/为空时跳过解析，避免整个配置加载 NPE 失败
         if (sites == null) sites = new JsonArray();
         for (JsonElement opt : sites) {
-            JsonObject obj = (JsonObject) opt;
+            // 防御：element 不是 object 时跳过，避免 ClassCastException
+            if (opt == null || !opt.isJsonObject()) continue;
+            JsonObject obj = opt.getAsJsonObject();
             SourceBean sb = new SourceBean();
+            // 防御：key 字段缺失/类型不对时跳过该站点
+            if (!obj.has("key") || obj.get("key").isJsonNull()) continue;
             String siteKey = obj.get("key").getAsString().trim();
             sb.setKey(siteKey);
             sb.setName(obj.has("name")?obj.get("name").getAsString().trim():siteKey);
-            sb.setType(obj.get("type").getAsInt());
-            sb.setApi(obj.get("api").getAsString().trim());
+            sb.setType(DefaultConfig.safeJsonInt(obj, "type", 0));
+            sb.setApi(DefaultConfig.safeJsonString(obj, "api", ""));
             sb.setSearchable(DefaultConfig.safeJsonInt(obj, "searchable", 1));
             sb.setQuickSearch(DefaultConfig.safeJsonInt(obj, "quickSearch", 1));
             if(siteKey.startsWith("py_")){
@@ -406,11 +423,12 @@ public class ApiConfig {
         if (infoJson.has("parses")) {
             JsonArray parses = infoJson.get("parses").getAsJsonArray();
             for (JsonElement opt : parses) {
-                JsonObject obj = (JsonObject) opt;
+                if (opt == null || !opt.isJsonObject()) continue;
+                JsonObject obj = opt.getAsJsonObject();
                 ParseBean pb = new ParseBean();
-                pb.setName(obj.get("name").getAsString().trim());
-                pb.setUrl(obj.get("url").getAsString().trim());
-                String ext = obj.has("ext") ? obj.get("ext").getAsJsonObject().toString() : "";
+                pb.setName(DefaultConfig.safeJsonString(obj, "name", ""));
+                pb.setUrl(DefaultConfig.safeJsonString(obj, "url", ""));
+                String ext = obj.has("ext") && obj.get("ext").isJsonObject() ? obj.get("ext").getAsJsonObject().toString() : "";
                 pb.setExt(ext);
                 pb.setType(DefaultConfig.safeJsonInt(obj, "type", 0));
                 parseBeanList.add(pb);
@@ -438,12 +456,20 @@ public class ApiConfig {
 
         String liveURL_final = null;
         try {
-            if (infoJson.has("lives") && infoJson.get("lives").getAsJsonArray() != null) {
-                JsonObject livesOBJ = infoJson.get("lives").getAsJsonArray().get(0).getAsJsonObject();
-                String lives = livesOBJ.toString();
+            if (infoJson.has("lives") && infoJson.get("lives").isJsonArray()
+                    && infoJson.get("lives").getAsJsonArray().size() > 0) {
+                JsonElement firstLive = infoJson.get("lives").getAsJsonArray().get(0);
+                // 防御：首元素不是 object 时跳过
+                if (firstLive == null || !firstLive.isJsonObject()) {
+                    // do nothing
+                } else {
+                    JsonObject livesOBJ = firstLive.getAsJsonObject();
+                    String lives = livesOBJ.toString();
                 int index = lives.indexOf("proxy://");
                 if (index != -1) {
                     int endIndex = lives.lastIndexOf("\"");
+                    // 防御：lastIndexOf 返回 -1 时 substring(-1) 抛 IOOBE
+                    if (endIndex < 0) endIndex = lives.length();
                     String url = lives.substring(index, endIndex);
                     url = DefaultConfig.checkReplaceProxy(url);
 
@@ -550,6 +576,7 @@ public class ApiConfig {
                 LiveChannelGroup liveChannelGroup = new LiveChannelGroup();
                 liveChannelGroup.setGroupName(liveURL_final);
                 liveChannelGroupList.add(liveChannelGroup);
+                } // close my else guard
             }
 
 
@@ -867,8 +894,14 @@ public class ApiConfig {
         if (lanLink.startsWith("clan://localhost/")) {
             return lanLink.replace("clan://localhost/", ControlManager.get().getAddress(true) + "file/");
         } else {
+            // 防御：长度 < 8（"clan://" 7 字符 + 至少 1）时 substring(7) 直接 OK 但后续 split 可能越界
+            if (lanLink.length() < 8) return lanLink;
             String link = lanLink.substring(7);
             int end = link.indexOf('/');
+            // 防御：indexOf 返回 -1 时 substring(-1) / substring(0) 异常，统一兜底
+            if (end < 0) {
+                return "http://" + link + "/file/";
+            }
             return "http://" + link.substring(0, end) + "/file/" + link.substring(end + 1);
         }
     }

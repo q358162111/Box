@@ -35,8 +35,26 @@ import java.net.URL;
 import java.net.URLDecoder;
 
 public class ImgUtil {
-    public static int defaultWidth = 244;
-    public static int defaultHeight = 320;
+    // 防御：原代码 public static int defaultWidth/Height 允许任意位置修改（"魔数"全局变量）
+    // 改为 private static final + public getter，避免被外部污染
+    private static final int DEFAULT_WIDTH = 244;
+    private static final int DEFAULT_HEIGHT = 320;
+
+    public static int getDefaultWidth() {
+        return DEFAULT_WIDTH;
+    }
+
+    public static int getDefaultHeight() {
+        return DEFAULT_HEIGHT;
+    }
+
+    /** 向后兼容：保留旧静态字段的只读访问。已废弃。 */
+    @Deprecated
+    public static int defaultWidth = DEFAULT_WIDTH;
+
+    /** 向后兼容：保留旧静态字段的只读访问。已废弃。 */
+    @Deprecated
+    public static int defaultHeight = DEFAULT_HEIGHT;
 
     /**
      * style 数据结构：ratio 指定宽高比（宽 / 高），type 表示风格（例如 rect、list）

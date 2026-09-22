@@ -65,6 +65,8 @@ public class MD5 {
         try {
             MessageDigest digest = sDigest.get();
             if (digest == null) return null;
+            // 必须先 reset 防止 ThreadLocal 残留上次摘要状态污染本次结果
+            digest.reset();
             digest.update(bytes);
             byte[] md = digest.digest();
             int j = md.length;
@@ -132,6 +134,8 @@ public class MD5 {
                 Log.e("MD5", "MD5信息摘要初始化失败");
                 return null;
             }
+            // 防止 ThreadLocal 残留状态污染
+            digest.reset();
             byte[] byteArray = inStr.getBytes();
             byte[] md5Bytes = digest.digest(byteArray);
             StringBuilder hexValue = new StringBuilder();
@@ -164,6 +168,7 @@ public class MD5 {
                 Log.e("MD5", "MD5信息摘要初始化失败");
                 return null;
             }
+            digest.reset();
             byte[] md5Bytes = digest.digest(strSource.getBytes("utf-8"));
             byte[] encryptBytes = Base64.encode(md5Bytes, Base64.DEFAULT);
             String strEncrypt = new String(encryptBytes, "utf-8");

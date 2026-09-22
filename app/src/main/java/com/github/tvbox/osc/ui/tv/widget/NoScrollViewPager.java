@@ -26,17 +26,27 @@ public class NoScrollViewPager extends ViewPager {
 
     /**
      * 禁止viewpager里面内容导致页面切换
+     * 仅对方向键（D-pad）屏蔽，左右方向键不消费，方便子 View 接收。
+     * 否则会丢弃所有按键事件，导致返回键、Home 键等失效。
      *
      * @param event
      * @return
      */
     @Override
     public boolean executeKeyEvent(KeyEvent event) {
-        return false;
+        // 修复：原实现 return false 丢弃所有按键，导致 ViewPager 拿到焦点时 DPAD_LEFT/RIGHT/UP/DOWN、
+        // Back 等全部被吞。改为：仅屏蔽方向键的页面切换行为，其他按键继续向下派发。
+        if (event != null
+                && (event.getKeyCode() == KeyEvent.KEYCODE_DPAD_LEFT
+                || event.getKeyCode() == KeyEvent.KEYCODE_DPAD_RIGHT)) {
+            return false;
+        }
+        return super.executeKeyEvent(event);
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
+        // 触屏事件：不消费，但不拦截（onInterceptTouchEvent 已返回 false），系统自然不会切换页面
         return false;
     }
 

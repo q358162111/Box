@@ -40,8 +40,9 @@ public class DefaultConfig {
         List<MovieSort.SortData> data = new ArrayList<>();
         if (sourceKey != null) {
             SourceBean sb = ApiConfig.get().getSource(sourceKey);
+            if (sb == null) return data;
             ArrayList<String> categories = sb.getCategories();
-            if (!categories.isEmpty()) {
+            if (categories != null && !categories.isEmpty()) {
                 for (String cate : categories) {
                     for (MovieSort.SortData sortData : list) {
                         if (sortData.name.equals(cate)) {
@@ -86,6 +87,11 @@ public class DefaultConfig {
 
     public static void restartApp() {
         Activity activity = AppManager.getInstance().getActivity(HomeActivity.class);
+        if (activity == null) {
+            // Activity 未注册时直接杀进程兜底，避免 NPE
+            android.os.Process.killProcess(android.os.Process.myPid());
+            return;
+        }
         final Intent intent = activity.getPackageManager().getLaunchIntentForPackage(activity.getPackageName());
         if (intent != null) {
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -99,20 +105,33 @@ public class DefaultConfig {
      * 清空公有目录
      */
     public static void clearPublic(Context mContext) {
-        File dir = new File(App.getInstance().getExternalFilesDir("").getParentFile().getAbsolutePath());
-        File[] files = dir.listFiles();
-        if (null != files) {
-            for (File file : files) {
-                FileUtils.recursiveDelete(file);
+        // Android 10+ Scoped Storage 下 getExternalFilesDir 与 getExternalStorageDirectory 可能为 null，
+        // 递归删除其父目录会触发 SecurityException，先做空检查再处理
+        File externalFilesDir = App.getInstance().getExternalFilesDir("");
+        if (externalFilesDir != null && externalFilesDir.getParentFile() != null) {
+            File dir = externalFilesDir.getParentFile();
+            File[] files = dir.listFiles();
+            if (null != files) {
+                for (File file : files) {
+                    FileUtils.recursiveDelete(file);
+                }
             }
         }
-        String publicFilePath = Environment.getExternalStorageDirectory().getPath() + "/" + getPackageName(mContext);
-        dir = new File(publicFilePath);
-        files = dir.listFiles();
-        if (null != files) {
-            for (File file : files) {
-                FileUtils.recursiveDelete(file);
+        // 外置存储根在 Android 10+ Scoped Storage 下不可访问，try-catch 防止 SecurityException
+        try {
+            File extRoot = Environment.getExternalStorageDirectory();
+            if (extRoot != null && extRoot.exists()) {
+                String publicFilePath = extRoot.getPath() + "/" + getPackageName(mContext);
+                File dir = new File(publicFilePath);
+                File[] files = dir.listFiles();
+                if (null != files) {
+                    for (File file : files) {
+                        FileUtils.recursiveDelete(file);
+                    }
+                }
             }
+        } catch (Throwable th) {
+            // Android 10+ Scoped Storage 下不可写，忽略
         }
     }
 
@@ -120,12 +139,14 @@ public class DefaultConfig {
      * 清空私有目录
      */
     public static  void clearPrivate(Context mContext) {
-        //清空文件夹
-        File dir = new File(Objects.requireNonNull(mContext.getFilesDir().getParent()));
+        //清空文件夹，仅清理应用自有 cache/databases/shared_prefs，避免误删系统保留文件
+        File parent = mContext.getFilesDir().getParentFile();
+        if (parent == null) return;
+        File dir = new File(parent.getAbsolutePath());
         File[] files = dir.listFiles();
         if (null != files) {
             for (File file : files) {
-                if (!file.getName().contains("lib")) {
+                if (file.isDirectory() && !file.getName().contains("lib")) {
                     FileUtils.recursiveDelete(file);
                 }
             }
