@@ -1,5 +1,6 @@
 package com.github.tvbox.osc.util;
 
+import static okhttp3.ConnectionSpec.CLEARTEXT;
 import static okhttp3.ConnectionSpec.COMPATIBLE_TLS;
 import static okhttp3.ConnectionSpec.MODERN_TLS;
 import static okhttp3.ConnectionSpec.RESTRICTED_TLS;
@@ -7,6 +8,7 @@ import com.github.catvod.net.SSLCompat;
 import com.github.tvbox.osc.base.App;
 
 import com.lzy.okgo.OkGo;
+import com.lzy.okgo.https.HttpsUtils;
 import com.lzy.okgo.interceptor.HttpLoggingInterceptor;
 import com.lzy.okgo.model.HttpHeaders;
 import com.orhanobut.hawk.Hawk;
@@ -85,9 +87,9 @@ public class OkGoHelper {
     public static ArrayList<String> dnsHttpsList = new ArrayList<>();
 
     public static List<ConnectionSpec> getConnectionSpec() {
-        // 移除 CLEARTEXT：禁止明文 HTTP，避免局域网嗅探/中间人攻击。
-        // 如需访问 http 站点，请单独构造 client 时显式追加。
-        return Util.immutableList(RESTRICTED_TLS, MODERN_TLS, COMPATIBLE_TLS);
+        // 保留 CLEARTEXT：IPTV/直播源生态以 http:// 明文地址为主，移除会导致直播无法播放。
+        // 明文风险由使用方自行承担（本应用定位为通用播放器，需兼容任意用户提供的源）。
+        return Util.immutableList(RESTRICTED_TLS, MODERN_TLS, COMPATIBLE_TLS, CLEARTEXT);
     }
 
 
@@ -201,9 +203,10 @@ public class OkGoHelper {
         try {
             final SSLSocketFactory sslSocketFactory = new SSLCompat();
             builder.sslSocketFactory(sslSocketFactory, SSLCompat.TM);
-            // 不再使用 HttpsUtils.UnSafeHostnameVerifier（关闭主机名校验等同于接受任意 HTTPS 中间人）。
-            // OkHttp 默认 hostname verifier 已通过证书链与 host 严格匹配；如确实需要绕过特定证书问题，
-            // 请在业务侧通过自定义 verifier + 白名单精确控制，而不要全局关闭。
+            // 恢复 UnSafeHostnameVerifier：大量第三方直播/点播源的 HTTPS 证书与域名不匹配，
+            // 严格校验会导致这些源全部无法播放。本应用播放的是用户自行配置的任意源，
+            // 证书校验放宽属于功能性权衡（原版行为）。
+            builder.hostnameVerifier(HttpsUtils.UnSafeHostnameVerifier);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
