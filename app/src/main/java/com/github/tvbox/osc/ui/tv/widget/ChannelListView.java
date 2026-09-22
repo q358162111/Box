@@ -5,14 +5,13 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.widget.ListView;
 
+import com.github.tvbox.osc.ui.activity.LivePlayActivity;
+
 public class ChannelListView extends ListView {
     DataChangedListener dataChangedListener;
-    // 防御：原代码直接引用 LivePlayActivity.currentChannelGroupIndex 静态字段，
-    // 1. 与 LivePlayActivity 形成循环依赖（widget -> Activity）；
-    // 2. 默认值在 static 初始化期就固化为 LivePlayActivity 的当时值，无法动态更新；
-    // 3. 静态字段引用 Activity 上下文时内存泄漏风险。
-    // 改为 0 默认值，使用方应在 setSelect 时显式传入。
-    public int pos = 0;
+    // 构造时读取当前分组索引作为初始选中位置（原行为）；
+    // 后续通过 setSelect 动态更新。
+    public int pos = LivePlayActivity.currentChannelGroupIndex;
     private int y;
 
     public ChannelListView(Context context) {

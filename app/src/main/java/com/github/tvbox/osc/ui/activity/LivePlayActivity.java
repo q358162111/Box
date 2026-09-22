@@ -932,13 +932,10 @@ public class LivePlayActivity extends BaseActivity {
 
     //节目播放
     private boolean playChannel(int channelGroupIndex, int liveChannelIndex, boolean changeSource) {
-        if (currentLiveChannelItem == null || currentLiveChannelItem.getChannelName() == null) {
-            // 防御：currentLiveChannelItem 未初始化时直接 return
-            showChannelInfo();
-            return true;
-        }
+        // 注意：currentLiveChannelItem 只在本方法内赋值（首次播放前为 null），
+        // 不能在此做 null 早退，否则永远无法开始播放。仅对 changeSource 分支做 null 防护。
         if ((channelGroupIndex == currentChannelGroupIndex && liveChannelIndex == currentLiveChannelIndex && !changeSource)
-                || (changeSource && currentLiveChannelItem.getSourceNum() == 1)) {
+                || (changeSource && currentLiveChannelItem != null && currentLiveChannelItem.getSourceNum() == 1)) {
             showChannelInfo();
             return true;
         }
