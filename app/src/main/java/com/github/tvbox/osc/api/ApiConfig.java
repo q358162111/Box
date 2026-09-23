@@ -23,6 +23,7 @@ import com.github.tvbox.osc.ui.activity.HomeActivity;
 import com.github.tvbox.osc.util.AES;
 import com.github.tvbox.osc.util.AdBlocker;
 import com.github.tvbox.osc.util.DefaultConfig;
+import com.github.tvbox.osc.util.EpgUtil;
 import com.github.tvbox.osc.util.HawkConfig;
 import com.github.tvbox.osc.util.M3U8;
 import com.github.tvbox.osc.util.MD5;
@@ -368,6 +369,8 @@ public class ApiConfig {
         spider = DefaultConfig.safeJsonString(infoJson, "spider", "");
         // wallpaper
         wallpaper = DefaultConfig.safeJsonString(infoJson, "wallpaper", "");
+        // 每次配置加载先重置台标模板，命中 lives[].logo 时再覆盖，确保配置切换确定性
+        EpgUtil.setLogoUrlTemplate("");
         // 直播播放请求头
         livePlayHeaders = infoJson.has("livePlayHeaders") ? infoJson.getAsJsonArray("livePlayHeaders") : new JsonArray();
         // 远端站点源
@@ -464,6 +467,11 @@ public class ApiConfig {
                     // do nothing
                 } else {
                     JsonObject livesOBJ = firstLive.getAsJsonObject();
+                    // 读取 lives[0].logo 模板 URL（含 {name} 占位符），
+                    // 用于按频道名动态拼接台标地址，避免每次新增频道都要重新编译软件内置的 epg_data.json。
+                    if (livesOBJ.has("logo") && !livesOBJ.get("logo").isJsonNull()) {
+                        EpgUtil.setLogoUrlTemplate(livesOBJ.get("logo").getAsString());
+                    }
                     String lives = livesOBJ.toString();
                 int index = lives.indexOf("proxy://");
                 if (index != -1) {
