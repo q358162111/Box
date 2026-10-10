@@ -1317,7 +1317,8 @@ public class PlayActivity extends BaseActivity {
             hasNext = mVodInfo.getplayIndex() + 1 < mVodInfo.seriesMap.get(mVodInfo.playFlag).size();
         }
         if (!hasNext) {
-            if (mVodInfo.reverseSort) {
+            //mVodInfo 为 null 时 reverseSort 不可访问，按默认（非倒序）提示
+            if (mVodInfo != null && mVodInfo.reverseSort) {
                 Toast.makeText(this, "已经是第一集了", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(this, "已经是最后一集了", Toast.LENGTH_SHORT).show();
@@ -1341,7 +1342,7 @@ public class PlayActivity extends BaseActivity {
             hasPre = mVodInfo.getplayIndex() - 1 >= 0;
         }
         if (!hasPre) {
-            if (mVodInfo.reverseSort) {
+            if (mVodInfo != null && mVodInfo.reverseSort) {
                 Toast.makeText(this, "已经是最后一集了", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(this, "已经是第一集了", Toast.LENGTH_SHORT).show();

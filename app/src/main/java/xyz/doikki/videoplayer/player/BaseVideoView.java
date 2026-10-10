@@ -320,10 +320,19 @@ public class BaseVideoView<P extends AbstractPlayer> extends FrameLayout
      */
     protected boolean prepareDataSource() {
         if (mAssetFileDescriptor != null) {
-            mMediaPlayer.setDataSource(mAssetFileDescriptor);
+            try {
+                mMediaPlayer.setDataSource(mAssetFileDescriptor);
+            } catch (Exception e) {
+                //数据源设置失败时放弃本次 prepare，保持错误状态而非被 PREPARING 覆盖
+                return false;
+            }
             return true;
         } else if (!TextUtils.isEmpty(mUrl)) {
-            mMediaPlayer.setDataSource(mUrl, mHeaders);
+            try {
+                mMediaPlayer.setDataSource(mUrl, mHeaders);
+            } catch (Exception e) {
+                return false;
+            }
             return true;
         }
         return false;

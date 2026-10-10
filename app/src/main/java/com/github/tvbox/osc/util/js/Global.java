@@ -274,12 +274,15 @@ public class Global {
     }
 
     private JSObject req(String url, JSObject options) {
+        Response res = null;
         try {
             Req req = Req.objectFrom(options.toJsonObject().toString());
-            Response res = Connect.to(url, req).execute();
+            res = Connect.to(url, req).execute();
             return Connect.success(runtime, req, res);
         } catch (Exception e) {
             return Connect.error(runtime);
+        } finally {
+            if (res != null) res.close();
         }
     }
 

@@ -403,7 +403,7 @@ public class LivePlayActivity extends BaseActivity {
             int chaIndx = 0;
             int getMin = 1;
             int getMax;
-            for (int j = 0; j < 20; j++) {
+            for (int j = 0; j < liveChannelGroupList.size(); j++) {
                 getMax = getMin + getLiveChannels(j).size() - 1;
 
                 if (selectedChannelNumber >= getMin && selectedChannelNumber <= getMax) {
@@ -2045,10 +2045,16 @@ public class LivePlayActivity extends BaseActivity {
             if (liveChannelIndex >= getLiveChannels(channelGroupIndex).size()) {
                 liveChannelIndex = 0;
                 if (Hawk.get(HawkConfig.LIVE_CROSS_GROUP, false)) {
+                    int maxTurn = liveChannelGroupList.size();
                     do {
                         channelGroupIndex++;
                         if (channelGroupIndex >= liveChannelGroupList.size())
                             channelGroupIndex = 0;
+                        //全部分组均有密码时终止轮转，避免死循环 ANR
+                        if (maxTurn-- <= 0) {
+                            channelGroupIndex = currentChannelGroupIndex;
+                            break;
+                        }
                     } while (!liveChannelGroupList.get(channelGroupIndex).getGroupPassword().isEmpty() || channelGroupIndex == currentChannelGroupIndex);
                 }
             }
@@ -2056,10 +2062,16 @@ public class LivePlayActivity extends BaseActivity {
             liveChannelIndex--;
             if (liveChannelIndex < 0) {
                 if (Hawk.get(HawkConfig.LIVE_CROSS_GROUP, false)) {
+                    int maxTurn = liveChannelGroupList.size();
                     do {
                         channelGroupIndex--;
                         if (channelGroupIndex < 0)
                             channelGroupIndex = liveChannelGroupList.size() - 1;
+                        //全部分组均有密码时终止轮转，避免死循环 ANR
+                        if (maxTurn-- <= 0) {
+                            channelGroupIndex = currentChannelGroupIndex;
+                            break;
+                        }
                     } while (!liveChannelGroupList.get(channelGroupIndex).getGroupPassword().isEmpty() || channelGroupIndex == currentChannelGroupIndex);
                 }
                 liveChannelIndex = getLiveChannels(channelGroupIndex).size() - 1;

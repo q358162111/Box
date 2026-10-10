@@ -846,7 +846,8 @@ public class HomeActivity extends BaseActivity {
     protected void onDestroy() {
         super.onDestroy();
         if (EventBus.getDefault().isRegistered(this)) EventBus.getDefault().unregister(this);
-        AppManager.getInstance().appExit(0);
+        // 不能在 onDestroy 里杀进程：切源/重载首页用 CLEAR_TASK 重启本 Activity 时会走到这里，杀进程=整个 App 退出
+        // 退出 App 统一走 doExit()
         ControlManager.get().stopServer();
     }
 

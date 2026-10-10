@@ -97,8 +97,9 @@ public class IjkmPlayer extends IjkPlayer {
             setDataSourceHeader(headers);
         } catch (Exception e) {
             mPlayerEventListener.onError(-1, PlayerHelper.getRootCauseMessage(e));
-            // 出错后不再继续设置数据源，避免同时收到错误与 prepared 状态
-            return;
+            // 出错后抛出，由 BaseVideoView.prepareDataSource 捕获并放弃本次 prepare，
+            // 避免错误状态随即被 STATE_PREPARING 覆盖导致状态机卡死
+            throw new IllegalStateException("setDataSource failed", e);
         }
         //mMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "protocol_whitelist", "ijkio,ffio,async,cache,crypto,file,http,https,ijkhttphook,ijkinject,ijklivehook,ijklongurl,ijksegment,ijktcphook,pipe,rtp,tcp,tls,udp,ijkurlhook,data");
         mMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "protocol_whitelist", "ijkio,ffio,async,cache,crypto,file,dash,http,https,ijkhttphook,ijkinject,ijklivehook,ijklongurl,ijksegment,ijktcphook,pipe,rtp,tcp,tls,udp,ijkurlhook,data,concat,subfile,ffconcat");

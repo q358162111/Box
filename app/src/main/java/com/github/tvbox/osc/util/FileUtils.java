@@ -304,7 +304,7 @@ public class FileUtils {
     public static String get(String str, Map<String, String> headerMap) {
         try {
             HttpHeaders h = new HttpHeaders();
-            Response response = null;
+            Response response;
             if (headerMap != null) {
                 for (String key : headerMap.keySet()) {
                     h.put(key, headerMap.get(key));
@@ -313,12 +313,15 @@ public class FileUtils {
             } else {
                 response =OkGo.<String>get(str).headers("User-Agent", str.startsWith("https://gitcode.net/") ? UA.random() : "okhttp/3.15").execute();
             }
-            if (response.isSuccessful() && response.body() != null){
-                return new String(response.body().bytes(), "UTF-8");
-            } else {
-                // 非 2xx 时关闭响应体，避免连接无法归还连接池
+            //统一在读取后关闭响应，成功路径同样要归还连接，避免连接/线程泄漏
+            try {
+                if (response.isSuccessful() && response.body() != null) {
+                    return new String(response.body().bytes(), "UTF-8");
+                } else {
+                    return "";
+                }
+            } finally {
                 response.close();
-                return "";
             }
         } catch (IOException e) {
             return "";

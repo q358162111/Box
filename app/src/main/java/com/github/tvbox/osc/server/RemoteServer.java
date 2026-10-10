@@ -98,6 +98,24 @@ public class RemoteServer extends NanoHTTPD {
         return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.FORBIDDEN, NanoHTTPD.MIME_PLAINTEXT, "Forbidden: path traversal detected");
     }
 
+    /**
+     * 读取文件全部字节，供 /file 端点以内存流方式返回，避免持有 FileInputStream 导致 fd 泄漏
+     */
+    private static byte[] readFileBytes(File file) throws IOException {
+        FileInputStream fis = new FileInputStream(file);
+        try {
+            byte[] buffer = new byte[8192];
+            java.io.ByteArrayOutputStream bos = new java.io.ByteArrayOutputStream();
+            int n;
+            while ((n = fis.read(buffer)) != -1) {
+                bos.write(buffer, 0, n);
+            }
+            return bos.toByteArray();
+        } finally {
+            fis.close();
+        }
+    }
+
     private void addGetRequestProcess() {
         getRequestList.add(new RawRequestProcess(this.mContext, "/", R.raw.index, NanoHTTPD.MIME_HTML));
         getRequestList.add(new RawRequestProcess(this.mContext, "/index.html", R.raw.index, NanoHTTPD.MIME_HTML));
@@ -127,6 +145,10 @@ public class RemoteServer extends NanoHTTPD {
 
     private Response getProxy(Object[] rs){
         try {
+            //源未配置或解析异常时 proxyLocal/proxy 可能返回 null
+            if (rs == null || rs.length < 3) {
+                return NanoHTTPD.newFixedLengthResponse(Response.Status.INTERNAL_ERROR, NanoHTTPD.MIME_PLAINTEXT, "proxy error");
+            }
             if (rs[0] instanceof NanoHTTPD.Response) return (NanoHTTPD.Response) rs[0];
             int code = (int) rs[0];
             String mime = (String) rs[1];
@@ -188,7 +210,9 @@ public class RemoteServer extends NanoHTTPD {
                         }
                         if (localFile.exists()) {
                             if (localFile.isFile()) {
-                                return NanoHTTPD.newChunkedResponse(NanoHTTPD.Response.Status.OK, "application/octet-stream", new FileInputStream(localFile));
+                                //读入内存后用 ByteArrayInputStream，流无需显式关闭，避免 fd 泄漏
+                                byte[] fileBytes = readFileBytes(localFile);
+                                return NanoHTTPD.newChunkedResponse(NanoHTTPD.Response.Status.OK, "application/octet-stream", new ByteArrayInputStream(fileBytes));
                             } else {
                                 return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, NanoHTTPD.MIME_PLAINTEXT, fileList(root, f));
                             }
@@ -219,7 +243,8 @@ public class RemoteServer extends NanoHTTPD {
                         String data = new String(Base64.decode(dashData, Base64.DEFAULT | Base64.NO_WRAP), "UTF-8");
                         return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/dash+xml", data);
                     } catch (Throwable th) {
-                        return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR, NanoHTTPD.MIME_PLAINTEXT, dashData);
+                        //解码失败时不得把原始 dashData 回写网络端点，避免内部数据泄漏
+                        return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR, NanoHTTPD.MIME_PLAINTEXT, "dash decode error");
                     }
                 }
             } else if (session.getMethod() == Method.POST) {

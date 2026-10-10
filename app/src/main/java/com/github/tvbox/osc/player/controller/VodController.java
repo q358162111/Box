@@ -141,7 +141,7 @@ public class VodController extends BaseController {
                         mHandler.postDelayed(mUpdateLayout, 255);   // Workaround Fix : SurfaceView
 
                         // takagen99: Check if Touch Screen, show back button
-                        if (((BaseActivity) mActivity).supportsTouch()) {
+                        if (mActivity instanceof BaseActivity && ((BaseActivity) mActivity).supportsTouch()) {
                             mBack.setVisibility(VISIBLE);
                         }
                         updateDanmuBtn();
@@ -220,13 +220,14 @@ public class VodController extends BaseController {
                     }
                     case 1004: { // 设置速度
                         if (isInPlaybackState()) {
+                            mSpeedRetryCount = 0;
                             try {
                                 float speed = (float) mPlayerConfig.getDouble("sp");
                                 mControlWrapper.setSpeed(speed);
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
-                        } else
+                        } else if (mSpeedRetryCount++ < 50) // 非播放态最多重试 5 秒，避免错误态下无限占用主线程
                             mHandler.sendEmptyMessageDelayed(1004, 100);
                         break;
                     }
@@ -1274,10 +1275,10 @@ public class VodController extends BaseController {
                 mPauseImg.setImageDrawable(getResources().getDrawable(R.drawable.v_play));
                 break;
             case VideoView.STATE_ERROR:
-                listener.errReplay();
+                if (listener != null) listener.errReplay();
                 break;
             case VideoView.STATE_PREPARED:
-                listener.prepared();
+                if (listener != null) listener.prepared();
                 // takagen99 : Add Video Resolution
                 if (mControlWrapper.getVideoSize().length >= 2) {
                     mPlayerResolution.setText(mControlWrapper.getVideoSize()[0] + " x " + mControlWrapper.getVideoSize()[1]);
@@ -1289,7 +1290,7 @@ public class VodController extends BaseController {
             case VideoView.STATE_BUFFERING:
                 break;
             case VideoView.STATE_PLAYBACK_COMPLETED:
-                listener.playNext(true);
+                if (listener != null) listener.playNext(true);
                 break;
         }
     }
@@ -1297,6 +1298,9 @@ public class VodController extends BaseController {
     boolean isBottomVisible() {
         return mBottomRoot.getVisibility() == VISIBLE;
     }
+
+    // 1004 速度设置在非播放态下的重试计数（防无限重投）
+    private int mSpeedRetryCount = 0;
 
     void showBottom() {
         mHandler.removeMessages(1003);

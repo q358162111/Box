@@ -67,8 +67,13 @@ public class SubtitleHelper {
             Hawk.put(HawkConfig.SUBTITLE_TEXT_STYLE, style);
         }
         int[][] subtitleTextColor = getSubtitleTextColor();
-        mSubtitleView.setTextColor(subtitleTextColor[0][colorIndex]);
-        mSubtitleView.setShadowLayer(10, 0, 0, subtitleTextColor[1][colorIndex]);
+        // colorIndex 来自用户配置，配置与资源不匹配时钳制到合法范围，避免越界崩溃
+        int idx = colorIndex == null ? 0 : colorIndex;
+        if (subtitleTextColor[0].length > 0) {
+            idx = Math.max(0, Math.min(idx, subtitleTextColor[0].length - 1));
+            mSubtitleView.setTextColor(subtitleTextColor[0][idx]);
+            mSubtitleView.setShadowLayer(10, 0, 0, subtitleTextColor[1][idx]);
+        }
         // mSubtitleView.setBackGroundTextColor(subtitleTextColor[1][colorIndex]);
     }
 

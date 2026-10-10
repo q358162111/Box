@@ -56,6 +56,12 @@
 | Gradle | 项目自带 `gradlew` 包装器，无需手动安装 |
 
 > 首次构建需联网下载依赖（已配置阿里云镜像与 JitPack 仓库，国内网络友好）。
+>
+> 网络受限环境的构建说明：
+> - `build.gradle` 已配置 `mavenLocal()` 与项目内仓库 `local-maven/`，预置了
+>   因 JitPack 下载不稳定而无法拉取的构件（如 `nextlib-media3ext`），可直接离线使用；
+> - `gradle.properties` 的 JVM 参数已追加 `-Djava.net.preferIPv6Addresses=true`，
+>   本机 IPv4 到 jitpack.io 限速严重时（约 90KB/s），强制 IPv6 可恢复正常下载速度。
 
 ## 快速开始
 

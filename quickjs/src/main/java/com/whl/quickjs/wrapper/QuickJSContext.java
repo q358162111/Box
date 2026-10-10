@@ -38,9 +38,11 @@ public class QuickJSContext {
 
     public void destroyContext() {
         checkSameThread();
+        checkDestroyed();
 
         nativeCleaner.forceClean();
         destroyContext(context);
+        destroyed = true;
     }
 
     public void setProperty(JSObject jsObj, String name, Object value) {

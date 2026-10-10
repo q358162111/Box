@@ -2,6 +2,7 @@
 buildscript {
     ext.kotlin_version = "1.9.25"
     repositories {
+        mavenLocal() // Gradle 在线下载偶发僵死时，手动预置的构件可从本地 maven 仓库取用
         gradlePluginPortal()
         google()
         mavenCentral()
@@ -24,6 +25,9 @@ buildscript {
 
 allprojects {
     repositories {
+        mavenLocal() // 同上：优先使用本地预置构件
+        // 项目内本地仓库：预置因网络/DNS 问题无法从 jitpack 稳定下载的构件（如 nextlib-media3ext）
+        maven { url "$rootDir/local-maven" }
         google()
         mavenCentral()
         maven { url "https://jitpack.io" }

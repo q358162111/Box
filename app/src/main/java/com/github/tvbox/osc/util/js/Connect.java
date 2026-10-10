@@ -34,6 +34,7 @@ public class Connect {
     }
 
     public static JSObject success(QuickJSContext ctx, Req req, Response res) {
+        //读取完成后必须关闭 Response，否则连接无法归还连接池
         try {
             JSObject jsObject = ctx.createJSObject();
             JSObject jsHeader = ctx.createJSObject();
@@ -50,6 +51,8 @@ public class Connect {
             return jsObject;
         } catch (Exception e) {
             return error(ctx);
+        } finally {
+            res.close();
         }
     }
 

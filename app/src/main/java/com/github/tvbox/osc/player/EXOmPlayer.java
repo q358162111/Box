@@ -119,4 +119,14 @@ public class EXOmPlayer extends ExoMediaPlayer {
         mMediaPlayer.addListener(listener);
     }
 
+    @Override
+    public void release() {
+        // release 时反注册字幕监听器，避免匿名 Listener 强引用 Controller/Activity 造成泄漏
+        if (timedTextListener != null && mMediaPlayer != null) {
+            mMediaPlayer.removeListener(timedTextListener);
+        }
+        timedTextListener = null;
+        super.release();
+    }
+
 }

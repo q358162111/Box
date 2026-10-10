@@ -92,7 +92,7 @@ public class HomeHotVodAdapter extends BaseQuickAdapter<Movie.Video, BaseViewHol
      * 根据传入的 style 动态设置 ImageView 的高度：高度 = 宽度 / ratio
      */
     private void applyStyleToImage(final ImageView ivThumb) {
-        if(style!=null){
+        if(style!=null && style.ratio > 0){
             ViewGroup container = (ViewGroup) ivThumb.getParent();
             int width = defaultWidth;
             int height = (int) (width / style.ratio);

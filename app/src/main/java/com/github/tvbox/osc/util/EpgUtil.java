@@ -12,12 +12,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
-import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class EpgUtil {
 
-    private static JsonObject epgDoc = null;
-    private static HashMap<String, JsonObject> epgHashMap = new HashMap<>();
+    private static volatile JsonObject epgDoc = null;
+    // init 在后台线程写、getEpgInfo 在主线程读，必须用并发容器避免半填充结构
+    private static final Map<String, JsonObject> epgHashMap = new ConcurrentHashMap<>();
 
     /**
      * 台标 URL 模板，由 lives[].logo 配置注入。
