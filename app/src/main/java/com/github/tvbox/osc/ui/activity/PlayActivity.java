@@ -512,7 +512,7 @@ public class PlayActivity extends BaseActivity {
                         mController.mSubtitleView.clearSubtitleCache();
                         mController.mSubtitleView.isInternal = true;
                         ((IjkmPlayer) mediaPlayer).setTrack(value.trackId);
-                        new Handler().postDelayed(new Runnable() {
+                        mHandler.postDelayed(new Runnable() {
                             @Override
                             public void run() {
                                 mediaPlayer.seekTo(progress);
@@ -525,7 +525,7 @@ public class PlayActivity extends BaseActivity {
                         mController.mSubtitleView.clearSubtitleCache();
                         mController.mSubtitleView.isInternal = true;
                         ((EXOmPlayer) mediaPlayer).selectExoTrack(value);
-                        new Handler().postDelayed(new Runnable() {
+                        mHandler.postDelayed(new Runnable() {
                             @Override
                             public void run() {
                                 mediaPlayer.seekTo(progress);
@@ -593,7 +593,7 @@ public class PlayActivity extends BaseActivity {
                     if (mediaPlayer instanceof EXOmPlayer) {
                         ((EXOmPlayer) mediaPlayer).selectExoTrack(value);
                     }
-                    new Handler().postDelayed(new Runnable() {
+                    mHandler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
                             mediaPlayer.seekTo(progress);
@@ -1290,6 +1290,9 @@ public class PlayActivity extends BaseActivity {
         if(executorService!=null){
             executorService.shutdownNow();
             executorService = null;
+        }
+        if (mHandler != null) {
+            mHandler.removeCallbacksAndMessages(null);
         }
         //手动注销
         sourceViewModel.playResult.removeObserver(mObserverPlayResult);

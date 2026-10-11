@@ -42,7 +42,11 @@ public class PythonSpider extends Spider {
     @Override
     public void init(Context context) {
         if (app == null || pySpider == null) return;
-        app.callAttr("init", pySpider);
+        try {
+            app.callAttr("init", pySpider);
+        } catch (Throwable th) {
+            PyLog.e("init-" + name, "插件 init 异常: " + th.getMessage());
+        }
     }
 
     public void init(Context context, String url) {

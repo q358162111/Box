@@ -43,20 +43,13 @@
 -keep public class * extends android.preference.Preference
 -keep public class * extends android.view.View
 
-# 保留support下的所有类及其内部类
--keep class android.support.** {*;}
-# 保留继承的
--keep public class * extends android.support.v4.**
--keep public class * extends android.support.v7.**
--keep public class * extends android.support.annotation.**
+# support 库遗留规则已删除:项目依赖全部为 AndroidX
 
 -keep class com.google.android.material.** { *; }
 -dontwarn com.google.android.material.**
 -dontnote com.google.android.material.**
 -dontwarn androidx.**
--keep class androidx.** { *; }
--keep interface androidx.** { *; }
-#-keep public class * extends androidx.**
+# androidx 各库自带 consumer rules,无需全量 keep(反射场景如有再单独加)
 
 -keep class org.xmlpull.v1.** {*;}
 
@@ -132,12 +125,9 @@
 -dontwarn android.view.**
 -dontwarn android.media.**
 -dontwarn org.chromium.**
-#okhttp
+#okhttp/okio 自带 R8 consumer rules,无需全量 keep
 -dontwarn okhttp3.**
--keep class okhttp3.**{*;}
-#okio
 -dontwarn okio.**
--keep class okio.**{*;}
 #loadsir
 -dontwarn com.kingja.loadsir.**
 -keep class com.kingja.loadsir.** {*;}
@@ -177,7 +167,6 @@
 #bugly
 -dontwarn com.tencent.bugly.**
 -keep public class com.tencent.bugly.**{*;}
--keep class android.support.**{*;}
 
 #dkplayer
 -keep class com.dueeeke.videoplayer.** { *; }

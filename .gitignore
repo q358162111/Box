@@ -85,6 +85,13 @@ fastlane/readme.md
 # Version control
 vcs.xml
 
+# flavor APK output dirs (custom outputFileName places them at module root)
+/app/arm64Generic/
+/app/arm64GenericNormal/
+/app/arm64HisenseNormal/
+/app/armeabiGeneric/
+/app/armeabiHisenseNormal/
+
 # lint
 lint/intermediates/
 lint/generated/

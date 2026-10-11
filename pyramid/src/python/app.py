@@ -14,9 +14,14 @@ def createFile(file_path):
 
 def redirectResponse(tUrl):
   # 限制最大跳转次数并设置超时，避免循环重定向递归爆栈、网络挂起线程卡死
+  # 优先校验 HTTPS 证书；部分插件源证书不规范，失败时降级跳过校验并打警告
   currentUrl = tUrl
   for _ in range(10):
-    rsp = requests.get(currentUrl, allow_redirects=False, verify=False, timeout=(5, 10))
+    try:
+      rsp = requests.get(currentUrl, allow_redirects=False, timeout=(5, 10))
+    except requests.exceptions.SSLError:
+      print('SSL verify failed, fallback to no-verify: ' + currentUrl)
+      rsp = requests.get(currentUrl, allow_redirects=False, verify=False, timeout=(5, 10))
     if 'Location' in rsp.headers:
       currentUrl = rsp.headers['Location']
     else:

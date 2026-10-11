@@ -113,6 +113,29 @@ public class SourceViewModel extends ViewModel {
 
     public static final ExecutorService spThreadPool = Executors.newSingleThreadExecutor();
 
+    // 共享的 Spider 调用线程池:避免每次请求都创建/销毁一次性单线程池
+    private static final ExecutorService spiderCallExecutor = Executors.newCachedThreadPool(r -> {
+        Thread t = new Thread(r, "spider-call");
+        t.setDaemon(true);
+        return t;
+    });
+
+    /**
+     * 在共享线程池中执行 Spider 调用并限时等待,超时或异常返回 null(超时会取消任务)。
+     */
+    private static String callSpiderWithTimeout(Callable<String> task, long timeoutSeconds) {
+        Future<String> future = spiderCallExecutor.submit(task);
+        try {
+            return future.get(timeoutSeconds, TimeUnit.SECONDS);
+        } catch (TimeoutException e) {
+            e.printStackTrace();
+            future.cancel(true);
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     //homeContent缓存，最多存储5个sourceKey的AbsSortXml对象
     //主线程回调与后台线程并发读写，必须同步包装（LinkedHashMap accessOrder 并发访问会损坏链表）
     private static final Map<String, AbsSortXml> sortCache = Collections.synchronizedMap(new LinkedHashMap<String, AbsSortXml>(5, 0.75f, true) {
@@ -151,53 +174,37 @@ public class SourceViewModel extends ViewModel {
             Runnable waitResponse = new Runnable() {
                 @Override
                 public void run() {
-                    ExecutorService executor = Executors.newSingleThreadExecutor();
-                    Future<String> future = executor.submit(new Callable<String>() {
+                    String sortJson = callSpiderWithTimeout(new Callable<String>() {
                         @Override
                         public String call() throws Exception {
                             Spider sp = ApiConfig.get().getCSP(sourceBean);
                             return sp.homeContent(true);
                         }
-                    });
-                    String sortJson = null;
-                    try {
-                        sortJson = future.get(20, TimeUnit.SECONDS);
-                    } catch (TimeoutException e) {
-                        e.printStackTrace();
-                        future.cancel(true);
-                    } catch (InterruptedException | ExecutionException e) {
-                        e.printStackTrace();
-                    } finally {
-                        if (sortJson != null) {
-                            final AbsSortXml sortXml = sortJson(sortResult, sortJson);
-                            if (sortXml != null && Hawk.get(HawkConfig.HOME_REC, 0) == 1) {
-                                AbsXml absXml = json(null, sortJson, sourceBean.getKey());
-                                if (absXml != null && absXml.movie != null && absXml.movie.videoList != null && absXml.movie.videoList.size() > 0) {
-                                    sortXml.videoList = absXml.movie.videoList;
-                                    sortResult.postValue(sortXml);
-                                    sortCache.put(sourceKey, sortXml);
-                                } else {
-                                    getHomeRecList(sourceBean, null, new HomeRecCallback() {
-                                        @Override
-                                        public void done(List<Movie.Video> videos) {
-                                            sortXml.videoList = videos;
-                                            sortResult.postValue(sortXml);
-                                            sortCache.put(sourceKey, sortXml);
-                                        }
-                                    });
-                                }
-                            } else {
+                    }, 20);
+                    if (sortJson != null) {
+                        final AbsSortXml sortXml = sortJson(sortResult, sortJson);
+                        if (sortXml != null && Hawk.get(HawkConfig.HOME_REC, 0) == 1) {
+                            AbsXml absXml = json(null, sortJson, sourceBean.getKey());
+                            if (absXml != null && absXml.movie != null && absXml.movie.videoList != null && absXml.movie.videoList.size() > 0) {
+                                sortXml.videoList = absXml.movie.videoList;
                                 sortResult.postValue(sortXml);
                                 sortCache.put(sourceKey, sortXml);
+                            } else {
+                                getHomeRecList(sourceBean, null, new HomeRecCallback() {
+                                    @Override
+                                    public void done(List<Movie.Video> videos) {
+                                        sortXml.videoList = videos;
+                                        sortResult.postValue(sortXml);
+                                        sortCache.put(sourceKey, sortXml);
+                                    }
+                                });
                             }
                         } else {
-                            sortResult.postValue(null);
+                            sortResult.postValue(sortXml);
+                            sortCache.put(sourceKey, sortXml);
                         }
-                        try {
-                            executor.shutdown();
-                        } catch (Throwable th) {
-                            th.printStackTrace();
-                        }
+                    } else {
+                        sortResult.postValue(null);
                     }
                 }
             };
@@ -419,38 +426,22 @@ public class SourceViewModel extends ViewModel {
             Runnable waitResponse = new Runnable() {
                 @Override
                 public void run() {
-                    ExecutorService executor = Executors.newSingleThreadExecutor();
-                    Future<String> future = executor.submit(new Callable<String>() {
+                    String sortJson = callSpiderWithTimeout(new Callable<String>() {
                         @Override
                         public String call() throws Exception {
                             Spider sp = ApiConfig.get().getCSP(sourceBean);
                             return sp.homeVideoContent();
                         }
-                    });
-                    String sortJson = null;
-                    try {
-                        sortJson = future.get(15, TimeUnit.SECONDS);
-                    } catch (TimeoutException e) {
-                        e.printStackTrace();
-                        future.cancel(true);
-                    } catch (InterruptedException | ExecutionException e) {
-                        e.printStackTrace();
-                    } finally {
-                        if (sortJson != null) {
-                            AbsXml absXml = json(null, sortJson, sourceBean.getKey());
-                            if (absXml != null && absXml.movie != null && absXml.movie.videoList != null) {
-                                callback.done(absXml.movie.videoList);
-                            } else {
-                                callback.done(null);
-                            }
+                    }, 15);
+                    if (sortJson != null) {
+                        AbsXml absXml = json(null, sortJson, sourceBean.getKey());
+                        if (absXml != null && absXml.movie != null && absXml.movie.videoList != null) {
+                            callback.done(absXml.movie.videoList);
                         } else {
                             callback.done(null);
                         }
-                        try {
-                            executor.shutdown();
-                        } catch (Throwable th) {
-                            th.printStackTrace();
-                        }
+                    } else {
+                        callback.done(null);
                     }
                 }
             };
@@ -529,8 +520,7 @@ public class SourceViewModel extends ViewModel {
             spThreadPool.execute(new Runnable() {
                 @Override
                 public void run() {
-                    ExecutorService executor = Executors.newSingleThreadExecutor();
-                    Future<String> future = executor.submit(new Callable<String>() {
+                    String json = callSpiderWithTimeout(new Callable<String>() {
                         @Override
                         public String call() {
                             Spider sp = ApiConfig.get().getCSP(sourceBean);
@@ -543,21 +533,9 @@ public class SourceViewModel extends ViewModel {
                                 return "";
                             }
                         }
-                    });
-
-                    String json = null;
-                    try {
-                        json = future.get(15, TimeUnit.SECONDS);
-                        LOG.i("echo--getDetail--result:" + json);
-                    } catch (TimeoutException e) {
-                        LOG.i("echo--getDetail--timeout");
-                        future.cancel(true);
-                    } catch (Exception e) {
-                        LOG.i("echo--getDetail--error: " + e.getMessage());
-                    } finally {
-                        json(detailResult, json, sourceBean.getKey());
-                        executor.shutdown();
-                    }
+                    }, 15);
+                    LOG.i("echo--getDetail--result:" + json);
+                    json(detailResult, json, sourceBean.getKey());
                 }
             });
         } else if (type == 0 || type == 1|| type == 4) {
@@ -1015,9 +993,8 @@ public class SourceViewModel extends ViewModel {
                                 final AbsXml[] resData = {null};
 
                                 final CountDownLatch countDownLatch = new CountDownLatch(1);
-                                ExecutorService threadPool = Executors.newSingleThreadExecutor();
                                 String finalPushUrl = pushUrl;
-                                threadPool.execute(new Runnable() {
+                                spiderCallExecutor.execute(new Runnable() {
                                     @Override
                                     public void run() {
                                         SourceBean sb = ApiConfig.get().getSource("push_agent");
@@ -1088,7 +1065,6 @@ public class SourceViewModel extends ViewModel {
                                 });
                                 try {
                                     countDownLatch.await(15, TimeUnit.SECONDS);
-                                    threadPool.shutdown();
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
                                 }
