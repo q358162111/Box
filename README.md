@@ -211,6 +211,14 @@ CLEARTEXT 明文与主机名校验问题，会导致部分直播频道无法播�
 **Q：release 包无法安装 / 签名问题？**
 release 未配置签名，需在 `app/build.gradle` 中自行添加 `signingConfig` 后重新构建。
 
+**Q：应用内检查更新提示"下载失败"？**
+检查更新与下载 APK 分两个地址：版本元数据（`output-metadata.json`）托管在仓库
+`raw/main/firmware/`，APK 本体托管在仓库的 Release 附件（`releases/download/stable/`）。
+注意 Gitee 对 raw 直链的大文件强制要求登录（匿名下载返回 403），因此 APK 不能放在 raw
+目录分发，必须使用 Release 附件。发布新版本时需同时：更新 `firmware/output-metadata.json`
+中的 `versionName` 与 `outputFile`，并将对应 APK 以相同文件名上传到 `stable` Release
+（同名附件重复上传会被加后缀，先删旧附件再上传）。
+
 **Q：Python 版为何比 Java 版体积大？**
 `python` flavor 内置了 Python 运行时与依赖库，属于预期行为。
 

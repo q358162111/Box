@@ -41,9 +41,10 @@ public class UpdateChecker {
 
     private static final String TAG = "UpdateChecker";
     private static final String UPDATE_URL = "https://gitee.com/hong-j/apk/raw/main/firmware/output-metadata.json";
-    private static final String APK_URL_DIR = "https://gitee.com/hong-j/apk/raw/main/firmware/";
-    private static final String APK_URL_TEMPLATE = "https://gitee.com/hong-j/apk/raw/main/firmware/TVBox_release-%s-%s-%s.apk";
-    private static final String APK_URL_FALLBACK = "https://gitee.com/hong-j/apk/raw/main/firmware/TVBox_release-armeabi-hisense-java.apk";
+    // Gitee raw 直链对大文件强制要求登录（403），APK 改用 Release 附件直链下载
+    private static final String APK_URL_DIR = "https://gitee.com/hong-j/apk/releases/download/stable/";
+    private static final String APK_URL_TEMPLATE = "https://gitee.com/hong-j/apk/releases/download/stable/TVBox_release-%s-%s-%s.apk";
+    private static final String APK_URL_FALLBACK = "https://gitee.com/hong-j/apk/releases/download/stable/TVBox_release-armeabi-hisense-java.apk";
     private static final int CONNECT_TIMEOUT_MS = 15000;
     private static final int READ_TIMEOUT_MS = 60000;
     private static final int BUFFER_SIZE = 8192;
