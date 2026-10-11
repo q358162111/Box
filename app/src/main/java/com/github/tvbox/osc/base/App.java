@@ -5,7 +5,6 @@ import android.os.Handler;
 import android.os.Looper;
 
 import androidx.core.os.HandlerCompat;
-import androidx.multidex.MultiDexApplication;
 
 import com.github.catvod.crawler.JarLoader;
 import com.github.catvod.crawler.JsLoader;
@@ -44,7 +43,7 @@ import me.jessyan.autosize.unit.Subunits;
  * @date :2020/12/17
  * @description:
  */
-public class App extends MultiDexApplication {
+public class App extends android.app.Application {
     private static App instance;
     private static P2PClass p;
     public static String burl;

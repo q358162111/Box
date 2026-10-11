@@ -12,7 +12,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -162,7 +161,7 @@ public class Path {
             byte[] buffer = new byte[8192];
             int n;
             while ((n = input.read(buffer)) != -1) bos.write(buffer, 0, n);
-            return bos.toString(StandardCharsets.UTF_8);
+            return bos.toString("UTF-8");
         } catch (IOException e) {
             e.printStackTrace();
             return "";

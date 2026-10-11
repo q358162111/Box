@@ -31,8 +31,6 @@ import okhttp3.ConnectionSpec;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.dnsoverhttps.DnsOverHttps;
-import okhttp3.internal.Util;
-import okhttp3.internal.Version;
 import xyz.doikki.videoplayer.exo.ExoMediaSourceHelper;
 
 public class OkGoHelper {
@@ -89,7 +87,7 @@ public class OkGoHelper {
     public static List<ConnectionSpec> getConnectionSpec() {
         // 保留 CLEARTEXT：IPTV/直播源生态以 http:// 明文地址为主，移除会导致直播无法播放。
         // 明文风险由使用方自行承担（本应用定位为通用播放器，需兼容任意用户提供的源）。
-        return Util.immutableList(RESTRICTED_TLS, MODERN_TLS, COMPATIBLE_TLS, CLEARTEXT);
+        return java.util.Collections.unmodifiableList(java.util.Arrays.asList(RESTRICTED_TLS, MODERN_TLS, COMPATIBLE_TLS, CLEARTEXT));
     }
 
 
@@ -143,10 +141,57 @@ public class OkGoHelper {
         }
         builder.connectionSpecs(getConnectionSpec());
         builder.cache(new Cache(new File(App.getInstance().getCacheDir().getAbsolutePath(), "dohcache"), 10 * 1024 * 1024));
-        OkHttpClient dohClient = builder.build();
+        dohClient = builder.build();
         String dohUrl = getDohUrl(Hawk.get(HawkConfig.DOH_URL, 0));
         // DOH 关闭时不构建 DnsOverHttps，回退系统 DNS（避免 null url 的 DoH 对象导致 NPE）
         dnsOverHttps = dohUrl.isEmpty() ? null : new DnsOverHttps.Builder().client(dohClient).url(HttpUrl.get(dohUrl)).build();
+    }
+
+    private static OkHttpClient dohClient = null;
+
+    /**
+     * 官方 DnsOverHttps 不可变，切换 DoH 服务商时重建对象（已构建的客户端保持旧解析器，重启后生效）。
+     */
+    public static void updateDohUrl(String url) {
+        dnsOverHttps = (url == null || url.isEmpty()) ? null
+                : new DnsOverHttps.Builder().client(dohClient).url(HttpUrl.get(url)).build();
+    }
+
+    /**
+     * 替代旧 vendored DnsOverHttps.lookupHttpsForwardSync：用官方 lookup 解析后
+     * 编码为最小化的 DNS 应答报文（仅 A 记录），供 RemoteServer 的 /dns-query 端点使用。
+     */
+    public static byte[] lookupHttpsForwardSync(String name) throws Exception {
+        if (dnsOverHttps == null) throw new IllegalStateException("DoH is disabled");
+        java.util.List<java.net.InetAddress> addresses = dnsOverHttps.lookup(name);
+        java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream();
+        java.io.DataOutputStream d = new java.io.DataOutputStream(out);
+        int answerCount = 0;
+        for (java.net.InetAddress addr : addresses) if (addr instanceof java.net.Inet4Address) answerCount++;
+        d.writeShort(0);            // ID
+        d.writeShort(0x8180);       // QR=1, RD=1, RA=1
+        d.writeShort(1);            // QDCOUNT
+        d.writeShort(answerCount);  // ANCOUNT
+        d.writeShort(0);            // NSCOUNT
+        d.writeShort(0);            // ARCOUNT
+        for (String label : name.split("\\.")) {
+            d.writeByte(label.length());
+            d.write(label.getBytes("UTF-8"));
+        }
+        d.writeByte(0);             // QNAME 结束
+        d.writeShort(1);            // QTYPE = A
+        d.writeShort(1);            // QCLASS = IN
+        for (java.net.InetAddress addr : addresses) {
+            if (!(addr instanceof java.net.Inet4Address)) continue;
+            d.writeShort(0xC00C);   // 指向 QNAME
+            d.writeShort(1);        // TYPE = A
+            d.writeShort(1);        // CLASS = IN
+            d.writeInt(60);         // TTL
+            d.writeShort(4);        // RDLENGTH
+            d.write(addr.getAddress());
+        }
+        d.flush();
+        return out.toByteArray();
     }
 
     static OkHttpClient defaultClient = null;
@@ -187,7 +232,7 @@ public class OkGoHelper {
             th.printStackTrace();
         }
 
-        HttpHeaders.setUserAgent(Version.userAgent());
+        HttpHeaders.setUserAgent("okhttp/4.12.0");
         OkHttpClient okHttpClient = builder.build();
         OkGo.getInstance().setOkHttpClient(okHttpClient);
 

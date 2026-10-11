@@ -1,7 +1,9 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
-    ext.kotlin_version = "1.9.25"
+    ext.kotlin_version = "2.0.21"
     repositories {
+        maven { url "https://maven.aliyun.com/repository/public" } // 国内镜像优先，规避 gradlePluginPortal 下载僵死
+        maven { url "https://maven.aliyun.com/repository/gradle-plugin" }
         mavenLocal() // Gradle 在线下载偶发僵死时，手动预置的构件可从本地 maven 仓库取用
         gradlePluginPortal()
         google()
@@ -13,11 +15,10 @@ buildscript {
         maven { url "https://chaquo.com/maven" }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.4.2'
+        classpath 'com.android.tools.build:gradle:8.7.3'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
-        classpath("com.android.tools:r8:8.5.35")
         classpath 'com.yanzhenjie.andserver:plugin:2.1.12'
         classpath "com.chaquo.python:gradle:12.0.1"
     }
@@ -25,6 +26,7 @@ buildscript {
 
 allprojects {
     repositories {
+        maven { url "https://maven.aliyun.com/repository/public" } // 国内镜像优先
         mavenLocal() // 同上：优先使用本地预置构件
         // 项目内本地仓库：预置因网络/DNS 问题无法从 jitpack 稳定下载的构件（如 nextlib-media3ext）
         maven { url "$rootDir/local-maven" }

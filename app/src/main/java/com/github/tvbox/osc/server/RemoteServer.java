@@ -229,7 +229,7 @@ public class RemoteServer extends NanoHTTPD {
                     }
                     byte[] rs;
                     try {
-                        rs = OkGoHelper.dnsOverHttps.lookupHttpsForwardSync(name);
+                        rs = OkGoHelper.lookupHttpsForwardSync(name);
                     } catch (Throwable th) {
                         com.blankj.utilcode.util.LogUtils.e("RemoteServer", "dns lookup failed: " + name, th);
                         rs = new byte[0];
