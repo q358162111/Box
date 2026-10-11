@@ -163,7 +163,7 @@ public class SearchActivity extends BaseActivity {
     public void hideSystemKeyBoard() {
         InputMethodManager imm = (InputMethodManager) this.getSystemService(Context.INPUT_METHOD_SERVICE);
         if (imm.isActive()) {
-            imm.hideSoftInputFromWindow(etSearch.getApplicationWindowToken(), InputMethodManager.RESULT_UNCHANGED_SHOWN);
+            imm.hideSoftInputFromWindow(etSearch.getApplicationWindowToken(), 0);
         }
     }
 

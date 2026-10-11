@@ -150,7 +150,6 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="@dimen/vs_10"
             android:text="@string/act_search_trend"
-            android:textAlignment="viewStart"
             android:textColor="@android:color/white"
             android:textSize="@dimen/ts_22" />
 

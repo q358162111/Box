@@ -4,6 +4,7 @@ import static xyz.doikki.videoplayer.util.PlayerUtils.stringForTimeVod;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -363,6 +364,7 @@ public class LivePlayActivity extends BaseActivity {
     }
 
     @Override
+    @SuppressLint("MissingSuperCall") // 有意接管返回键：逐层收起面板/双击退出由 exit() 处理
     public void onBackPressed() {
         if (tvLeftChannelListLayout.getVisibility() == View.VISIBLE) {
             mHandler.removeCallbacks(mHideChannelListRun);

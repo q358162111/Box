@@ -1,5 +1,6 @@
 package com.github.tvbox.osc.server;
 
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -67,10 +68,17 @@ public class PlayService extends Service {
     }
     
     @Subscribe(threadMode = ThreadMode.MAIN)
+    @SuppressLint("MissingPermission") // 已在方法内做 API 33+ POST_NOTIFICATIONS 运行时校验
     public void refresh(RefreshEvent event){
         if (event.type == RefreshEvent.TYPE_REFRESH_NOTIFY){
             if (event.obj != null) {
                 videoInfo = event.obj.toString();
+            }
+            // API 33+ 通知权限运行时校验，未授权时跳过更新避免 SecurityException
+            if (android.os.Build.VERSION.SDK_INT >= 33 &&
+                    checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)
+                            != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                return;
             }
             NotificationManagerCompat.from(this).notify(NOTIFICATION_ID, buildNotification());
         }

@@ -267,17 +267,17 @@
         <item>Prefer configuration address</item>
         <item>Prefer setting configuration</item>
     </string-array>
-    <string name="checking_for_updates">正在检查更新...</string>
-    <string name="new_version_available">有新版本可用：%s</string>
-    <string name="you_are_up_to_date">您的软件已是最新版本</string>
-    <string name="failed_to_check_updates">检查更新失败</string>
-    <string name="error_checking_updates">检查更新时发生错误</string>
-    <string name="version_name_not_found">未找到版本号信息</string>
-    <string name="updating">软件下载中...</string>
-    <string name="update_message">是否下载更新</string>
-    <string name="download">下载</string>
-    <string name="download_failed">下载失败</string>
-    <string name="cancel">取消</string>
+    <string name="checking_for_updates">Checking for updates...</string>
+    <string name="new_version_available">New version available: %s</string>
+    <string name="you_are_up_to_date">Your app is up to date</string>
+    <string name="failed_to_check_updates">Failed to check for updates</string>
+    <string name="error_checking_updates">Error while checking for updates</string>
+    <string name="version_name_not_found">Version info not found</string>
+    <string name="updating">Downloading update...</string>
+    <string name="update_message">Download the update?</string>
+    <string name="download">Download</string>
+    <string name="download_failed">Download failed</string>
+    <string name="cancel">Cancel</string>
 
     <!-- 当前应用的版本号 -->
 

@@ -104,6 +104,8 @@ android {
         checkReleaseBuilds false
         abortOnError false
         disable 'UnsafeOptInUsageError'
+        // targetSdk 28 为有意保持：TV 应用依赖旧运行时行为（scoped storage 等），非疏忽
+        disable 'ExpiredTargetSdkVersion'
     }
 }
 

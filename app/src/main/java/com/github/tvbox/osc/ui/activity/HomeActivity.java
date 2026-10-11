@@ -402,7 +402,7 @@ public class HomeActivity extends BaseActivity {
                 SourceBean home = ApiConfig.get().getHomeSourceBean();
                 if (HomeShow) {
                     if (home != null && home.getName() != null && !home.getName().isEmpty()) tvName.setText(home.getName());
-                        tvName.clearAnimation();
+                    tvName.clearAnimation();
                 }
             }
         });
@@ -618,6 +618,7 @@ public class HomeActivity extends BaseActivity {
     }
 
     @Override
+    @SuppressLint("MissingSuperCall") // 有意接管返回键：双击退出由 doExit() 处理，调 super 会破坏该交互
     public void onBackPressed() {
         //打断加载
         if(isLoading()){
