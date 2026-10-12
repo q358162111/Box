@@ -35,10 +35,8 @@ public class PythonSpider extends Spider {
     }
 
     public PythonSpider(String name, String cache) {
-        // 未显式传路径时回落到应用私有外部目录(scoped storage 兼容)
-        this.cachePath = cache != null ? cache
-                : new File(PythonLoader.getInstance().app != null
-                        ? PythonLoader.getInstance().app.getExternalFilesDir(null) : null, "plugin") + File.separator;
+        // 未显式传路径时回落到 PythonLoader 的默认插件目录(应用私有外部目录,scoped storage 兼容)
+        this.cachePath = cache != null ? cache : PythonLoader.getInstance().cache;
         this.name = name;
     }
 
