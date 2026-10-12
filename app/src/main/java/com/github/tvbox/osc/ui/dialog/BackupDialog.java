@@ -167,12 +167,8 @@ public class BackupDialog extends BaseDialog {
                             }
                         }
                         Toast.makeText(getContext(), HomeActivity.getRes().getString(R.string.set_rest_ok), Toast.LENGTH_SHORT).show();
-                        new Handler().postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                restartApp();
-                            }
-                        }, 3000);
+                        // 恢复成功后延迟重启;App.post 复用应用级 Handler,重复触发时自动移除旧任务
+                        App.post(restartAppRunnable, 3000);
                     } else {
                         Toast.makeText(getContext(), HomeActivity.getRes().getString(R.string.set_rest_fail_hk), Toast.LENGTH_SHORT).show();
                     }
@@ -184,6 +180,13 @@ public class BackupDialog extends BaseDialog {
             e.printStackTrace();
         }
     }
+    private final Runnable restartAppRunnable = new Runnable() {
+        @Override
+        public void run() {
+            restartApp();
+        }
+    };
+
     private void restartApp() {
         Context context = getContext();
         if (context != null) {

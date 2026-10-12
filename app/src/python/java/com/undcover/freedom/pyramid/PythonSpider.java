@@ -27,7 +27,7 @@ public class PythonSpider extends Spider {
     private String name;
 
     public PythonSpider() {
-        this("/storage/emulated/0/plugin/");
+        this(null);
     }
 
     public PythonSpider(String cache) {
@@ -35,7 +35,10 @@ public class PythonSpider extends Spider {
     }
 
     public PythonSpider(String name, String cache) {
-        this.cachePath = cache;
+        // 未显式传路径时回落到应用私有外部目录(scoped storage 兼容)
+        this.cachePath = cache != null ? cache
+                : new File(PythonLoader.getInstance().app != null
+                        ? PythonLoader.getInstance().app.getExternalFilesDir(null) : null, "plugin") + File.separator;
         this.name = name;
     }
 

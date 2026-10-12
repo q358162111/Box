@@ -20,10 +20,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -41,6 +43,12 @@ public class PythonLoader {
     private Application app;
     // setConfig 写 / getSpider 子线程读，使用并发容器保证线程安全
     private final ConcurrentHashMap<String, JSONObject> siteMap;
+    // 共享的 Spider 初始化线程池:避免每次 getSpider 创建/销毁一次性线程池
+    private final ExecutorService spiderInitExecutor = Executors.newSingleThreadExecutor(r -> {
+        Thread t = new Thread(r, "spider-init");
+        t.setDaemon(true);
+        return t;
+    });
     Python pyInstance;
     PyObject pyApp;
     Python.Platform androidPlatform;
@@ -93,6 +101,9 @@ public class PythonLoader {
             pyInstance = Python.getInstance();
             pyApp = pyInstance.getModule("app");
         }
+        // 默认用应用私有外部目录,兼容 Android 10+ scoped storage;
+        // setPluginConfig 仍可显式覆盖为自定义路径
+        this.cache = new File(app.getExternalFilesDir(null), "plugin") + File.separator;
         return this;
     }
 
@@ -128,14 +139,11 @@ public class PythonLoader {
             return spiders.get(key);
         }
 
-        // 使用ExecutorService来管理线程
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        Future<?> future = null;
         try {
             PythonSpider sp = new PythonSpider(key, cache);
 
-            // 提交初始化任务
-            future = executor.submit(() -> {
+            // 在共享线程池中执行初始化,避免每次创建/销毁一次性线程池
+            Future<?> future = spiderInitExecutor.submit(() -> {
                 try {
                     sp.init(app, url);
                 } catch (Exception e) {
@@ -157,29 +165,27 @@ public class PythonLoader {
             // 超时了，不做中断，返回空的Spider
         } catch (ExecutionException | InterruptedException e) {
             PyLog.e("echo-init:ExecutionException|InterruptedException");
-        } finally {
-            // 关闭线程池
-            if (future != null && !future.isDone()) {
-                future.cancel(true);  // 取消任务
-            }
-            executor.shutdown();  // 关闭线程池
         }
         return new SpiderNull();
     }
 
     int port = -1;
 
+    // 端口探测失败的端口集合,避免每次调用都从头重扫已知不可用的端口
+    private final Set<Integer> failedPorts = ConcurrentHashMap.newKeySet();
+
     public void getPort() {
-        if (port <= 0) {
-            for (int i = 9978; i < 10000; i++) {
-                try {
-                    if (OkHttpUtil.string("http://127.0.0.1:" + i + "/proxy?do=ck&api=python", null).equals("ok")) {
-                        port = i;
-                        return;
-                    }
-                } catch (Exception e) {
-                    // 单个端口探测失败不影响后续探测
+        if (port > 0) return;
+        for (int i = 9978; i < 10000; i++) {
+            if (failedPorts.contains(i)) continue;
+            try {
+                if (OkHttpUtil.string("http://127.0.0.1:" + i + "/proxy?do=ck&api=python", null).equals("ok")) {
+                    port = i;
+                    return;
                 }
+            } catch (Exception e) {
+                // 探测失败记录端口,下次跳过
+                failedPorts.add(i);
             }
         }
     }

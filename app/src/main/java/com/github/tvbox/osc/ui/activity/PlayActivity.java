@@ -1667,6 +1667,13 @@ public class PlayActivity extends BaseActivity {
                     });
         } else if (pb.getType() == 2) { // json 扩展
             setTip("正在解析播放地址", true, false);
+            if (parseThreadPool != null) {
+                try {
+                    parseThreadPool.shutdownNow();
+                } catch (Throwable th) {
+                    th.printStackTrace();
+                }
+            }
             parseThreadPool = Executors.newSingleThreadExecutor();
             LinkedHashMap<String, String> jxs = new LinkedHashMap<>();
             for (ParseBean p : ApiConfig.get().getParseBeanList()) {
@@ -1722,6 +1729,13 @@ public class PlayActivity extends BaseActivity {
     }
     private void parseMix(ParseBean pb,boolean isSuper){
         setTip("正在解析播放地址", true, false);
+        if (parseThreadPool != null) {
+            try {
+                parseThreadPool.shutdownNow();
+            } catch (Throwable th) {
+                th.printStackTrace();
+            }
+        }
         parseThreadPool = Executors.newSingleThreadExecutor();
         LinkedHashMap<String, HashMap<String, String>> jxs = new LinkedHashMap<>();
         String extendName = "";

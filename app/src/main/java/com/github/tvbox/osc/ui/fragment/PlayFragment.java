@@ -494,7 +494,7 @@ public class PlayFragment extends BaseLazyFragment {
                         mController.mSubtitleView.clearSubtitleCache();
                         mController.mSubtitleView.isInternal = true;
                         ((IjkmPlayer) mediaPlayer).setTrack(value.trackId);
-                        new Handler().postDelayed(new Runnable() {
+                        mHandler.postDelayed(new Runnable() {
                             @Override
                             public void run() {
                                 mediaPlayer.seekTo(progress);
@@ -508,7 +508,7 @@ public class PlayFragment extends BaseLazyFragment {
                         mController.mSubtitleView.clearSubtitleCache();
                         mController.mSubtitleView.isInternal = true;
                         ((EXOmPlayer) mediaPlayer).selectExoTrack(value);
-                        new Handler().postDelayed(new Runnable() {
+                        mHandler.postDelayed(new Runnable() {
                             @Override
                             public void run() {
                                 mediaPlayer.seekTo(progress);
@@ -576,7 +576,7 @@ public class PlayFragment extends BaseLazyFragment {
                     if (mediaPlayer instanceof EXOmPlayer) {
                         ((EXOmPlayer) mediaPlayer).selectExoTrack(value);
                     }
-                    new Handler().postDelayed(new Runnable() {
+                    mHandler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
                             mediaPlayer.seekTo(progress);
@@ -1162,6 +1162,9 @@ public class PlayFragment extends BaseLazyFragment {
             executorService.shutdownNow();
             executorService = null;
         }
+        if (mHandler != null) {
+            mHandler.removeCallbacksAndMessages(null);
+        }
         //手动注销
         sourceViewModel.playResult.removeObserver(mObserverPlayResult);
         EventBus.getDefault().unregister(this);
@@ -1558,6 +1561,13 @@ public class PlayFragment extends BaseLazyFragment {
                     });
         } else if (pb.getType() == 2) { // json 扩展
             setTip("正在解析播放地址", true, false);
+            if (parseThreadPool != null) {
+                try {
+                    parseThreadPool.shutdownNow();
+                } catch (Throwable th) {
+                    th.printStackTrace();
+                }
+            }
             parseThreadPool = Executors.newSingleThreadExecutor();
             LinkedHashMap<String, String> jxs = new LinkedHashMap<>();
             for (ParseBean p : ApiConfig.get().getParseBeanList()) {
@@ -1614,6 +1624,13 @@ public class PlayFragment extends BaseLazyFragment {
     }
     private void parseMix(ParseBean pb,boolean isSuper){
         setTip("正在解析播放地址", true, false);
+        if (parseThreadPool != null) {
+            try {
+                parseThreadPool.shutdownNow();
+            } catch (Throwable th) {
+                th.printStackTrace();
+            }
+        }
         parseThreadPool = Executors.newSingleThreadExecutor();
         LinkedHashMap<String, HashMap<String, String>> jxs = new LinkedHashMap<>();
         LinkedHashMap<String, String> json_jxs = new LinkedHashMap<>();
