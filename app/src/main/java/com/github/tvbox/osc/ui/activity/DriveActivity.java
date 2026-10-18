@@ -368,7 +368,7 @@ public class DriveActivity extends BaseActivity {
 
     private void openWebdavDialog(StorageDrive drive) {
         WebdavDialog webdavDialog = new WebdavDialog(mContext, drive);
-        EventBus.getDefault().register(webdavDialog);
+        // WebdavDialog 构造函数内已自行注册 EventBus，此处不可重复注册（会抛 already registered 崩溃）
         webdavDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialog) {
@@ -380,7 +380,7 @@ public class DriveActivity extends BaseActivity {
 
     private void openAlistDriveDialog(StorageDrive drive) {
         AlistDriveDialog dialog = new AlistDriveDialog(mContext, drive);
-        EventBus.getDefault().register(dialog);
+        // AlistDriveDialog 构造函数内已自行注册 EventBus，此处不可重复注册（会抛 already registered 崩溃）
         dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialog) {
