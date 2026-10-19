@@ -42,14 +42,6 @@ public class Json {
         return result;
     }
 
-    public static List<JsonElement> safeListElement(JsonObject obj, String key) {
-        List<JsonElement> result = new ArrayList<>();
-        if (!obj.has(key)) return result;
-        if (obj.get(key).isJsonObject()) result.add(obj.get(key).getAsJsonObject());
-        for (JsonElement opt : obj.getAsJsonArray(key)) result.add(opt.getAsJsonObject());
-        return result;
-    }
-
     public static JsonObject safeObject(JsonElement element) {
         try {
             if (element.isJsonPrimitive()) element = JsonParser.parseString(element.getAsJsonPrimitive().getAsString());
