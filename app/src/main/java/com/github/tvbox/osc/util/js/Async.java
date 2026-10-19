@@ -58,7 +58,9 @@ public class Async {
         //if (then != null) then.call(callback);
         JSFunction thenFn = promise.getJSFunction("then");
         if (thenFn != null) {
-            thenFn.call(callback);
+            // 同时注册 onRejected：Promise 被 reject 时若不回调，Future 永不完成，
+            // 单线程 executor 上的后续调用将全部永久阻塞
+            thenFn.call(callback, rejectCallback);
         } else {
             // If there's no then, complete immediately
             future.set(result);
@@ -71,6 +73,19 @@ public class Async {
            // future.complete(args[0]);
             // args[0] holds the resolved value from the JS promise
             future.set(args.length > 0 ? args[0] : null);
+            return null;
+        }
+    };
+
+    // Promise 的 onRejected 回调：把异常放入 Future，避免调用线程永久阻塞
+    private final JSCallFunction rejectCallback = new JSCallFunction() {
+        @Override
+        public Object call(Object... args) {
+            Throwable cause = args.length > 0 && args[0] instanceof Throwable ? (Throwable) args[0] : null;
+            if (cause == null) {
+                cause = new Exception(args.length > 0 && args[0] != null ? args[0].toString() : "JS promise rejected");
+            }
+            future.setException(cause);
             return null;
         }
     };

@@ -846,6 +846,8 @@ public class HomeActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        // 清理所有 Handler 回调（含每秒自重排的时钟 Runnable），防止旧实例被主线程队列持有泄漏
+        mHandler.removeCallbacksAndMessages(null);
         if (EventBus.getDefault().isRegistered(this)) EventBus.getDefault().unregister(this);
         // 不能在 onDestroy 里杀进程：切源/重载首页用 CLEAR_TASK 重启本 Activity 时会走到这里，杀进程=整个 App 退出
         // 退出 App 统一走 doExit()

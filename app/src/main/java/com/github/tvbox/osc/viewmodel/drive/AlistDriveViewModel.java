@@ -199,6 +199,9 @@ public class AlistDriveViewModel extends AbstractDriveViewModel {
                         }
                     } catch (Exception ex) {
                         ex.printStackTrace();
+                        // 探测/请求阶段异常必须回调 fail，否则 UI 加载态永不消失
+                        if (callback != null)
+                            callback.fail("无法访问，请注意地址格式");
                     }
                 }
             }.start();
