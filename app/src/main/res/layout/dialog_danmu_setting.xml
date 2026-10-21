@@ -21,7 +21,7 @@
             android:layout_marginBottom="@dimen/vs_10"
             android:singleLine="true"
             android:textColor="@color/color_FFFFFF"
-            android:text="弹幕设置"
+            android:text="@string/danmu_setting"
             android:textSize="@dimen/ts_26"
             android:textStyle="bold" />
 
@@ -35,7 +35,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:text="弹幕开关"
+                android:text="@string/danmu_switch"
                 android:textColor="@color/color_FFFFFF"
                 android:gravity="center_vertical|left"
                 android:textSize="@dimen/ts_20" />
@@ -65,7 +65,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:text="弹幕颜色"
+                android:text="@string/danmu_color"
                 android:textColor="@color/color_FFFFFF"
                 android:gravity="center_vertical|left"
                 android:textSize="@dimen/ts_20" />
@@ -95,7 +95,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:text="弹幕速度"
+                android:text="@string/danmu_speed"
                 android:textColor="@color/color_FFFFFF"
                 android:gravity="center_vertical|left"
                 android:textSize="@dimen/ts_20" />
@@ -125,7 +125,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:text="弹幕大小"
+                android:text="@string/danmu_size"
                 android:textColor="@color/color_FFFFFF"
                 android:gravity="center_vertical|left"
                 android:textSize="@dimen/ts_20" />
@@ -184,7 +184,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:text="弹幕行数"
+                android:text="@string/danmu_rows"
                 android:textColor="@color/color_FFFFFF"
                 android:gravity="center_vertical|left"
                 android:textSize="@dimen/ts_20" />
@@ -243,7 +243,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:text="弹幕透明"
+                android:text="@string/danmu_alpha"
                 android:textColor="@color/color_FFFFFF"
                 android:gravity="center_vertical|left"
                 android:textSize="@dimen/ts_20" />

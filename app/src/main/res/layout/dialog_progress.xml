@@ -8,7 +8,7 @@
         android:id="@+id/tv_update_message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="正在检查更新..."
+        android:text="@string/checking_for_updates"
         android:textSize="18sp" />
     <ProgressBar
         android:id="@+id/progressBar"

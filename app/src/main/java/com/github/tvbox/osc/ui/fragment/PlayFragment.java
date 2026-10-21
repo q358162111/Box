@@ -223,10 +223,10 @@ public class PlayFragment extends BaseLazyFragment {
             public boolean handleMessage(@NonNull Message msg) {
                 if (msg.what == 100) {
                     stopParse();
-                    errorWithRetry("嗅探错误", false);
+                    errorWithRetry(getString(R.string.sniff_error), false);
                 } else if (msg.what == 200) {
                     if (mHandler.hasMessages(100)) {
-                        setTip("加载完成，嗅探视频中", true, false);
+                        setTip(getString(R.string.load_sniffing), true, false);
                     }
                 } else if (msg.what == 300) {
                     setTip((String)msg.obj, false, true);
@@ -336,7 +336,7 @@ public class PlayFragment extends BaseLazyFragment {
 
             @Override
             public void errReplay() {
-                errorWithRetry("视频播放出错", false);
+                errorWithRetry(getString(R.string.play_error), false);
             }
 
             @Override
@@ -815,7 +815,7 @@ public class PlayFragment extends BaseLazyFragment {
                             if (playerType >= 10) {
                                 VodInfo.VodSeries vs = mVodInfo.seriesMap.get(mVodInfo.playFlag).get(mVodInfo.playIndex);
                                 String playTitle = mVodInfo.name + " : " + vs.name;
-                                setTip("调用外部播放器" + PlayerHelper.getPlayerName(playerType) + "进行播放", true, false);
+                                setTip(getString(R.string.external_player_call, PlayerHelper.getPlayerName(playerType)), true, false);
                                 boolean callResult = false;
                                 switch (playerType) {
                                     case 10: {
@@ -834,7 +834,7 @@ public class PlayFragment extends BaseLazyFragment {
                                         break;
                                     }
                                 }
-                                setTip("调用外部播放器" + PlayerHelper.getPlayerName(playerType) + (callResult ? "成功" : "失败"), callResult, !callResult);
+                                setTip(getString(callResult ? R.string.external_player_ok : R.string.external_player_fail, PlayerHelper.getPlayerName(playerType)), callResult, !callResult);
                                 return;
                             }
                         } catch (JSONException e) {
@@ -1031,10 +1031,10 @@ public class PlayFragment extends BaseLazyFragment {
                     }
                     checkDanmu(danmaku);
                 } catch (Throwable th) {
-                    errorWithRetry("获取播放信息错误", true);
+                    errorWithRetry(getString(R.string.get_play_info_error), true);
                 }
             } else {
-                errorWithRetry("获取播放信息错误", true);
+                errorWithRetry(getString(R.string.get_play_info_error), true);
             }
         }        
     };
@@ -1197,9 +1197,9 @@ public class PlayFragment extends BaseLazyFragment {
         }
         if (!hasNext) {
             if(mVodInfo.reverseSort){
-                Toast.makeText(requireContext(), "已经是第一集了", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), getString(R.string.first_episode), Toast.LENGTH_SHORT).show();
             }else {
-                Toast.makeText(requireContext(), "已经是最后一集了", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), getString(R.string.last_episode), Toast.LENGTH_SHORT).show();
             }
             // takagen99: To auto go back to Detail Page after last episode
             if (inProgress && ((DetailActivity) mActivity).fullWindows) {
@@ -1226,9 +1226,9 @@ public class PlayFragment extends BaseLazyFragment {
         }
         if (!hasPre) {
             if(mVodInfo.reverseSort){
-                Toast.makeText(requireContext(), "已经是最后一集了", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), getString(R.string.last_episode), Toast.LENGTH_SHORT).show();
             }else {
-                Toast.makeText(requireContext(), "已经是第一集了", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), getString(R.string.first_episode), Toast.LENGTH_SHORT).show();
             }
             return;
         }
@@ -1308,14 +1308,14 @@ public class PlayFragment extends BaseLazyFragment {
         List<VodInfo.VodSeries> seriesList = mVodInfo.seriesMap == null ? null : mVodInfo.seriesMap.get(mVodInfo.playFlag);
         if (seriesList == null || seriesList.isEmpty()
                 || mVodInfo.getplayIndex() < 0 || mVodInfo.getplayIndex() >= seriesList.size()) {
-            errorWithRetry("播放列表为空", true);
+            errorWithRetry(getString(R.string.playlist_empty), true);
             return;
         }
         VodInfo.VodSeries vs = seriesList.get(mVodInfo.getplayIndex());
         EventBus.getDefault().post(new RefreshEvent(RefreshEvent.TYPE_REFRESH, mVodInfo.getplayIndex()));
         EventBus.getDefault().post(new RefreshEvent(RefreshEvent.TYPE_REFRESH_NOTIFY, mVodInfo.name + "&&" + vs.name));
         String playTitleInfo = mVodInfo.name + " : " + vs.name;
-        setTip("正在获取播放信息", true, false);
+        setTip(getString(R.string.getting_play_info), true, false);
         mController.setTitle(playTitleInfo);
 
         stopParse();
@@ -1466,7 +1466,7 @@ public class PlayFragment extends BaseLazyFragment {
         if (pb.getType() == 4) {
             parseMix(pb,true);
         }else if (pb.getType() == 0) {
-            setTip("正在嗅探播放地址", true, false);
+            setTip(getString(R.string.sniffing_url), true, false);
             mHandler.removeMessages(100);
             mHandler.sendEmptyMessageDelayed(100, 20 * 1000);
             if(pb.getExt()!=null){
@@ -1494,7 +1494,7 @@ public class PlayFragment extends BaseLazyFragment {
             loadWebView(pb.getUrl() + webUrl);
 
         } else if (pb.getType() == 1) { // json 解析
-            setTip("正在解析播放地址", true, false);
+            setTip(getString(R.string.parsing_url), true, false);
             // 解析ext
             HttpHeaders reqHeaders = new HttpHeaders();
             try {
@@ -1548,7 +1548,7 @@ public class PlayFragment extends BaseLazyFragment {
                             } catch (Throwable e) {
                                 e.printStackTrace();
                                 errorWithRetry("解析错误", false);
-//                                setTip("解析错误", false, true);
+//                                setTip(getString(R.string.parse_error), false, true);
                             }
                         }
 
@@ -1556,11 +1556,11 @@ public class PlayFragment extends BaseLazyFragment {
                         public void onError(Response<String> response) {
                             super.onError(response);
                             errorWithRetry("解析错误", false);
-//                            setTip("解析错误", false, true);
+//                            setTip(getString(R.string.parse_error), false, true);
                         }
                     });
         } else if (pb.getType() == 2) { // json 扩展
-            setTip("正在解析播放地址", true, false);
+            setTip(getString(R.string.parsing_url), true, false);
             if (parseThreadPool != null) {
                 try {
                     parseThreadPool.shutdownNow();
@@ -1581,7 +1581,7 @@ public class PlayFragment extends BaseLazyFragment {
                     JSONObject rs = ApiConfig.get().jsonExt(pb.getUrl(), jxs, webUrl);
                     if (rs == null || !rs.has("url") || rs.optString("url").isEmpty()) {
 //                        errorWithRetry("解析错误", false);
-                        setTip("解析错误", false, true);
+                        setTip(getString(R.string.parse_error), false, true);
                     } else {
                         HashMap<String, String> headers = null;
                         if (rs.has("header")) {
@@ -1604,7 +1604,7 @@ public class PlayFragment extends BaseLazyFragment {
                             requireActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    Toast.makeText(mContext, "解析来自:" + rs.optString("jxFrom"), Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(mContext, getString(R.string.parse_from, rs.optString("jxFrom")), Toast.LENGTH_SHORT).show();
                                 }
                             });
                         }
@@ -1623,7 +1623,7 @@ public class PlayFragment extends BaseLazyFragment {
         }
     }
     private void parseMix(ParseBean pb,boolean isSuper){
-        setTip("正在解析播放地址", true, false);
+        setTip(getString(R.string.parsing_url), true, false);
         if (parseThreadPool != null) {
             try {
                 parseThreadPool.shutdownNow();
@@ -1657,13 +1657,13 @@ public class PlayFragment extends BaseLazyFragment {
                     //并发执行 嗅探和json
                     JSONObject rs = SuperParse.parse(jxs, parseFlag+"123", webUrl);
                     if (!rs.has("url") || rs.optString("url").isEmpty()) {
-                        setTip("解析错误", false, true);
+                        setTip(getString(R.string.parse_error), false, true);
                     } else {
                         if (rs.has("parse") && rs.optInt("parse", 0) == 1) {
                             if (rs.has("ua")) {
                                 webUserAgent = rs.optString("ua").trim();
                             }
-                            setTip("超级解析中", true, false);
+                            setTip(getString(R.string.super_parsing), true, false);
 
                             if(!isAdded())return;
                             requireActivity().runOnUiThread(new Runnable() {
@@ -1691,7 +1691,7 @@ public class PlayFragment extends BaseLazyFragment {
                     JSONObject rs = ApiConfig.get().jsonExtMix(parseFlag + "111", pb.getUrl(), finalExtendName, jxs, webUrl);
                     if (rs == null || !rs.has("url") || rs.optString("url").isEmpty()) {
 //                        errorWithRetry("解析错误", false);
-                        setTip("解析错误", false, true);
+                        setTip(getString(R.string.parse_error), false, true);
                     } else {
                         if (rs.has("parse") && rs.optInt("parse", 0) == 1) {
                             if (rs.has("ua")) {
@@ -1703,7 +1703,7 @@ public class PlayFragment extends BaseLazyFragment {
                                 public void run() {
                                     String mixParseUrl = DefaultConfig.checkReplaceProxy(rs.optString("url", ""));
                                     stopParse();
-                                    setTip("正在嗅探播放地址", true, false);
+                                    setTip(getString(R.string.sniffing_url), true, false);
                                     mHandler.removeMessages(100);
                                     mHandler.sendEmptyMessageDelayed(100, 20 * 1000);
                                     loadWebView(mixParseUrl);
@@ -1744,7 +1744,7 @@ public class PlayFragment extends BaseLazyFragment {
             requireActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Toast.makeText(mContext, "解析来自:" + rs.optString("jxFrom"), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mContext, getString(R.string.parse_from, rs.optString("jxFrom")), Toast.LENGTH_SHORT).show();
                 }
             });
         }
@@ -1785,14 +1785,14 @@ public class PlayFragment extends BaseLazyFragment {
 
                     @Override
                     public void fail() {
-                        Toast.makeText(mContext, "XWalkView不兼容，已替换为系统自带WebView", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(mContext, getString(R.string.xwalk_incompatible), Toast.LENGTH_SHORT).show();
                         initWebView(true);
                         loadUrl(url);
                     }
 
                     @Override
                     public void ignore() {
-                        Toast.makeText(mContext, "XWalkView运行组件未下载，已替换为系统自带WebView", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(mContext, getString(R.string.xwalk_not_downloaded), Toast.LENGTH_SHORT).show();
                         initWebView(true);
                         loadUrl(url);
                     }

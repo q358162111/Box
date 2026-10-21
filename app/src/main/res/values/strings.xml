@@ -281,6 +281,163 @@
 
     <!-- 当前应用的版本号 -->
 
+    <!--    Common    -->
+    <string name="confirm">Confirm</string>
+    <string name="off">Off</string>
+    <string name="system">System</string>
+    <string name="hard_decode">HW Decode</string>
+    <string name="parse">Parse</string>
+    <string name="speed">Speed</string>
+    <string name="more">More</string>
+    <string name="program">Program</string>
+    <string name="info">Info</string>
+    <string name="password">Password</string>
+    <string name="username">Username</string>
+    <string name="space_name">Space Name</string>
+    <string name="init_path">Initial Path</string>
+    <string name="current_ip">Current IP</string>
+    <string name="debug_mode">Debug Mode</string>
+    <string name="system_default">System Default</string>
+    <string name="no_data">No Data</string>
+    <string name="no_information">No Information</string>
+    <string name="search_history">Search History</string>
+    <string name="check_update">Check Update</string>
+
+    <!--    Pages    -->
+    <string name="loading_now">Now Loading</string>
+    <string name="no_play_data">No play data</string>
+    <string name="quick_search_tip">Related resources from other sources; try other keywords if not found</string>
+    <string name="subtitle_search_result">Subtitle Search Results</string>
+    <string name="zip_file">Archive</string>
+    <string name="push_clipboard">Push Clipboard Content</string>
+    <string name="remote_tvbox_address">Remote TVBox Address</string>
+    <string name="epg_playback">Playback</string>
+    <string name="sub_local">Local</string>
+    <string name="fast_search_count">Search (%1$d/%2$d)</string>
+    <string name="no_program_info">No program info…</string>
+    <string name="check_source">Check Source</string>
+    <string name="backup_now">Backup Now</string>
+    <string name="storage_permission">Storage Permission</string>
+    <string name="download_xwalk">Download XWalkView Runtime</string>
+    <string name="alist_address">Alist Address</string>
+    <string name="webdav_address">WebDAV Address</string>
+    <string name="danmu_setting">Danmu Settings</string>
+    <string name="danmu_switch">Danmu Switch</string>
+    <string name="danmu_color">Danmu Color</string>
+    <string name="danmu_speed">Danmu Speed</string>
+    <string name="danmu_size">Danmu Size</string>
+    <string name="danmu_rows">Danmu Rows</string>
+    <string name="danmu_alpha">Danmu Opacity</string>
+    <string name="about_desc">This app only provides aggregated display. All resources come from the Internet; the app does not participate in producing, uploading, storing or downloading any content. For study and reference only, please delete within 24 hours after installation.\n\nPlease keep the source when repackaging and distributing\nhttps://github.com/CatVodTVOfficial/TVBoxOSC</string>
+
+    <!--    Playback tips (code references)    -->
+    <string name="sniff_error">Sniff error</string>
+    <string name="load_sniffing">Loaded, sniffing video</string>
+    <string name="play_error">Video playback error</string>
+    <string name="get_play_info_error">Failed to get play info</string>
+    <string name="getting_play_info">Getting play info</string>
+    <string name="sniffing_url">Sniffing play URL</string>
+    <string name="parsing_url">Parsing play URL</string>
+    <string name="parse_error">Parse error</string>
+    <string name="super_parsing">Super parsing</string>
+    <string name="network_error">Network request error</string>
+    <string name="parse_from">Parsed from: %s</string>
+    <string name="playlist_empty">Play list is empty</string>
+    <string name="first_episode">Already the first episode</string>
+    <string name="last_episode">Already the last episode</string>
+    <string name="external_player_call">Calling external player %s</string>
+    <string name="external_player_ok">External player %s succeeded</string>
+    <string name="external_player_fail">External player %s failed</string>
+    <string name="xwalk_incompatible">XWalkView incompatible, switched to system WebView</string>
+    <string name="xwalk_not_downloaded">XWalkView runtime not downloaded, switched to system WebView</string>
+    <string name="password_error">Wrong password</string>
+    <string name="select_channel_first">Select a channel first</string>
+
+    <!--    Page action tips (code references)    -->
+    <string name="copied">Copied: %s</string>
+    <string name="push_fail_address">Push failed, the address may be wrong</string>
+    <string name="push_success">Push successful</string>
+    <string name="push_fail_version">Push failed, remote TVBox version not supported</string>
+    <string name="select_save_type">Select storage type</string>
+    <string name="select_sort_type">Select list sort order</string>
+    <string name="folder_added">This folder is already in the space list!</string>
+    <string name="select_search_source">Search sources</string>
+    <string name="no_search_source">No search source</string>
+    <string name="source_no_search_support">Source does not support search, switched to global search</string>
+    <string name="input_space_name">Please enter a space name</string>
+    <string name="input_alist_url">Please enter the Alist address</string>
+    <string name="input_webdav_url">Please enter the WebDAV address</string>
+    <string name="cannot_locate_activity">Cannot locate Activity, please retry</string>
+    <string name="subtitle_no_match">No matching subtitles found</string>
+    <string name="input_remote_address">Enter remote TVBox address</string>
+    <string name="input_remote_port">Enter remote TVBox port</string>
+    <string name="not_implemented">Not implemented yet~</string>
+    <string name="no_more">No more</string>
+
+    <!--    Settings options (code references)    -->
+    <string name="switch_on">On</string>
+    <string name="switch_off">Off</string>
+    <string name="switch_opened">Enabled</string>
+    <string name="switch_closed">Disabled</string>
+    <string name="site_rec">Site Recommended</string>
+    <string name="watch_history">Watch History</string>
+    <string name="douban_hot">Douban Hot</string>
+    <string name="text_list">Text List</string>
+    <string name="thumbnail">Thumbnail</string>
+    <string name="locale_zh">Chinese</string>
+    <string name="locale_en">English</string>
+    <string name="theme_netflix">Netflix</string>
+    <string name="theme_dora">Doraemon</string>
+    <string name="theme_pepsi">Pepsi</string>
+    <string name="theme_naruto">Naruto</string>
+    <string name="theme_minion">Minion</string>
+    <string name="theme_iori">Iori</string>
+    <string name="theme_sakura">Sakura</string>
+    <string name="bg_pip">Picture-in-Picture</string>
+    <string name="select_dialog">Please Select</string>
+    <string name="xwalk_tip">Note: XWalkView only works on some lower Android versions; Android 5.0+ is recommended to use system WebView</string>
+    <string name="wall_url_empty">Wallpaper URL is empty</string>
+    <string name="items_unit">%d items</string>
+    <string name="player_ali">Ali</string>
+    <string name="scale_default">Default</string>
+    <string name="scale_fill">Fill</string>
+    <string name="scale_original">Original</string>
+    <string name="scale_crop">Crop</string>
+    <string name="setting_more">More Settings</string>
+
+    <!--    More hardcoded text (round 3)    -->
+    <string name="scan_qr_tip">Scan the QR code above with your phone/PC or visit the address in a browser\n%s</string>
+    <string name="scan_qr_remote_tip">For remote search, scan the QR code below with your phone/PC or visit the address in a browser\n%s</string>
+    <string name="live_source_line">Line %1$d/%2$d</string>
+    <string name="search_results">Search Results</string>
+    <string name="hot_search">Hot Search</string>
+    <string name="guess_search">Guess You Want</string>
+    <string name="epg_live">Live</string>
+    <string name="epg_booking">Booked</string>
+    <string name="epg_live_now">Live Now</string>
+    <string name="epg_playback_now">Playback</string>
+    <string name="file_type_zip">Archive</string>
+    <string name="file_type_file">File</string>
+    <string name="version_num">Version: %s</string>
+    <string name="position_top">Top</string>
+    <string name="position_bottom">Bottom</string>
+    <string name="redownload">Re-download</string>
+    <string name="times_unit">%dx</string>
+    <string name="rows_unit">%d rows</string>
+    <string name="dns_close">Off</string>
+    <string name="dns_tencent">Tencent</string>
+    <string name="dns_ali">Alibaba</string>
+    <string name="xwalk_unzip_ok">XWalkView runtime extracted!</string>
+    <string name="xwalk_unzip_fail">Failed to extract XWalkView runtime!</string>
+    <string name="thunder_name_too_long">File name too long</string>
+    <string name="thunder_path_too_long">File path too long</string>
+    <string name="thunder_too_small">File too small</string>
+    <string name="thunder_disk_full">Insufficient disk space</string>
+    <string name="thunder_refuse">Network connection refused</string>
+    <string name="thunder_buf_full">Insufficient buffer</string>
+    <string name="thunder_copyright">Copyright restricted: download not allowed</string>
+    <string name="thunder_invalid_link">Invalid link</string>
+
     <!-- 结束 视频设置 相关配置 -->
 
 </resources>

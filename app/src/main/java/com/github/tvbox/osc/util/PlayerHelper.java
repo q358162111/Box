@@ -3,6 +3,8 @@ package com.github.tvbox.osc.util;
 import android.content.Context;
 
 import com.blankj.utilcode.util.ToastUtils;
+import com.github.tvbox.osc.R;
+import com.github.tvbox.osc.base.App;
 import com.github.tvbox.osc.api.ApiConfig;
 import com.github.tvbox.osc.bean.IJKCode;
 import com.github.tvbox.osc.player.EXOmPlayer;
@@ -131,7 +133,7 @@ public class PlayerHelper {
         } else if (playType == 2) {
             return "Exo";
         } else if (playType == 3) {
-            return "阿里";
+            return App.getInstance().getString(R.string.player_ali);
         } else if (playType == 10) {
             return "MX";
         } else if (playType == 11) {
@@ -139,7 +141,7 @@ public class PlayerHelper {
         } else if (playType == 12) {
             return "Kodi";
         } else {
-            return "系统";
+            return App.getInstance().getString(R.string.system);
         }
     }
 
@@ -152,10 +154,11 @@ public class PlayerHelper {
     }
 
     public static String getScaleName(int screenScaleType) {
-        String scaleText = "默认";
+        Context context = App.getInstance();
+        String scaleText = context.getString(R.string.scale_default);
         switch (screenScaleType) {
             case VideoView.SCREEN_SCALE_DEFAULT:
-                scaleText = "默认";
+                scaleText = context.getString(R.string.scale_default);
                 break;
             case VideoView.SCREEN_SCALE_16_9:
                 scaleText = "16:9";
@@ -164,13 +167,13 @@ public class PlayerHelper {
                 scaleText = "4:3";
                 break;
             case VideoView.SCREEN_SCALE_MATCH_PARENT:
-                scaleText = "填充";
+                scaleText = context.getString(R.string.scale_fill);
                 break;
             case VideoView.SCREEN_SCALE_ORIGINAL:
-                scaleText = "原始";
+                scaleText = context.getString(R.string.scale_original);
                 break;
             case VideoView.SCREEN_SCALE_CENTER_CROP:
-                scaleText = "裁剪";
+                scaleText = context.getString(R.string.scale_crop);
                 break;
         }
         return scaleText;

@@ -30,7 +30,7 @@
                 android:shadowDx="0"
                 android:shadowDy="0"
                 android:shadowRadius="5"
-                android:text="远端tvbox地址"
+                android:text="@string/remote_tvbox_address"
                 android:textColor="@color/color_FFFFFF"
                 android:textSize="@dimen/ts_20"
                 android:textStyle="bold" />
@@ -107,7 +107,7 @@
                 android:shadowDx="0"
                 android:shadowDy="0"
                 android:shadowRadius="5"
-                android:text="当前 IP"
+                android:text="@string/current_ip"
                 android:textColor="@color/color_FFFFFF"
                 android:textSize="@dimen/ts_20"
                 android:textStyle="bold" />
@@ -163,7 +163,7 @@
                 android:shadowDx="0"
                 android:shadowDy="0"
                 android:shadowRadius="5"
-                android:text="推送"
+                android:text="@string/hm_push"
                 android:textColor="@color/color_FFFFFF"
                 android:textColorHint="@color/color_FFFFFF_50"
                 android:textSize="@dimen/ts_20" />

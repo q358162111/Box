@@ -48,7 +48,7 @@
             android:shadowDx="0"
             android:shadowDy="0"
             android:shadowRadius="5"
-            android:text="确定"
+            android:text="@string/confirm"
             android:textColor="@color/color_FFFFFF"
             android:textColorHint="@color/color_FFFFFF_50"
             android:textSize="@dimen/ts_20" />
@@ -69,7 +69,7 @@
             android:shadowDx="0"
             android:shadowDy="0"
             android:shadowRadius="5"
-            android:text="取消"
+            android:text="@string/cancel"
             android:textColor="@color/color_FFFFFF"
             android:textColorHint="@color/color_FFFFFF_50"
             android:textSize="@dimen/ts_20" />

@@ -78,12 +78,12 @@ public class WebdavDialog extends BaseDialog {
                 String password = etPassword.getText().toString();
                 if(name == null || name.length() == 0)
                 {
-                    Toast.makeText(WebdavDialog.this.getContext(), "请赋予一个空间名称", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(WebdavDialog.this.getContext(), WebdavDialog.this.getContext().getString(R.string.input_space_name), Toast.LENGTH_SHORT).show();
                     return;
                 }
                 if(url == null || url.length() == 0)
                 {
-                    Toast.makeText(WebdavDialog.this.getContext(), "请务必填入WebDav地址", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(WebdavDialog.this.getContext(), WebdavDialog.this.getContext().getString(R.string.input_webdav_url), Toast.LENGTH_SHORT).show();
                     return;
                 }
                 if(!url.endsWith("/"))

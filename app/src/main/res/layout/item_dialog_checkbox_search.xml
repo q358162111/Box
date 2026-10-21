@@ -20,7 +20,7 @@
             android:drawablePadding="@dimen/vs_10"
             android:focusable="true"
             android:padding="@dimen/vs_10"
-            android:text="Check Source"
+            android:text="@string/check_source"
             android:textColor="@color/color_FFFFFF"
             android:textSize="@dimen/ts_20" />
     </LinearLayout>

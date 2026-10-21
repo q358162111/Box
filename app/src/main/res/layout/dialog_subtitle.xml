@@ -61,7 +61,7 @@
                     android:focusable="true"
                     android:gravity="center"
                     android:padding="@dimen/vs_10"
-                    android:text="Internal"
+                    android:text="@string/vod_sub_int"
                     android:textColor="@color/color_FFFFFF"
                     android:textSize="@dimen/ts_20" />
 
@@ -78,7 +78,7 @@
                     android:focusable="true"
                     android:gravity="center"
                     android:padding="@dimen/vs_10"
-                    android:text="Local"
+                    android:text="@string/sub_local"
                     android:textColor="@color/color_FFFFFF"
                     android:textSize="@dimen/ts_20" />
 
@@ -95,7 +95,7 @@
                     android:focusable="true"
                     android:gravity="center"
                     android:padding="@dimen/vs_10"
-                    android:text="Remote"
+                    android:text="@string/vod_sub_remote"
                     android:textColor="@color/color_FFFFFF"
                     android:textSize="@dimen/ts_20" />
             </LinearLayout>

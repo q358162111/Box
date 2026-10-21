@@ -331,7 +331,7 @@ public class GridFragment extends BaseLazyFragment {
                         showEmpty();
                     }
                     if (page > maxPage && maxPage!=0) {
-                        Toast.makeText(getContext(), "没有更多了", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), getString(R.string.no_more), Toast.LENGTH_SHORT).show();
                         gridAdapter.loadMoreEnd();
                     } else {
                         gridAdapter.loadMoreComplete();

@@ -129,7 +129,7 @@ public class DriveActivity extends BaseActivity {
                 FastClickCheckUtil.check(view);
                 StorageDriveType.TYPE[] types = StorageDriveType.TYPE.values();
                 SelectDialog<StorageDriveType.TYPE> dialog = new SelectDialog<>(DriveActivity.this);
-                dialog.setTip("请选择存盘类型");
+                dialog.setTip(getString(R.string.select_save_type));
                 dialog.setItemCheckDisplay(false);
                 String[] typeNames = StorageDriveType.getTypeNames();
                 dialog.setAdapter(null, new SelectDialogAdapter.SelectDialogInterface<StorageDriveType.TYPE>() {
@@ -306,7 +306,7 @@ public class DriveActivity extends BaseActivity {
         List<String> options = Arrays.asList("按名字升序", "按名字降序", "按修改时间升序", "按修改时间降序");
         int sort = Hawk.get(HawkConfig.STORAGE_DRIVE_SORT, 0);
         SelectDialog<String> dialog = new SelectDialog<>(DriveActivity.this);
-        dialog.setTip("请选择列表排序方式");
+        dialog.setTip(getString(R.string.select_sort_type));
         dialog.setAdapter(null, new SelectDialogAdapter.SelectDialogInterface<String>() {
             @Override
             public void click(String value, int pos) {
@@ -356,7 +356,7 @@ public class DriveActivity extends BaseActivity {
                         String absPath = dirFile.getAbsolutePath();
                         for (DriveFolderFile drive : drives) {
                             if (drive.getDriveType() == StorageDriveType.TYPE.LOCAL && absPath.equals(drive.getDriveData().name)) {
-                                Toast.makeText(mContext, "此文件夹之前已被添加到空间列表！", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(mContext, getString(R.string.folder_added), Toast.LENGTH_SHORT).show();
                                 return;
                             }
                         }
@@ -508,7 +508,7 @@ public class DriveActivity extends BaseActivity {
         if (viewModel.getCurrentDriveNote() == null) {
             if (isInSearch) {
                 //if returns from a search result, back to search result
-                this.txtTitle.setText("搜索结果");
+                this.txtTitle.setText(getString(R.string.search_results));
                 adapter.setNewData(searchResult);
                 viewModel = null;
                 return;

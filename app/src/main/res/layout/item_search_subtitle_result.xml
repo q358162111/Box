@@ -26,7 +26,7 @@
             android:layout_weight="0.8"
             android:singleLine="true"
             android:maxLines="1"
-            android:text="字幕搜索结果"
+            android:text="@string/subtitle_search_result"
             android:textColor="@android:color/white"
             android:textSize="@dimen/ts_22" />
         <TextView
@@ -35,7 +35,7 @@
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:maxLines="1"
-            android:text="压缩包"
+            android:text="@string/zip_file"
             android:textColor="@android:color/white"
             android:textSize="@dimen/ts_22" />
 

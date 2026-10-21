@@ -35,6 +35,7 @@ import com.github.tvbox.osc.ui.dialog.SelectDialog;
 import com.github.tvbox.osc.ui.dialog.XWalkInitDialog;
 import com.github.tvbox.osc.util.FastClickCheckUtil;
 import com.github.tvbox.osc.util.HawkConfig;
+import com.github.tvbox.osc.util.LocaleHelper;
 import com.github.tvbox.osc.util.HistoryHelper;
 import com.github.tvbox.osc.util.OkGoHelper;
 import com.github.tvbox.osc.util.PlayerHelper;
@@ -104,29 +105,29 @@ public class ModelSettingFragment extends BaseLazyFragment {
     @Override
     protected void init() {
         tvFastSearchText = findViewById(R.id.showFastSearchText);
-        tvFastSearchText.setText(Hawk.get(HawkConfig.FAST_SEARCH_MODE, false) ? "已开启" : "已关闭");
+        tvFastSearchText.setText(Hawk.get(HawkConfig.FAST_SEARCH_MODE, false) ? getString(R.string.switch_opened) : getString(R.string.switch_closed));
         tvDebugOpen = findViewById(R.id.tvDebugOpen);
-        tvDebugOpen.setText(Hawk.get(HawkConfig.DEBUG_OPEN, false) ? "开启" : "关闭");
+        tvDebugOpen.setText(Hawk.get(HawkConfig.DEBUG_OPEN, false) ? getString(R.string.switch_on) : getString(R.string.switch_off));
         tvApi = findViewById(R.id.tvApi);
         tvApi.setText(Hawk.get(HawkConfig.API_URL, ""));
         // Home Section
         tvHomeApi = findViewById(R.id.tvHomeApi);
         tvHomeApi.setText(ApiConfig.get().getHomeSourceBean().getName());
         tvHomeShow = findViewById(R.id.tvHomeShow);
-        tvHomeShow.setText(Hawk.get(HawkConfig.HOME_SHOW_SOURCE, false) ? "开启" : "关闭");
+        tvHomeShow.setText(Hawk.get(HawkConfig.HOME_SHOW_SOURCE, false) ? getString(R.string.switch_on) : getString(R.string.switch_off));
         tvHomeRec = findViewById(R.id.tvHomeRec);
         tvHomeRec.setText(getHomeRecName(Hawk.get(HawkConfig.HOME_REC, 0)));
         tvHomeNum = findViewById(R.id.tvHomeNum);
         tvHomeNum.setText(HistoryHelper.getHomeRecName(Hawk.get(HawkConfig.HOME_NUM, 0)));
         // Player Section
         tvShowPreviewText = findViewById(R.id.showPreviewText);
-        tvShowPreviewText.setText(Hawk.get(HawkConfig.SHOW_PREVIEW, true) ? "开启" : "关闭");
+        tvShowPreviewText.setText(Hawk.get(HawkConfig.SHOW_PREVIEW, true) ? getString(R.string.switch_on) : getString(R.string.switch_off));
         tvScale = findViewById(R.id.tvScaleType);
         tvScale.setText(PlayerHelper.getScaleName(Hawk.get(HawkConfig.PLAY_SCALE, 0)));
         tvPlay = findViewById(R.id.tvPlay);
         tvPlay.setText(PlayerHelper.getPlayerName(Hawk.get(HawkConfig.PLAY_TYPE, 0)));
         tvVideoPurifyText = findViewById(R.id.tvVideoPurifyText);
-        tvVideoPurifyText.setText(Hawk.get(HawkConfig.VIDEO_PURIFY, true) ? "开启" : "关闭");
+        tvVideoPurifyText.setText(Hawk.get(HawkConfig.VIDEO_PURIFY, true) ? getString(R.string.switch_on) : getString(R.string.switch_off));
         // System Section
         tvLocale = findViewById(R.id.tvLocale);
         tvLocale.setText(getLocaleView(Hawk.get(HawkConfig.HOME_LOCALE, 0)));
@@ -135,15 +136,16 @@ public class ModelSettingFragment extends BaseLazyFragment {
         tvRender = findViewById(R.id.tvRenderType);
         tvRender.setText(PlayerHelper.getRenderName(Hawk.get(HawkConfig.PLAY_RENDER, 0)));
         tvParseWebView = findViewById(R.id.tvParseWebView);
-        tvParseWebView.setText(Hawk.get(HawkConfig.PARSE_WEBVIEW, true) ? "系统自带" : "XWalkView");
+        tvParseWebView.setText(Hawk.get(HawkConfig.PARSE_WEBVIEW, true) ? getString(R.string.system_default) : "XWalkView");
         tvSearchView = findViewById(R.id.tvSearchView);
         tvSearchView.setText(getSearchView(Hawk.get(HawkConfig.SEARCH_VIEW, 0)));
         tvDns = findViewById(R.id.tvDns);
+        OkGoHelper.refreshDnsList();
         int dnsIndex = Hawk.get(HawkConfig.DOH_URL, 0);
         if (dnsIndex < 0 || dnsIndex >= OkGoHelper.dnsHttpsList.size()) dnsIndex = 0;
         tvDns.setText(OkGoHelper.dnsHttpsList.get(dnsIndex));
         tvHomeDefaultShow = findViewById(R.id.tvHomeDefaultShow);
-        tvHomeDefaultShow.setText(Hawk.get(HawkConfig.HOME_DEFAULT_SHOW, false) ? "开启" : "关闭");
+        tvHomeDefaultShow.setText(Hawk.get(HawkConfig.HOME_DEFAULT_SHOW, false) ? getString(R.string.switch_on) : getString(R.string.switch_off));
 
         //takagen99 : Set HomeApi as default
         findViewById(R.id.llHomeApi).requestFocus();
@@ -153,7 +155,7 @@ public class ModelSettingFragment extends BaseLazyFragment {
             public void onClick(View v) {
                 FastClickCheckUtil.check(v);
                 Hawk.put(HawkConfig.DEBUG_OPEN, !Hawk.get(HawkConfig.DEBUG_OPEN, false));
-                tvDebugOpen.setText(Hawk.get(HawkConfig.DEBUG_OPEN, false) ? "开启" : "关闭");
+                tvDebugOpen.setText(Hawk.get(HawkConfig.DEBUG_OPEN, false) ? getString(R.string.switch_on) : getString(R.string.switch_off));
             }
         });
         // Input Source URL ------------------------------------------------------------------------
@@ -267,7 +269,7 @@ public class ModelSettingFragment extends BaseLazyFragment {
             public void onClick(View v) {
                 FastClickCheckUtil.check(v);
                 Hawk.put(HawkConfig.HOME_SHOW_SOURCE, !Hawk.get(HawkConfig.HOME_SHOW_SOURCE, false));
-                tvHomeShow.setText(Hawk.get(HawkConfig.HOME_SHOW_SOURCE, true) ? "开启" : "关闭");
+                tvHomeShow.setText(Hawk.get(HawkConfig.HOME_SHOW_SOURCE, true) ? getString(R.string.switch_on) : getString(R.string.switch_off));
             }
         });
         findViewById(R.id.llHomeIcon).setOnClickListener(new View.OnClickListener() {
@@ -361,7 +363,7 @@ public class ModelSettingFragment extends BaseLazyFragment {
             public void onClick(View v) {
                 FastClickCheckUtil.check(v);
                 Hawk.put(HawkConfig.SHOW_PREVIEW, !Hawk.get(HawkConfig.SHOW_PREVIEW, true));
-                tvShowPreviewText.setText(Hawk.get(HawkConfig.SHOW_PREVIEW, true) ? "开启" : "关闭");
+                tvShowPreviewText.setText(Hawk.get(HawkConfig.SHOW_PREVIEW, true) ? getString(R.string.switch_on) : getString(R.string.switch_off));
             }
         });
         // Select Screen Ratio -------------------------------------
@@ -409,15 +411,15 @@ public class ModelSettingFragment extends BaseLazyFragment {
         TextView tvBgPlayType = findViewById(R.id.tvBackgroundPlayType);
         Integer defaultBgPlayTypePos = Hawk.get(HawkConfig.BACKGROUND_PLAY_TYPE, 0);
         ArrayList<String> bgPlayTypes = new ArrayList<>();
-        bgPlayTypes.add("关闭");
-        bgPlayTypes.add("开启");
-        bgPlayTypes.add("画中画");
+        bgPlayTypes.add(getString(R.string.switch_off));
+        bgPlayTypes.add(getString(R.string.switch_on));
+        bgPlayTypes.add(getString(R.string.bg_pip));
         tvBgPlayType.setText(bgPlayTypes.get(defaultBgPlayTypePos));
         backgroundPlay.setOnClickListener(view -> {
             FastClickCheckUtil.check(view);
             int bgPlayTypePos = Hawk.get(HawkConfig.BACKGROUND_PLAY_TYPE, 0);
             SelectDialog<String> dialog = new SelectDialog<>(mActivity);
-            dialog.setTip("请选择");
+            dialog.setTip(getString(R.string.select_dialog));
             dialog.setAdapter(null, new SelectDialogAdapter.SelectDialogInterface<String>() {
                 @Override
                 public void click(String value, int pos) {
@@ -502,7 +504,7 @@ public class ModelSettingFragment extends BaseLazyFragment {
         findViewById(R.id.llVideoPurify).setOnClickListener(v -> {
             FastClickCheckUtil.check(v);
             Hawk.put(HawkConfig.VIDEO_PURIFY, !Hawk.get(HawkConfig.VIDEO_PURIFY, true));
-            tvVideoPurifyText.setText(Hawk.get(HawkConfig.VIDEO_PURIFY, true) ? "开启" : "关闭");
+            tvVideoPurifyText.setText(Hawk.get(HawkConfig.VIDEO_PURIFY, true) ? getString(R.string.switch_on) : getString(R.string.switch_off));
         });
 
         // 3. SYSTEM Configuration -------------------------------------------------------------- //
@@ -513,9 +515,9 @@ public class ModelSettingFragment extends BaseLazyFragment {
                 FastClickCheckUtil.check(v);
                 boolean useSystem = !Hawk.get(HawkConfig.PARSE_WEBVIEW, true);
                 Hawk.put(HawkConfig.PARSE_WEBVIEW, useSystem);
-                tvParseWebView.setText(Hawk.get(HawkConfig.PARSE_WEBVIEW, true) ? "系统自带" : "XWalkView");
+                tvParseWebView.setText(Hawk.get(HawkConfig.PARSE_WEBVIEW, true) ? getString(R.string.system_default) : "XWalkView");
                 if (!useSystem) {
-                    Toast.makeText(mContext, "注意: XWalkView只适用于部分低Android版本，Android5.0以上推荐使用系统自带", Toast.LENGTH_LONG).show();
+                    Toast.makeText(mContext, getString(R.string.xwalk_tip), Toast.LENGTH_LONG).show();
                     XWalkInitDialog dialog = new XWalkInitDialog(mContext);
                     dialog.setOnListener(new XWalkInitDialog.OnListener() {
                         @Override
@@ -624,7 +626,7 @@ public class ModelSettingFragment extends BaseLazyFragment {
             public void onClick(View v) {
                 FastClickCheckUtil.check(v);
                 if (ApiConfig.get().wallpaper == null || ApiConfig.get().wallpaper.isEmpty()) {
-                    Toast.makeText(mContext, "壁纸地址为空", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mContext, getString(R.string.wall_url_empty), Toast.LENGTH_SHORT).show();
                     return;
                 }
                 Toast.makeText(mContext, getString(R.string.mn_wall_load), Toast.LENGTH_SHORT).show();
@@ -705,7 +707,7 @@ public class ModelSettingFragment extends BaseLazyFragment {
             public void onClick(View v) {
                 FastClickCheckUtil.check(v);
                 Hawk.put(HawkConfig.FAST_SEARCH_MODE, !Hawk.get(HawkConfig.FAST_SEARCH_MODE, false));
-                tvFastSearchText.setText(Hawk.get(HawkConfig.FAST_SEARCH_MODE, false) ? "已开启" : "已关闭");
+                tvFastSearchText.setText(Hawk.get(HawkConfig.FAST_SEARCH_MODE, false) ? getString(R.string.switch_opened) : getString(R.string.switch_closed));
             }
         });
         // Select App Language ( English / Chinese ) -----------------
@@ -726,6 +728,8 @@ public class ModelSettingFragment extends BaseLazyFragment {
                     public void click(Integer value, int pos) {
                         Hawk.put(HawkConfig.HOME_LOCALE, value);
                         tvLocale.setText(getLocaleView(value));
+                        // 立即更新 Application 上下文的 locale，使 App.getInstance().getString 的文案跟随切换
+                        LocaleHelper.setLocale(mActivity, value == 0 ? "zh" : "en");
                     }
 
                     @Override
@@ -820,7 +824,7 @@ public class ModelSettingFragment extends BaseLazyFragment {
             public void onClick(View v) {
                 FastClickCheckUtil.check(v);
                 Hawk.put(HawkConfig.HOME_DEFAULT_SHOW, !Hawk.get(HawkConfig.HOME_DEFAULT_SHOW, false));
-                tvHomeDefaultShow.setText(Hawk.get(HawkConfig.HOME_DEFAULT_SHOW, true) ? "开启" : "关闭");
+                tvHomeDefaultShow.setText(Hawk.get(HawkConfig.HOME_DEFAULT_SHOW, true) ? getString(R.string.switch_on) : getString(R.string.switch_off));
             }
         });
 
@@ -841,45 +845,45 @@ public class ModelSettingFragment extends BaseLazyFragment {
 
     String getHomeRecName(int type) {
         if (type == 1) {
-            return "站点推荐";
+            return getString(R.string.site_rec);
         } else if (type == 2) {
-            return "观看历史";
+            return getString(R.string.watch_history);
         } else {
-            return "豆瓣热播";
+            return getString(R.string.douban_hot);
         }
     }
 
     String getSearchView(int type) {
         if (type == 0) {
-            return "文字列表";
+            return getString(R.string.text_list);
         } else {
-            return "缩略图";
+            return getString(R.string.thumbnail);
         }
     }
 
     String getLocaleView(int type) {
         if (type == 0) {
-            return "中文";
+            return getString(R.string.locale_zh);
         } else {
-            return "英文";
+            return getString(R.string.locale_en);
         }
     }
 
     String getThemeView(int type) {
         if (type == 0) {
-            return "奈飞";
+            return getString(R.string.theme_netflix);
         } else if (type == 1) {
-            return "哆啦";
+            return getString(R.string.theme_dora);
         } else if (type == 2) {
-            return "百事";
+            return getString(R.string.theme_pepsi);
         } else if (type == 3) {
-            return "鸣人";
+            return getString(R.string.theme_naruto);
         } else if (type == 4) {
-            return "小黄";
+            return getString(R.string.theme_minion);
         } else if (type == 5) {
-            return "八神";
+            return getString(R.string.theme_iori);
         } else {
-            return "樱花";
+            return getString(R.string.theme_sakura);
         }
     }
 

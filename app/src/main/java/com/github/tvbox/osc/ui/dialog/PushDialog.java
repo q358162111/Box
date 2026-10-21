@@ -68,11 +68,11 @@ public class PushDialog extends BaseDialog {
                 String addr = etAddr.getText().toString();
                 String port = etPort.getText().toString();
                 if (addr == null || addr.length() == 0) {
-                    Toast.makeText(PushDialog.this.getContext(), "请输入远端tvbox地址", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(PushDialog.this.getContext(), PushDialog.this.getContext().getString(R.string.input_remote_address), Toast.LENGTH_SHORT).show();
                     return;
                 }
                 if (port == null || port.length() == 0) {
-                    Toast.makeText(PushDialog.this.getContext(), "请输入远端tvbox端口", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(PushDialog.this.getContext(), PushDialog.this.getContext().getString(R.string.input_remote_port), Toast.LENGTH_SHORT).show();
                     return;
                 }
                 Hawk.put(HawkConfig.PUSH_TO_ADDR, addr);
@@ -87,7 +87,7 @@ public class PushDialog extends BaseDialog {
         findViewById(R.id.btnCancel).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(PushDialog.this.getContext(), "功能还没实现~", Toast.LENGTH_SHORT).show();
+                Toast.makeText(PushDialog.this.getContext(), PushDialog.this.getContext().getString(R.string.not_implemented), Toast.LENGTH_SHORT).show();
             }
         });
     }

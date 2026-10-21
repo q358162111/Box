@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.text.TextUtils;
 
+import com.github.tvbox.osc.R;
 import com.github.tvbox.osc.base.App;
 import com.github.tvbox.osc.bean.Movie;
 import com.github.tvbox.osc.util.FileUtils;
@@ -369,17 +370,17 @@ public class Thunder {
     private static String errorInfo(int code) {
         switch (code) {
             case 9125:
-                return "文件名太长";
+                return App.getInstance().getString(R.string.thunder_name_too_long);
             case 111120:
-                return "文件路径太长";
+                return App.getInstance().getString(R.string.thunder_path_too_long);
             case 111142:
-                return "文件太小";
+                return App.getInstance().getString(R.string.thunder_too_small);
             case 111085:
-                return "磁盘空间不足";
+                return App.getInstance().getString(R.string.thunder_disk_full);
             case 111171:
-                return "拒绝的网络连接";
+                return App.getInstance().getString(R.string.thunder_refuse);
             case 9301:
-                return "缓冲区不足";
+                return App.getInstance().getString(R.string.thunder_buf_full);
             case 114001:
             case 114004:
             case 114005:
@@ -388,9 +389,9 @@ public class Thunder {
             case 114011:
             case 9304:
             case 111154:
-                return "版权限制：无权下载";
+                return App.getInstance().getString(R.string.thunder_copyright);
             case 114101:
-                return "无效链接";
+                return App.getInstance().getString(R.string.thunder_invalid_link);
             default:
                 return "ErrorCode=" + code;
         }

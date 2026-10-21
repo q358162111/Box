@@ -47,7 +47,7 @@
                 android:focusable="true"
                 android:gravity="center"
                 android:padding="@dimen/vs_10"
-                android:text="Search"
+                android:text="@string/search"
                 android:textColor="@color/color_FFFFFF"
                 android:textSize="@dimen/ts_22" />
         </LinearLayout>

@@ -103,7 +103,7 @@ public class BackupDialog extends BaseDialog {
                                 public void onDenied(List<String> permissions, boolean never) {
                                     if (never) {
                                         Toast.makeText(getContext(), HomeActivity.getRes().getString(R.string.set_permission_fail2), Toast.LENGTH_SHORT).show();
-                                        if (getContext() instanceof Activity) XXPermissions.startPermissionActivity((Activity) getContext(), permissions); else { Toast.makeText(getContext(), "无法定位 Activity，请重试", Toast.LENGTH_SHORT).show(); }
+                                        if (getContext() instanceof Activity) XXPermissions.startPermissionActivity((Activity) getContext(), permissions); else { Toast.makeText(getContext(), getContext().getString(R.string.cannot_locate_activity), Toast.LENGTH_SHORT).show(); }
                                     } else {
                                         Toast.makeText(getContext(), HomeActivity.getRes().getString(R.string.set_permission_fail1), Toast.LENGTH_SHORT).show();
                                     }

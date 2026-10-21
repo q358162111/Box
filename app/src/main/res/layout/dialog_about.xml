@@ -22,7 +22,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
 
-        android:text="检查更新" />
+        android:text="@string/check_update" />
     </LinearLayout>
     <TextView
         android:layout_width="@dimen/vs_600"
@@ -33,7 +33,7 @@
         android:shadowDx="0"
         android:shadowDy="0"
         android:shadowRadius="3"
-        android:text="本软件只提供聚合展示功能，所有资源来自网上, 软件不参与任何制作, 上传, 储存, 下载等内容. 软件仅供学习参考, 请于安装后24小时内删除。\n\n打包分发请保留出处\nhttps://github.com/CatVodTVOfficial/TVBoxOSC"
+        android:text="@string/about_desc"
         android:textColor="@color/color_FFFFFF"
         android:textSize="@dimen/ts_24" />
 

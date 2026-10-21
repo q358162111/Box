@@ -306,7 +306,7 @@ public class SearchActivity extends BaseActivity {
                 etSearch.setText("");
                 wordAdapter.setNewData(hots);
                 mGridViewWord.smoothScrollToPosition(0);
-                tHotSearchText.setText("热门搜索");
+                tHotSearchText.setText(getString(R.string.hot_search));
                 cancel();
             }
         });
@@ -401,7 +401,7 @@ public class SearchActivity extends BaseActivity {
                     if (text.length() == 0) {
                         wordAdapter.setNewData(hots);
                         mGridViewWord.smoothScrollToPosition(0);
-                        tHotSearchText.setText("热门搜索");
+                        tHotSearchText.setText(getString(R.string.hot_search));
                     }
                 } else if (pos == 0) {
                     RemoteDialog remoteDialog = new RemoteDialog(mContext);
@@ -472,7 +472,7 @@ public class SearchActivity extends BaseActivity {
                     ConstraintLayout cl_root = dialog.findViewById(R.id.cl_root);
                     ViewGroup.LayoutParams clp = cl_root.getLayoutParams();
                     clp.width = AutoSizeUtils.mm2px(dialog.getContext(), 340 + 250 * spanCount);
-                    dialog.setTip("搜索数据源");
+                    dialog.setTip(getString(R.string.select_search_source));
                     dialog.setAdapter(tvRecyclerView, new SelectDialogAdapter.SelectDialogInterface<SourceBean>() {
                         @Override
                         public void click(SourceBean value, int pos) {
@@ -500,7 +500,7 @@ public class SearchActivity extends BaseActivity {
                     }, siteKey, i);
                     dialog.show();
                 } else {
-                    Toast.makeText(mContext, "无搜索源", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mContext, getString(R.string.no_search_source), Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -594,7 +594,7 @@ public class SearchActivity extends BaseActivity {
                                         .get("keyword_txt").getAsString();
                                 hots.add(keywordTxt.trim());
                             }
-                            tHotSearchText.setText("猜你想搜");
+                            tHotSearchText.setText(getString(R.string.guess_search));
                             wordAdapter.setNewData(hots);
                             mGridViewWord.smoothScrollToPosition(0);
                         } catch (Throwable th) {
@@ -671,7 +671,7 @@ public class SearchActivity extends BaseActivity {
 
     private void refreshQRCode() {
         String address = ControlManager.get().getAddress(false);
-        tvAddress.setText(String.format("远程搜索使用手机/电脑扫描下面二维码或者直接浏览器访问地址\n%s", address));
+        tvAddress.setText(getString(R.string.scan_qr_remote_tip, address));
         ivQRCode.setImageBitmap(QRCodeGen.generateBitmap(address, 300, 300));
     }
 
@@ -741,7 +741,7 @@ public class SearchActivity extends BaseActivity {
             if (home.isSearchable()) {
                 searchRequestList.add(home);
             } else {
-                Toast.makeText(mContext, "当前源不支持搜索,自动切换到全局搜索", Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext, getString(R.string.source_no_search_support), Toast.LENGTH_SHORT).show();
                 searchRequestList.addAll(ApiConfig.get().getSourceBeanList());
             }
         } else if (TextUtils.isEmpty(sKey) || ApiConfig.get().getSource(sKey) == null) {

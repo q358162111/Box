@@ -16,6 +16,6 @@ public class SearchSubtitleAdapter extends BaseQuickAdapter<SubtitleBean, BaseVi
     @Override
     protected void convert(BaseViewHolder helper, SubtitleBean item) {
         helper.setText(R.id.subtitleName, item.getName());
-        helper.setText(R.id.subtitleNameInfo, item.getIsZip() ? "压缩包" : "文件");
+        helper.setText(R.id.subtitleNameInfo, helper.itemView.getContext().getString(item.getIsZip() ? R.string.file_type_zip : R.string.file_type_file));
     }
 }

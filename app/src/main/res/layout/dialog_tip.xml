@@ -43,7 +43,7 @@
                 android:focusable="true"
                 android:gravity="center"
                 android:padding="@dimen/vs_10"
-                android:text="确定"
+                android:text="@string/confirm"
                 android:textColor="@color/color_FFFFFF"
                 android:textSize="@dimen/ts_22" />
 
@@ -57,7 +57,7 @@
                 android:focusable="true"
                 android:gravity="center"
                 android:padding="@dimen/vs_10"
-                android:text="取消"
+                android:text="@string/cancel"
                 android:textColor="@color/color_FFFFFF"
                 android:textSize="@dimen/ts_22" />
         </LinearLayout>

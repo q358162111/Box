@@ -1,5 +1,6 @@
 package com.github.tvbox.osc.base;
 
+import android.content.Context;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
@@ -55,6 +56,12 @@ public class App extends android.app.Application {
     public App() {
         instance = this;
         handler = HandlerCompat.createAsync(Looper.getMainLooper());
+    }
+
+    @Override
+    protected void attachBaseContext(Context base) {
+        // 用持久化的语言设置包装应用上下文，使 App.getInstance().getString 跟随语言切换
+        super.attachBaseContext(LocaleHelper.onAttach(base));
     }
 
     @Override

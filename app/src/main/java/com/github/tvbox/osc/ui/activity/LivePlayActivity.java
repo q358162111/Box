@@ -922,7 +922,7 @@ public class LivePlayActivity extends BaseActivity {
         if (channel_Name == null || channel_Name.getSourceNum() <= 0) {
             tv_source.setText("1/1");
         } else {
-            tv_source.setText("线路 " + (channel_Name.getSourceIndex() + 1) + "/" + channel_Name.getSourceNum());
+            tv_source.setText(getString(R.string.live_source_line, channel_Name.getSourceIndex() + 1, channel_Name.getSourceNum()));
         }
 
         getEpg(new Date());
@@ -963,7 +963,7 @@ public class LivePlayActivity extends BaseActivity {
         if (channel_Name == null || channel_Name.getSourceNum() <= 0) {
             tv_source.setText("1/1");
         } else {
-            tv_source.setText("线路 " + (channel_Name.getSourceIndex() + 1) + "/" + channel_Name.getSourceNum());
+            tv_source.setText(getString(R.string.live_source_line, channel_Name.getSourceIndex() + 1, channel_Name.getSourceNum()));
         }
 
         getEpg(new Date());
@@ -1975,7 +1975,7 @@ public class LivePlayActivity extends BaseActivity {
                     channelGroupPasswordConfirmed.add(groupIndex);
                     loadChannelGroupDataAndPlay(groupIndex, liveChannelIndex);
                 } else {
-                    Toast.makeText(App.getInstance(), "密码错误", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(App.getInstance(), getString(R.string.password_error), Toast.LENGTH_SHORT).show();
                 }
 
                 if (tvLeftChannelListLayout.getVisibility() == View.VISIBLE)
@@ -2097,7 +2097,7 @@ public class LivePlayActivity extends BaseActivity {
 
     private boolean isCurrentLiveChannelValid() {
         if (currentLiveChannelItem == null) {
-            Toast.makeText(App.getInstance(), "请先选择频道", Toast.LENGTH_SHORT).show();
+            Toast.makeText(App.getInstance(), getString(R.string.select_channel_first), Toast.LENGTH_SHORT).show();
             return false;
         }
         return true;

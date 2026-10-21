@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.widget.Toast;
 
+import com.github.tvbox.osc.R;
+
 import org.xwalk.core.XWalkInitializer;
 
 import java.io.BufferedInputStream;
@@ -200,9 +202,9 @@ public class XWalkUtils {
         Method method = cls.getMethod("extractResource", String.class, String.class);
         boolean obj = (boolean) method.invoke(null, apkPath(context), libExtractPath(context));
         if (obj) {
-            Toast.makeText(context, "解压XWalkView运行组件完成!", Toast.LENGTH_LONG).show();
+            Toast.makeText(context, context.getString(R.string.xwalk_unzip_ok), Toast.LENGTH_LONG).show();
         } else {
-            Toast.makeText(context, "解压XWalkView运行组件失败!", Toast.LENGTH_LONG).show();
+            Toast.makeText(context, context.getString(R.string.xwalk_unzip_fail), Toast.LENGTH_LONG).show();
         }
         return obj;
     }

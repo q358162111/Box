@@ -5,6 +5,7 @@ import static okhttp3.ConnectionSpec.COMPATIBLE_TLS;
 import static okhttp3.ConnectionSpec.MODERN_TLS;
 import static okhttp3.ConnectionSpec.RESTRICTED_TLS;
 import com.github.catvod.net.SSLCompat;
+import com.github.tvbox.osc.R;
 import com.github.tvbox.osc.base.App;
 
 import com.lzy.okgo.OkGo;
@@ -116,14 +117,19 @@ public class OkGoHelper {
         return "";
     }
 
-    static void initDnsOverHttps() {
-        dnsHttpsList.add("关闭");
-        dnsHttpsList.add("腾讯");
-        dnsHttpsList.add("阿里");
+    public static void refreshDnsList() {
+        dnsHttpsList.clear();
+        dnsHttpsList.add(App.getInstance().getString(R.string.dns_close));
+        dnsHttpsList.add(App.getInstance().getString(R.string.dns_tencent));
+        dnsHttpsList.add(App.getInstance().getString(R.string.dns_ali));
         dnsHttpsList.add("360");
         dnsHttpsList.add("Google");
         dnsHttpsList.add("AdGuard");
         dnsHttpsList.add("Quad9");
+    }
+
+    static void initDnsOverHttps() {
+        refreshDnsList();
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
         HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor("OkExoPlayer");
         if (Hawk.get(HawkConfig.DEBUG_OPEN, false)) {

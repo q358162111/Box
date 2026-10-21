@@ -1,11 +1,15 @@
 package com.github.tvbox.osc.util;
+
+import com.github.tvbox.osc.R;
+import com.github.tvbox.osc.base.App;
+
 public class HistoryHelper {
-    
+
     private static Integer[] hisNumArray = {20, 40, 60, 80, 100};
 
     public static final String getHomeRecName(int index){
         Integer value = getHisNum(index);
-        return value + "条";
+        return App.getInstance().getString(R.string.items_unit, value);
     }
 
     public static final int getHisNum(int index){

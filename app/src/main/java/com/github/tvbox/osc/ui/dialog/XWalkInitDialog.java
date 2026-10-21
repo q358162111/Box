@@ -38,10 +38,10 @@ public class XWalkInitDialog extends BaseDialog {
         TextView downText = findViewById(R.id.downXWalk);
         TextView downTip = findViewById(R.id.downXWalkArch);
 
-        downTip.setText("下载XWalkView运行组件\nArch:" + XWalkUtils.getRuntimeAbi());
+        downTip.setText(getContext().getString(R.string.download_xwalk) + "\nArch:" + XWalkUtils.getRuntimeAbi());
 
         if (XWalkUtils.xWalkLibExist(context)) {
-            downText.setText("重新下载");
+            downText.setText(getContext().getString(R.string.redownload));
         }
 
         downText.setOnClickListener(new View.OnClickListener() {
@@ -61,7 +61,7 @@ public class XWalkInitDialog extends BaseDialog {
                         try {
                             XWalkUtils.unzipXWalkZip(context, response.body().getAbsolutePath());
                             XWalkUtils.extractXWalkLib(context);
-                            downText.setText("重新下载");
+                            downText.setText(getContext().getString(R.string.redownload));
                             if (listener != null)
                                 listener.onchange();
                             dismiss();

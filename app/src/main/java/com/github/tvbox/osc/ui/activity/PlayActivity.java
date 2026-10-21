@@ -236,10 +236,10 @@ public class PlayActivity extends BaseActivity {
             public boolean handleMessage(@NonNull Message msg) {
                 if (msg.what == 100) {
                     stopParse();
-                    errorWithRetry("嗅探错误", false);
+                    errorWithRetry(getString(R.string.sniff_error), false);
                 } else if (msg.what == 200) {
                     if (mHandler.hasMessages(100)) {
-                        setTip("加载完成，嗅探视频中", true, false);
+                        setTip(getString(R.string.load_sniffing), true, false);
                     }
                 } else if (msg.what == 300) {
                     setTip((String)msg.obj, false, true);
@@ -348,7 +348,7 @@ public class PlayActivity extends BaseActivity {
 
             @Override
             public void errReplay() {
-                errorWithRetry("视频播放出错", false);
+                errorWithRetry(getString(R.string.play_error), false);
             }
 
             @Override
@@ -485,7 +485,7 @@ public class PlayActivity extends BaseActivity {
         }
 
         if (trackInfo == null) {
-            Toast.makeText(mContext, "没有内置字幕", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, getString(R.string.vod_sub_na), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -828,7 +828,7 @@ public class PlayActivity extends BaseActivity {
                             if (playerType >= 10) {
                                 VodInfo.VodSeries vs = mVodInfo.seriesMap.get(mVodInfo.playFlag).get(mVodInfo.playIndex);
                                 String playTitle = mVodInfo.name + " : " + vs.name;
-                                setTip("调用外部播放器" + PlayerHelper.getPlayerName(playerType) + "进行播放", true, false);
+                                setTip(getString(R.string.external_player_call, PlayerHelper.getPlayerName(playerType)), true, false);
                                 boolean callResult = false;
                                 switch (playerType) {
                                     case 10: {
@@ -847,7 +847,7 @@ public class PlayActivity extends BaseActivity {
                                         break;
                                     }
                                 }
-                                setTip("调用外部播放器" + PlayerHelper.getPlayerName(playerType) + (callResult ? "成功" : "失败"), callResult, !callResult);
+                                setTip(getString(callResult ? R.string.external_player_ok : R.string.external_player_fail, PlayerHelper.getPlayerName(playerType)), callResult, !callResult);
                                 return;
                             }
                         } catch (JSONException e) {
@@ -1042,10 +1042,10 @@ public class PlayActivity extends BaseActivity {
                     }
                     checkDanmu(danmaku);
                 } catch (Throwable th) {
-                    errorWithRetry("获取播放信息错误", true);
+                    errorWithRetry(getString(R.string.get_play_info_error), true);
                 }
             } else {
-                errorWithRetry("获取播放信息错误", true);
+                errorWithRetry(getString(R.string.get_play_info_error), true);
             }
         }
     };
@@ -1322,9 +1322,9 @@ public class PlayActivity extends BaseActivity {
         if (!hasNext) {
             //mVodInfo 为 null 时 reverseSort 不可访问，按默认（非倒序）提示
             if (mVodInfo != null && mVodInfo.reverseSort) {
-                Toast.makeText(this, "已经是第一集了", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.first_episode), Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(this, "已经是最后一集了", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.last_episode), Toast.LENGTH_SHORT).show();
             }
             if (inProgress) {
                 this.finish();
@@ -1346,9 +1346,9 @@ public class PlayActivity extends BaseActivity {
         }
         if (!hasPre) {
             if (mVodInfo != null && mVodInfo.reverseSort) {
-                Toast.makeText(this, "已经是最后一集了", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.last_episode), Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(this, "已经是第一集了", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.first_episode), Toast.LENGTH_SHORT).show();
             }
             return;
         }
@@ -1408,7 +1408,7 @@ public class PlayActivity extends BaseActivity {
         EventBus.getDefault().post(new RefreshEvent(RefreshEvent.TYPE_REFRESH, mVodInfo.getplayIndex()));
         EventBus.getDefault().post(new RefreshEvent(RefreshEvent.TYPE_REFRESH_NOTIFY, mVodInfo.name + "&&" + vs.name));
         String playTitleInfo = mVodInfo.name + " : " + vs.name;
-        setTip("正在获取播放信息", true, false);
+        setTip(getString(R.string.getting_play_info), true, false);
         mController.setTitle(playTitleInfo);
 
         stopParse();
@@ -1573,7 +1573,7 @@ public class PlayActivity extends BaseActivity {
         if (pb.getType() == 4) {
             parseMix(pb,true);
         }else if (pb.getType() == 0) {
-            setTip("正在嗅探播放地址", true, false);
+            setTip(getString(R.string.sniffing_url), true, false);
             mHandler.removeMessages(100);
             mHandler.sendEmptyMessageDelayed(100, 20 * 1000);
             if (pb.getExt() != null) {
@@ -1600,7 +1600,7 @@ public class PlayActivity extends BaseActivity {
             }
             loadWebView(pb.getUrl() + webUrl);
         } else if (pb.getType() == 1) { // json 解析
-            setTip("正在解析播放地址", true, false);
+            setTip(getString(R.string.parsing_url), true, false);
             // 解析ext
             HttpHeaders reqHeaders = new HttpHeaders();
             try {
@@ -1625,7 +1625,7 @@ public class PlayActivity extends BaseActivity {
                             if (response.body() != null) {
                                 return response.body().string();
                             } else {
-                                throw new IllegalStateException("网络请求错误");
+                                throw new IllegalStateException(getString(R.string.network_error));
                             }
                         }
 
@@ -1653,20 +1653,20 @@ public class PlayActivity extends BaseActivity {
                                 playUrl(rs.getString("url"), headers);
                             } catch (Throwable e) {
                                 e.printStackTrace();
-                                errorWithRetry("解析错误", false);
-//                                setTip("解析错误", false, true);
+                                errorWithRetry(getString(R.string.parse_error), false);
+//                                setTip(getString(R.string.parse_error), false, true);
                             }
                         }
 
                         @Override
                         public void onError(Response<String> response) {
                             super.onError(response);
-                            errorWithRetry("解析错误", false);
-//                            setTip("解析错误", false, true);
+                            errorWithRetry(getString(R.string.parse_error), false);
+//                            setTip(getString(R.string.parse_error), false, true);
                         }
                     });
         } else if (pb.getType() == 2) { // json 扩展
-            setTip("正在解析播放地址", true, false);
+            setTip(getString(R.string.parsing_url), true, false);
             if (parseThreadPool != null) {
                 try {
                     parseThreadPool.shutdownNow();
@@ -1686,8 +1686,8 @@ public class PlayActivity extends BaseActivity {
                 public void run() {
                     JSONObject rs = ApiConfig.get().jsonExt(pb.getUrl(), jxs, webUrl);
                     if (rs == null || !rs.has("url") || rs.optString("url").isEmpty()) {
-//                        errorWithRetry("解析错误", false);//没有url重试也没有重新获取
-                        setTip("解析错误", false, true);
+//                        errorWithRetry(getString(R.string.parse_error), false);//没有url重试也没有重新获取
+                        setTip(getString(R.string.parse_error), false, true);
                     } else {
                         HashMap<String, String> headers = null;
                         if (rs.has("header")) {
@@ -1709,7 +1709,7 @@ public class PlayActivity extends BaseActivity {
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    Toast.makeText(mContext, "解析来自:" + rs.optString("jxFrom"), Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(mContext, getString(R.string.parse_from, rs.optString("jxFrom")), Toast.LENGTH_SHORT).show();
                                 }
                             });
                         }
@@ -1728,7 +1728,7 @@ public class PlayActivity extends BaseActivity {
         }
     }
     private void parseMix(ParseBean pb,boolean isSuper){
-        setTip("正在解析播放地址", true, false);
+        setTip(getString(R.string.parsing_url), true, false);
         if (parseThreadPool != null) {
             try {
                 parseThreadPool.shutdownNow();
@@ -1756,13 +1756,13 @@ public class PlayActivity extends BaseActivity {
                 if(isSuper){
                     JSONObject rs = SuperParse.parse(jxs,parseFlag+"123",webUrl);
                     if (!rs.has("url") || rs.optString("url").isEmpty()) {
-                        setTip("解析错误", false, true);
+                        setTip(getString(R.string.parse_error), false, true);
                     } else {
                         if (rs.has("parse") && rs.optInt("parse", 0) == 1) {
                             if (rs.has("ua")) {
                                 webUserAgent = rs.optString("ua").trim();
                             }
-                            setTip("超级解析中", true, false);
+                            setTip(getString(R.string.super_parsing), true, false);
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
@@ -1787,7 +1787,7 @@ public class PlayActivity extends BaseActivity {
                 }else {
                     JSONObject rs = ApiConfig.get().jsonExtMix(parseFlag + "111", pb.getUrl(), finalExtendName, jxs, webUrl);
                     if (rs == null || !rs.has("url") || rs.optString("url").isEmpty()) {
-                        setTip("解析错误", false, true);
+                        setTip(getString(R.string.parse_error), false, true);
                     } else {
                         if (rs.has("parse") && rs.optInt("parse", 0) == 1) {
                             if (rs.has("ua")) {
@@ -1798,7 +1798,7 @@ public class PlayActivity extends BaseActivity {
                                 public void run() {
                                     String mixParseUrl = DefaultConfig.checkReplaceProxy(rs.optString("url", ""));
                                     stopParse();
-                                    setTip("正在嗅探播放地址", true, false);
+                                    setTip(getString(R.string.sniffing_url), true, false);
                                     mHandler.removeMessages(100);
                                     mHandler.sendEmptyMessageDelayed(100, 20 * 1000);
                                     loadWebView(mixParseUrl);
@@ -1838,7 +1838,7 @@ public class PlayActivity extends BaseActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Toast.makeText(mContext, "解析来自:" + rs.optString("jxFrom"), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mContext, getString(R.string.parse_from, rs.optString("jxFrom")), Toast.LENGTH_SHORT).show();
                 }
             });
         }
@@ -1868,14 +1868,14 @@ public class PlayActivity extends BaseActivity {
 
                     @Override
                     public void fail() {
-                        Toast.makeText(mContext, "XWalkView不兼容，已替换为系统自带WebView", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(mContext, getString(R.string.xwalk_incompatible), Toast.LENGTH_SHORT).show();
                         initWebView(true);
                         loadUrl(url);
                     }
 
                     @Override
                     public void ignore() {
-                        Toast.makeText(mContext, "XWalkView运行组件未下载，已替换为系统自带WebView", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(mContext, getString(R.string.xwalk_not_downloaded), Toast.LENGTH_SHORT).show();
                         initWebView(true);
                         loadUrl(url);
                     }

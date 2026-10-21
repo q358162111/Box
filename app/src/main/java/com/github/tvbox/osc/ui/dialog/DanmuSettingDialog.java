@@ -133,19 +133,19 @@ public class DanmuSettingDialog extends BaseDialog {
         List<Float> sizes = Arrays.asList(0.6f, 0.7f, 0.8f, 0.9f, 1.0f, 1.1f, 1.2f, 1.3f, 1.4f, 1.5f, 1.6f, 1.7f, 1.8f, 1.9f, 2.0f);
         int index = sizes.indexOf(HawkUtils.getDanmuSizeScale())+1;
         AtomicReference<Integer> size = new AtomicReference<>(index);
-        sizeText.setText(size+"倍");
+        sizeText.setText(getContext().getString(R.string.times_unit, size));
         sizeAdd.setOnClickListener((v)->{
             if(size.get() >= 15) return;
             size.set(size.get() + 1);
             HawkUtils.setDanmuSizeScale(sizes.get(size.get()-1));
-            sizeText.setText(size+"倍");
+            sizeText.setText(getContext().getString(R.string.times_unit, size));
             EventBus.getDefault().post(new RefreshEvent(RefreshEvent.TYPE_SET_DANMU_SETTINGS,false));
         });
         sizeSub.setOnClickListener((v)->{
             if(size.get() <= 1) return;
             size.set(size.get() - 1);
             HawkUtils.setDanmuSizeScale(sizes.get(size.get()-1));
-            sizeText.setText(size+"倍");
+            sizeText.setText(getContext().getString(R.string.times_unit, size));
             EventBus.getDefault().post(new RefreshEvent(RefreshEvent.TYPE_SET_DANMU_SETTINGS,false));
         });
     }
@@ -155,19 +155,19 @@ public class DanmuSettingDialog extends BaseDialog {
         ImageView lineAdd = findViewById(R.id.lineAdd);
         ImageView lineSub = findViewById(R.id.lineSub);
         AtomicReference<Integer> line = new AtomicReference<>(HawkUtils.getDanmuMaxLine());
-        lineText.setText(line+"行");
+        lineText.setText(getContext().getString(R.string.rows_unit, line));
         lineAdd.setOnClickListener((v)->{
             if(line.get() >= 15) return;
             line.set(line.get() + 1);
             HawkUtils.setDanmuMaxLine(line.get());
-            lineText.setText(line+"行");
+            lineText.setText(getContext().getString(R.string.rows_unit, line));
             EventBus.getDefault().post(new RefreshEvent(RefreshEvent.TYPE_SET_DANMU_SETTINGS,false));
         });
         lineSub.setOnClickListener((v)->{
             if(line.get() <= 1) return;
             line.set(line.get() - 1);
             HawkUtils.setDanmuMaxLine(line.get());
-            lineText.setText(line+"行");
+            lineText.setText(getContext().getString(R.string.rows_unit, line));
             EventBus.getDefault().post(new RefreshEvent(RefreshEvent.TYPE_SET_DANMU_SETTINGS,false));
         });
     }

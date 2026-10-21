@@ -184,7 +184,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/vs_20"
                 android:textSize="@dimen/ts_22"
-                android:text="搜索历史" />
+                android:text="@string/search_history" />
 
             <ImageView                
                 android:id="@+id/clear_history"

@@ -26,7 +26,7 @@
                 android:layout_marginEnd="@dimen/vs_20"
                 android:layout_marginRight="@dimen/vs_20"
                 android:gravity="center_vertical|end"
-                android:text="空间名称"
+                android:text="@string/space_name"
                 android:textColor="@color/color_FF000000"
                 android:textSize="@dimen/ts_20" />
 
@@ -58,7 +58,7 @@
                 android:layout_marginEnd="@dimen/vs_20"
                 android:layout_marginRight="@dimen/vs_20"
                 android:gravity="center_vertical|end"
-                android:text="Alist地址"
+                android:text="@string/alist_address"
                 android:textColor="@color/color_FF000000"
                 android:textSize="@dimen/ts_20" />
 
@@ -89,7 +89,7 @@
                 android:layout_marginEnd="@dimen/vs_20"
                 android:layout_marginRight="@dimen/vs_20"
                 android:gravity="center_vertical|end"
-                android:text="初始路径"
+                android:text="@string/init_path"
                 android:textColor="@color/color_FF000000"
                 android:textSize="@dimen/ts_20" />
 
@@ -120,7 +120,7 @@
                 android:layout_marginEnd="@dimen/vs_20"
                 android:layout_marginRight="@dimen/vs_20"
                 android:gravity="center_vertical|end"
-                android:text="密码"
+                android:text="@string/password"
                 android:textColor="@color/color_FF000000"
                 android:textSize="@dimen/ts_20" />
 
@@ -158,7 +158,7 @@
             android:focusable="true"
             android:gravity="center"
             android:padding="@dimen/vs_10"
-            android:text="确定"
+            android:text="@string/confirm"
             android:textColor="@android:color/white"
             android:textSize="@dimen/vs_20" />
 
@@ -171,7 +171,7 @@
             android:focusable="true"
             android:gravity="center"
             android:padding="@dimen/vs_10"
-            android:text="取消"
+            android:text="@string/cancel"
             android:textColor="@android:color/white"
             android:textSize="@dimen/vs_20" />
 

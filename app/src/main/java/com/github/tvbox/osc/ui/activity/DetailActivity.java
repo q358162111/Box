@@ -410,7 +410,7 @@ public class DetailActivity extends BaseActivity {
                         String cpContent = removeHtmlTag(mVideo.des);
                         ClipData clipData = ClipData.newPlainText(null, cpContent);
                         clipprofile.setPrimaryClip(clipData);
-                        Toast.makeText(DetailActivity.this, "已复制：" + cpContent, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(DetailActivity.this, getString(R.string.det_url) + cpContent, Toast.LENGTH_SHORT).show();
                     }
                 });
                 return true;
@@ -553,7 +553,7 @@ public class DetailActivity extends BaseActivity {
                 String cpContent = "视频ID：" + vodId + "，图片地址：" + (mVideo == null ? "" : mVideo.pic);
                 ClipData clipData = ClipData.newPlainText(null, cpContent);
                 clipboard.setPrimaryClip(clipData);
-                Toast.makeText(DetailActivity.this, "已复制" + cpContent, Toast.LENGTH_SHORT).show();
+                Toast.makeText(DetailActivity.this, getString(R.string.det_url) + cpContent, Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -945,7 +945,7 @@ public class DetailActivity extends BaseActivity {
                                 if (response.body() != null) {
                                     return response.body().string();
                                 } else {
-                                    Toast.makeText(DetailActivity.this, "推送失败，填的地址可能不对", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(DetailActivity.this, getString(R.string.push_fail_address), Toast.LENGTH_SHORT).show();
                                     throw new IllegalStateException("网络请求错误");
                                 }
                             }
@@ -954,15 +954,15 @@ public class DetailActivity extends BaseActivity {
                             public void onSuccess(Response<String> response) {
                                 String r = response.body();
                                 if ("mirrored".equals(r))
-                                    Toast.makeText(DetailActivity.this, "推送成功", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(DetailActivity.this, getString(R.string.push_success), Toast.LENGTH_SHORT).show();
                                 else
-                                    Toast.makeText(DetailActivity.this, "推送失败，远端tvbox版本不支持", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(DetailActivity.this, getString(R.string.push_fail_version), Toast.LENGTH_SHORT).show();
                             }
 
                             @Override
                             public void onError(Response<String> response) {
                                 super.onError(response);
-                                Toast.makeText(DetailActivity.this, "推送失败，填的地址可能不对", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(DetailActivity.this, getString(R.string.push_fail_address), Toast.LENGTH_SHORT).show();
                             }
                         });
             }

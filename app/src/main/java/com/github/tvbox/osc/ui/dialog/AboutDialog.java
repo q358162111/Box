@@ -45,7 +45,7 @@ public class AboutDialog extends BaseDialog {
             String packageName = getContext().getPackageName();
             String versionName = packageManager.getPackageInfo(packageName, 0).versionName;
             TextView versionTextView = findViewById(R.id.tv_version);
-            versionTextView.setText("版本号: " + versionName);
+            versionTextView.setText(getContext().getString(R.string.version_num, versionName));
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }

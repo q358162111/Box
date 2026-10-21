@@ -77,7 +77,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="调试模式"
+                        android:text="@string/debug_mode"
                         android:textColor="@android:color/white"
                         android:textSize="@dimen/ts_24" />
 
@@ -90,7 +90,7 @@
                         android:id="@+id/tvDebugOpen"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="关"
+                        android:text="@string/off"
                         android:textColor="@android:color/white"
                         android:textSize="@dimen/ts_24" />
 
@@ -1263,7 +1263,7 @@
                             android:id="@+id/tvParseWebView"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="系统自带"
+                            android:text="@string/system_default"
                             android:textColor="@android:color/white"
                             android:textSize="@dimen/ts_24" />
 
