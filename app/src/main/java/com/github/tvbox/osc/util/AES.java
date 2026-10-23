@@ -31,6 +31,9 @@ public class AES {
     /**
      * AES ECB 解密。Android 不支持 PKCS7Padding，使用 PKCS5Padding（等价）。
      * 修复了原代码 "AES/ECB/PKCS7Padding" 始终抛 NoSuchPaddingException、永远返回 null 的致命 bug。
+     * 安全说明：ECB 模式无 IV、相同明文块产生相同密文块，且密钥不足 16 位时以 "0" 右填充（rightPadding），
+     * 不适用于承载敏感数据（如令牌/隐私）。当前仅用于源配置内嵌的非敏感数据（如 playUrl 扩展），风险有限；
+     * 若后续用于敏感字段，应改为 AES/GCM + 随机 IV。
      */
     public static String ECB(String data, String key) {
         if (data == null || key == null) return null;

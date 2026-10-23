@@ -433,6 +433,18 @@ public class PlayActivity extends BaseActivity {
                             }
                         });
                     }
+
+                    @Override
+                    public void fail(String msg) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (!isFinishing()) {
+                                    Toast.makeText(PlayActivity.this, "字幕加载失败", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
+                    }
                 });
               /*  EventBus.getDefault().register(searchSubtitleDialog);
                 searchSubtitleDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
@@ -1275,11 +1287,18 @@ public class PlayActivity extends BaseActivity {
 
         } else {
             // Closed playback
-            if (onStopCalled) {
+            // mVideoView 在 fragment 视图销毁后可能为 null；
+            // pipActionReceiver 从未注册时 unregisterReceiver 会抛 IllegalArgumentException
+            if (onStopCalled && mVideoView != null) {
                 mVideoView.release();
             }
-            unregisterReceiver(pipActionReceiver);
-            pipActionReceiver = null;
+            if (pipActionReceiver != null) {
+                try {
+                    unregisterReceiver(pipActionReceiver);
+                } catch (IllegalArgumentException ignored) {
+                }
+                pipActionReceiver = null;
+            }
         }
     }
 
@@ -1293,6 +1312,14 @@ public class PlayActivity extends BaseActivity {
         }
         if (mHandler != null) {
             mHandler.removeCallbacksAndMessages(null);
+        }
+        // PIP 接收器：销毁时统一注销，防止匿名内部类持有 Activity 泄漏
+        if (pipActionReceiver != null) {
+            try {
+                unregisterReceiver(pipActionReceiver);
+            } catch (IllegalArgumentException ignored) {
+            }
+            pipActionReceiver = null;
         }
         //手动注销
         sourceViewModel.playResult.removeObserver(mObserverPlayResult);

@@ -12,7 +12,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
@@ -46,7 +45,10 @@ public class SSLCompat extends SSLSocketFactory {
         try {
             SSLContext context = SSLContext.getInstance("TLS");
             context.init(null, new X509TrustManager[]{TM}, null);
-            HttpsURLConnection.setDefaultSSLSocketFactory(factory = context.getSocketFactory());
+            // 注意：不要再调用 HttpsURLConnection.setDefaultSSLSocketFactory(...) 把 TrustAll 污染到
+            // 整个进程——那会让所有 HttpsURLConnection（含自动更新 APK 下载等敏感链路）都失去证书校验。
+            // 放宽校验仅限显式 new SSLCompat() 接入的 OkHttp 客户端（自签第三方源的功能性权衡）。
+            factory = context.getSocketFactory();
         } catch (Exception e) {
             e.printStackTrace();
         }

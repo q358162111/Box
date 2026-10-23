@@ -82,7 +82,8 @@ public class M3U8 {
             if (ilast <= 4) {
                 continue;
             }
-            String preUrl = line.substring(0, ilast - 4);
+            // 彻底剥离最后一段（扩展名），不再假设固定 4 字符；.ts 等短后缀下前缀统计才正确
+            String preUrl = line.substring(0, ilast);
             Integer cnt = preUrlMap.get(preUrl);
             if (cnt != null) {
                 preUrlMap.put(preUrl, cnt + 1);

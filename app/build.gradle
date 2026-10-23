@@ -36,10 +36,23 @@ android {
         exclude 'META-INF/DEPENDENCIES'
     }
 
+    signingConfigs {
+        release {
+            def ksFile = file("../test.keystore")
+            if (ksFile.exists()) {
+                storeFile ksFile
+                storePassword project.findProperty("KEYSTORE_PASS") ?: "900825"
+                keyAlias project.findProperty("KEYSTORE_ALIAS") ?: "key0"
+                keyPassword project.findProperty("KEYSTORE_KEY_PASS") ?: "900825"
+            }
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled true
             shrinkResources true
+            signingConfig signingConfigs.release
         }
     }
 

@@ -9,18 +9,13 @@ import androidx.core.content.ContextCompat;
 
 import com.github.catvod.crawler.python.IPyLoader;
 import com.github.tvbox.osc.base.App;
-import com.github.tvbox.osc.util.LOG;
-import com.github.tvbox.osc.util.MD5;
 import com.undcover.freedom.pyramid.PythonLoader;
-import com.undcover.freedom.pyramid.PythonSpider;
 import java.io.UnsupportedEncodingException;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class pyLoader implements IPyLoader {
     private final PythonLoader pythonLoader;
     private final ConcurrentHashMap<String, Spider> spiders;
-    private String lastConfig = null; // 记录上次的配置
 
     public pyLoader() {
         pythonLoader = PythonLoader.getInstance().setApplication(App.getInstance());
@@ -30,21 +25,8 @@ public class pyLoader implements IPyLoader {
     @Override
     public void clear() {
         spiders.clear();
-    }
-
-    @Override
-    public void setConfig(String jsonStr) {
-        if (jsonStr != null && !jsonStr.equals(lastConfig)) {
-            Log.i("PyLoader", "echo-setConfig 初始化json ");
-            pythonLoader.setConfig(jsonStr);
-            lastConfig = jsonStr;
-        }
-    }
-
-    private String recentPyApi;
-    @Override
-    public void setRecentPyKey(String pyApi) {
-        recentPyApi = pyApi;
+        // 联动清空 PythonLoader 内层缓存，避免配置切换后内层仍返回绑定旧配置的 Spider
+        pythonLoader.clearSpiders();
     }
 
     @Override
@@ -60,7 +42,6 @@ public class pyLoader implements IPyLoader {
             }
             Log.i("PyLoader", "echo-getSpider url: " + getPyUrl(cls, ext));
             Spider sp = pythonLoader.getSpider(key, getPyUrl(cls, ext));
-//            Log.i("PyLoader", "echo-getSpider homeContent: " + sp.homeContent(true));
             spiders.put(key, sp);
             Log.i("PyLoader", "echo-getSpider 加载spider: " + key);
             return sp;
@@ -70,24 +51,9 @@ public class pyLoader implements IPyLoader {
         return new SpiderNull();
     }
 
-    @Override
-    public Object[] proxyInvoke(Map<String, String> params){
-        if(recentPyApi==null)return null;
-        LOG.i("echo-recentPyApi" + recentPyApi);
-        try {
-            PythonSpider originalSpider = (PythonSpider) getSpider(MD5.string2MD5(recentPyApi), recentPyApi,"");
-            return originalSpider.proxyLocal(params);
-        } catch (Throwable th) {
-            LOG.i("echo-proxyInvoke_Throwable:---" + th.getMessage());
-            th.printStackTrace();
-        }
-        return null;
-    }
-
     private String getPyUrl(String api, String ext) throws UnsupportedEncodingException {
         StringBuilder urlBuilder = new StringBuilder(api);
         if (!ext.isEmpty()) {
-//            ext= URLEncoder.encode(ext,"utf8");
             urlBuilder.append(api.contains("?") ? "&" : "?").append("extend=").append(ext);
         }
         return urlBuilder.toString();

@@ -36,6 +36,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 //import java9.util.concurrent.CompletableFuture;
 
@@ -68,18 +70,40 @@ public class JsSpider extends Spider {
         return executor.submit(callable);
     }
 
+    // 单次 JS 调用超时上限（秒）。超过则判定该 spider 不可用。
+    private static final int JS_CALL_TIMEOUT_SECONDS = 30;
+    // 某次调用超时后 executor 线程被僵尸任务永久占住，置 broken 让后续调用直接返回兜底，
+    // 不再往队列堆积（队列里的任务会永远排在僵尸任务后面）
+    private volatile boolean broken = false;
+
+    /**
+     * 带超时地在 executor 上执行任务。
+     * 超时后 cancel 外层任务并标记 broken：内层 JS 调用无法被真正中断，
+     * 单线程 executor 会被占住，因此后续调用必须走 broken 短路而不是继续排队。
+     */
+    private <T> T callWithTimeout(Callable<T> callable) {
+        if (broken) return null;
+        Future<T> future = executor.submit(callable);
+        try {
+            return future.get(JS_CALL_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        } catch (TimeoutException te) {
+            future.cancel(true);
+            broken = true;
+            LOG.i("JsSpider 调用超时，标记 spider 不可用: " + key);
+            return null;
+        } catch (InterruptedException | ExecutionException e) {
+            LOG.i("Executor 提交或等待失败" + e);
+            return null;
+        }
+    }
+
     //private Object call(String func, Object... args) throws Exception {
         //return executor.submit((FunCall.call(jsObject, func, args))).get();
       //  return CompletableFuture.supplyAsync(() -> Async.run(jsObject, func, args), executor).join().get();
     private Object call(String func, Object... args) {
 //        return executor.submit((FunCall.call(jsObject, func, args))).get();
-        try {
-            return submit(() -> Async.run(jsObject, func, args).get()).get();  // 等待 executor 线程完成 JS 调用
-        } catch (InterruptedException | ExecutionException e) {
-            LOG.i("Executor 提交或等待失败"+ e);
-            return null;
-        }
-}
+        return callWithTimeout(() -> Async.run(jsObject, func, args).get());
+    }
 
     private JSObject cfg(String ext) {
         JSObject cfg = ctx.createJSObject();
@@ -96,7 +120,10 @@ public class JsSpider extends Spider {
      //   else call("init", Json.valid(extend) ? ctx.parse(extend) : extend);
     public void init(Context context, String extend) {
         try {
-            if (cat) call("init", submit(() -> cfg(extend)).get());
+            if (cat) {
+                JSObject cfgObj = callWithTimeout(() -> cfg(extend));
+                if (cfgObj != null) call("init", cfgObj);
+            }
             else call("init", Json.valid(extend) ? ctx.parse(extend) : extend);
         }catch (Exception e){
 
@@ -131,7 +158,8 @@ public class JsSpider extends Spider {
      //   return (String) call("category", tid, pg, filter, obj);
     public String categoryContent(String tid, String pg, boolean filter, HashMap<String, String> extend)  {
         try {
-            JSObject obj = submit(() -> new JSUtils<String>().toObj(ctx, extend)).get();
+            JSObject obj = callWithTimeout(() -> new JSUtils<String>().toObj(ctx, extend));
+            if (obj == null) return null;
             return (String) call("category", tid, pg, filter, obj);
         }catch (Exception e){
             return null;
@@ -177,7 +205,8 @@ public class JsSpider extends Spider {
      //   return (String) call("play", flag, id, array);
     public String playerContent(String flag, String id, List<String> vipFlags) {
         try {
-            JSArray array = submit(() -> new JSUtils<String>().toArray(ctx, vipFlags)).get();
+            JSArray array = callWithTimeout(() -> new JSUtils<String>().toArray(ctx, vipFlags));
+            if (array == null) return null;
             return (String) call("play", flag, id, array);
         }catch (Exception e){
             return null;
@@ -213,8 +242,10 @@ public class JsSpider extends Spider {
     public Object[] proxyLocal(Map<String, String> params)  {
         try {
             if ("catvod".equals(params.get("from"))) return proxy2(params);
-            else return submit(() -> proxy1(params)).get();
-
+            else {
+                Object[] rs = callWithTimeout(() -> proxy1(params));
+                return rs != null ? rs : new Object[0];
+            }
         }catch (Exception E){
             return new Object[0];
         }
@@ -298,6 +329,18 @@ public class JsSpider extends Spider {
         ctx.setModuleLoader(new QuickJSContext.BytecodeModuleLoader() {
             @Override
             public byte[] getModuleBytecode(String moduleName) {
+                try {
+                    return getModuleBytecodeInner(moduleName);
+                } catch (Throwable e) {
+                    // 编译失败（如新版 cheerio 的正则语法不被当前 QuickJS 支持）必须在此吞掉：
+                    // 若带着挂起的 QuickJSException 返回，native 侧随后调 JNI FindClass 会触发
+                    // ART 断言 SIGABRT 直接闪退。降级为空模块，让源以功能缺失的方式继续运行。
+                    LOG.i("getModuleBytecode 编译失败，降级为空模块: " + moduleName + " , " + e);
+                    return ctx.compileModule("", moduleName);
+                }
+            }
+
+            private byte[] getModuleBytecodeInner(String moduleName) {
                 String ss = FileUtils.loadModule(moduleName);
                 //if (TextUtils.isEmpty(ss)) {return null;}
                 if (TextUtils.isEmpty(ss)) {
@@ -461,8 +504,10 @@ public class JsSpider extends Spider {
     private Object[] proxy2(Map<String, String> params) throws Exception {
         String url = params.get("url");
         String header = params.get("header");
-        JSArray array = submit(() -> new JSUtils<String>().toArray(ctx, Arrays.asList(url.split("/")))).get();
-        Object object = submit(() -> ctx.parse(header)).get();
+        JSArray array = callWithTimeout(() -> new JSUtils<String>().toArray(ctx, Arrays.asList(url.split("/"))));
+        if (array == null) return new Object[0];
+        Object object = callWithTimeout(() -> ctx.parse(header));
+        if (object == null) return new Object[0];
         String json = (String) call("proxy", array, object);
         Res res = Res.objectFrom(json);
         String contentType = res.getContentType();

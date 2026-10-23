@@ -15,7 +15,6 @@ import com.github.tvbox.osc.util.urlhttp.OKCallBack;
 import com.github.tvbox.osc.util.urlhttp.OkHttpUtil;
 
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -25,7 +24,6 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -41,8 +39,6 @@ public class PythonLoader {
     private final ConcurrentHashMap<String, Spider> spiders = new ConcurrentHashMap<>();
     private static volatile PythonLoader sInstance;
     private Application app;
-    // setConfig 写 / getSpider 子线程读，使用并发容器保证线程安全
-    private final ConcurrentHashMap<String, JSONObject> siteMap;
     // 共享的 Spider 初始化线程池:避免每次 getSpider 创建/销毁一次性线程池
     private final ExecutorService spiderInitExecutor = Executors.newSingleThreadExecutor(r -> {
         Thread t = new Thread(r, "spider-init");
@@ -54,7 +50,6 @@ public class PythonLoader {
     Python.Platform androidPlatform;
 
     public PythonLoader() {
-        siteMap = new ConcurrentHashMap<>();
     }
 
     public static PythonLoader getInstance() {
@@ -76,18 +71,12 @@ public class PythonLoader {
         PyToast.init(context);
     }
 
-    public void setConfig(String config) {
-        try {
-            JSONObject configJo = new JSONObject(config);
-            JSONArray siteList = configJo.getJSONArray("sites");
-            for (int i = 0; i < siteList.length(); i++) {
-                JSONObject jo = siteList.getJSONObject(i);
-                String key = jo.optString("api");
-                siteMap.put(key, jo);
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+    /**
+     * 清空内层 Spider 缓存（绑定旧配置的 PythonSpider 持有 PyObject，配置切换后必须清理）。
+     * 供 pyLoader.clear() 联动调用，避免只清外层缓存后内层仍返回旧 Spider。
+     */
+    public void clearSpiders() {
+        spiders.clear();
     }
 
     public PythonLoader setApplication(Application app) {
@@ -114,24 +103,6 @@ public class PythonLoader {
         return this;
     }
 
-    public String getUrlByApi(String api) {
-        String key = "";
-        String url = "";
-        if (siteMap.containsKey(api)) {
-            JSONObject jo = siteMap.get(api);
-            key = jo.optString("key");
-            url = jo.optString("ext");
-        }
-        if (!key.isEmpty() && !url.isEmpty()) {
-            if (spiders.containsKey(key)) {
-                return "";
-            } else {
-                return url;
-            }
-        }
-        return "";
-    }
-
     public Spider getSpider(String key, String url) throws Exception {
         if (app == null) throw new Exception("set application first");
         if (spiders.containsKey(key)) {
@@ -139,11 +110,12 @@ public class PythonLoader {
             return spiders.get(key);
         }
 
+        Future<?> future = null;
         try {
             PythonSpider sp = new PythonSpider(key, cache);
 
             // 在共享线程池中执行初始化,避免每次创建/销毁一次性线程池
-            Future<?> future = spiderInitExecutor.submit(() -> {
+            future = spiderInitExecutor.submit(() -> {
                 try {
                     sp.init(app, url);
                 } catch (Exception e) {
@@ -162,38 +134,21 @@ public class PythonLoader {
             PyLog.e(key + " :插件初始化失败，返回空 Spider");
         } catch (TimeoutException e) {
             PyLog.e("echo-init方法执行超时");
-            // 超时了，不做中断，返回空的Spider
+            // 超时后尝试中断任务，释放被占住的单线程池；
+            // 否则挂起任务会一直阻塞后续所有 Python 源的初始化
+            if (future != null) {
+                future.cancel(true);
+            }
         } catch (ExecutionException | InterruptedException e) {
             PyLog.e("echo-init:ExecutionException|InterruptedException");
-        }
-        return new SpiderNull();
-    }
-
-    int port = -1;
-
-    // 端口探测失败的端口集合,避免每次调用都从头重扫已知不可用的端口
-    private final Set<Integer> failedPorts = ConcurrentHashMap.newKeySet();
-
-    public void getPort() {
-        if (port > 0) return;
-        for (int i = 9978; i < 10000; i++) {
-            if (failedPorts.contains(i)) continue;
-            try {
-                if (OkHttpUtil.string("http://127.0.0.1:" + i + "/proxy?do=ck&api=python", null).equals("ok")) {
-                    port = i;
-                    return;
-                }
-            } catch (Exception e) {
-                // 探测失败记录端口,下次跳过
-                failedPorts.add(i);
+            if (future != null) {
+                future.cancel(true);
+            }
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
             }
         }
-    }
-
-    public String localProxyUrl() {
-        getPort();
-        // 防止 port 探测失败时返回 -1
-        return port > 0 ? "http://127.0.0.1:" + port + "/proxy" : null;
+        return new SpiderNull();
     }
 
     public Map<String, String> str2map(String header) {

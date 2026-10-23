@@ -219,6 +219,11 @@ public class SearchSubtitleDialog extends BaseDialog {
 
     public interface SubtitleLoader {
         void loadSubtitle(SubtitleBean subtitle);
+        /**
+         * 字幕加载失败时回调，实现方应在 UI 线程提示用户。
+         * 提供默认 no-op，不破坏已有实现。
+         */
+        default void fail(String msg) { }
     }
 
     @Override

@@ -29,6 +29,7 @@ import com.github.tvbox.osc.util.M3U8;
 import com.github.tvbox.osc.util.MD5;
 import com.github.tvbox.osc.util.FileUtils;
 import com.github.tvbox.osc.util.VideoParseRuler;
+import com.github.tvbox.osc.viewmodel.SourceViewModel;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -362,7 +363,6 @@ public class ApiConfig {
 
     private static volatile String jarCache = "true";
     private void parseJson(String apiUrl, String jsonStr) {
-//        pyLoader.setConfig(jsonStr);
         JsonObject infoJson = new Gson().fromJson(jsonStr, JsonObject.class);
         jarCache = DefaultConfig.safeJsonString(infoJson, "jarCache", "true");
         // spider
@@ -377,6 +377,8 @@ public class ApiConfig {
         SourceBean firstSite = null;
         // 重新解析配置时清空旧源，避免新旧配置站点混杂
         sourceBeanList.clear();
+        // 配置变更后同步清空首页缓存，否则同 key 旧缓存会让新配置首页返回过期数据
+        SourceViewModel.clearSortCache();
         JsonArray sites = infoJson.has("video") ? infoJson.getAsJsonObject("video").getAsJsonArray("sites") : infoJson.get("sites").getAsJsonArray();
         // sites 字段缺失/为空时跳过解析，避免整个配置加载 NPE 失败
         if (sites == null) sites = new JsonArray();
@@ -801,9 +803,11 @@ public class ApiConfig {
         SourceBean sourceBean = getHomeSourceBean();
         if (sourceBean == null) return null;
         String apiString = sourceBean.getApi();
-        return apiString != null && apiString.contains(".py")
-                ? pyLoader.proxyInvoke(param)
-                : jarLoader.proxyInvoke(param);
+        if (apiString != null && apiString.contains(".py")) {
+            // python 代理链路已移除：原实现依赖 setRecentPyKey（无调用方）恒返回 null
+            return null;
+        }
+        return jarLoader.proxyInvoke(param);
     }
 
     public JSONObject jsonExt(String key, LinkedHashMap<String, String> jxs, String url) {

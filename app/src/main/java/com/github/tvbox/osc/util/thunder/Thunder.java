@@ -64,6 +64,8 @@ public class Thunder {
     }
 
     public static void stop(Boolean bool) {
+        // 代际自增：使所有在跑的旧 parse/play 任务立即失效退出
+        parseGeneration++;
         if (currentTask > 0) {
             XLTaskHelper.instance().stopTask(currentTask);
             currentTask = 0L;
@@ -97,9 +99,15 @@ public class Thunder {
 
     private static ArrayList<String> playList = null;
     private static ArrayList<String> ed2kList = null;
+    // 解析代际：每次 parse/stop 自增。shutdownNow 不等待旧任务结束，
+    // 旧任务凭代际判断自己是否已过期，过期则立即退出，
+    // 避免其继续写共享的 currentTask/playList/torrentFileInfoArrayList 污染新一轮解析
+    private static volatile int parseGeneration = 0;
+
     public static void parse(Context context, Movie.Video.UrlBean urlBean, ThunderCallback callback) {
         init(context);
         stop(true);
+        final int gen = parseGeneration;
         threadPool = Executors.newSingleThreadExecutor();
         torrentFileInfoArrayList=new ArrayList<>();
         playList=new ArrayList<>();
@@ -108,7 +116,9 @@ public class Thunder {
         threadPool.execute(new Runnable() {
             @Override
             public void run() {
+                if (gen != parseGeneration) return;
                 for (int idx=0;idx<urlBean.infoList.size();idx++) {
+                    if (gen != parseGeneration) return;
                     Movie.Video.UrlBean.UrlInfo urlInfo = urlBean.infoList.get(idx);
                     if (urlInfo != null) {
                         String url="";
@@ -208,6 +218,7 @@ public class Thunder {
                     }
                 }
 
+                if (gen != parseGeneration) return;
                 if (urlMap.size() > 0) {
                     callback.list(urlMap);
                 } else {

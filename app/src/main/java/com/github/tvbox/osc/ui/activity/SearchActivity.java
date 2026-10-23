@@ -94,6 +94,8 @@ public class SearchActivity extends BaseActivity {
     private TvRecyclerView mGridView;
     private TvRecyclerView mGridViewWord;
     private SourceViewModel sourceViewModel;
+    // 具名布局监听器：匿名内部类持有 Activity，需 onDestroy 主动移除防泄漏
+    private ViewTreeObserver.OnGlobalLayoutListener searchWidthListener;
     private CustomEditText etSearch;
     private TextView tvSearch;
     private TextView tvClear;
@@ -215,7 +217,7 @@ public class SearchActivity extends BaseActivity {
         wordAdapter = new PinyinAdapter();
         mGridViewWord.setAdapter(wordAdapter);
         searchResultWidth = Hawk.get(HawkConfig.SEARCH_RESULT_WIDTH, -1);
-        llLayout.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+        searchWidthListener = new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
                 if (searchResultWidth != -1) {
@@ -231,7 +233,8 @@ public class SearchActivity extends BaseActivity {
                     }
                 }
             }
-        });
+        };
+        llLayout.getViewTreeObserver().addOnGlobalLayoutListener(searchWidthListener);
 
         wordAdapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
             @Override
@@ -814,6 +817,14 @@ public class SearchActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        // 移除布局监听器，防止匿名/具名监听持有 Activity 泄漏
+        if (searchWidthListener != null && llLayout != null) {
+            ViewTreeObserver vto = llLayout.getViewTreeObserver();
+            if (vto.isAlive()) {
+                vto.removeOnGlobalLayoutListener(searchWidthListener);
+            }
+            searchWidthListener = null;
+        }
         cancel();
         try {
             if (sourceViewModel != null) {

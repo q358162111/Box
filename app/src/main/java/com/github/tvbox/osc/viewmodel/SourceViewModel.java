@@ -97,6 +97,8 @@ public class SourceViewModel extends ViewModel {
 
     public void destroyExecutor() {
         if (searchExecutorService != null) {
+            // 置 null 前先 shutdown，避免 5 个线程常驻到进程结束
+            searchExecutorService.shutdownNow();
             searchExecutorService = null;
         }
     }
@@ -112,6 +114,15 @@ public class SourceViewModel extends ViewModel {
     }
 
     public static final ExecutorService spThreadPool = Executors.newSingleThreadExecutor();
+
+    // getFixUrl 专用线程池：getPlay 在 spThreadPool 内调用 getFixUrl，若 getFixUrl 也提交到
+    // spThreadPool 会造成自死锁（单线程池内阻塞等待自己池里的任务，只能靠超时兜底）。
+    // 独立池隔离两者，同时避免主线程同步阻塞。
+    private static final ExecutorService extendLoadExecutor = Executors.newSingleThreadExecutor(r -> {
+        Thread t = new Thread(r, "extend-load");
+        t.setDaemon(true);
+        return t;
+    });
 
     // 共享的 Spider 调用线程池:避免每次请求都创建/销毁一次性单线程池
     private static final ExecutorService spiderCallExecutor = Executors.newCachedThreadPool(r -> {
@@ -144,6 +155,13 @@ public class SourceViewModel extends ViewModel {
             return size() > 5;
         }
     });
+
+    /**
+     * 清空首页缓存。源配置变更后必须调用，否则同 key 的旧缓存会让新配置首页返回过期数据。
+     */
+    public static void clearSortCache() {
+        sortCache.clear();
+    }
     // homeContent
     public void getSort(final String sourceKey) {
         LOG.i("echo--getSort-start");
@@ -208,7 +226,8 @@ public class SourceViewModel extends ViewModel {
                     }
                 }
             };
-            spThreadPool.execute(waitResponse);
+            // homeContent 含首次下载 jar/py + 20s 超时，放单线程池会阻塞其它请求（全局饥饿）
+            spiderCallExecutor.execute(waitResponse);
         } else if (type == 0 || type == 1) {
             OkGo.<String>get(sourceBean.getApi())
                     .tag(sourceBean.getKey() + "_sort")
@@ -259,58 +278,63 @@ public class SourceViewModel extends ViewModel {
                         }
                     });
         } else if (type == 4) {
-            String extend=sourceBean.getExt();
-            extend=getFixUrl(extend);
-            OkGo.<String>get(sourceBean.getApi())
-                    .tag(sourceBean.getKey() + "_sort")
-                    .params("filter", "true")
-                    .params("extend", extend)
-                    .execute(new AbsCallback<String>() {
-                        @Override
-                        public String convertResponse(okhttp3.Response response) throws Throwable {
-                            if (response.body() != null) {
-                                return response.body().string();
-                            } else {
-                                throw new IllegalStateException("网络请求错误");
-                            }
-                        }
-
-                        @Override
-                        public void onSuccess(Response<String> response) {
-                            String sortJson = response.body();
-                            if (sortJson != null) {
-                                final AbsSortXml sortXml = sortJson(sortResult, sortJson);
-                                if (sortXml != null && Hawk.get(HawkConfig.HOME_REC, 0) == 1) {
-                                    AbsXml absXml = json(null, sortJson, sourceBean.getKey());
-                                    if (absXml != null && absXml.movie != null && absXml.movie.videoList != null && absXml.movie.videoList.size() > 0) {
-                                        sortXml.videoList = absXml.movie.videoList;
-                                        sortResult.postValue(sortXml);
-                                        sortCache.put(sourceKey, sortXml);
+            // getFixUrl 可能阻塞最长 5s（远端 extend 下载），不能在主线程同步调用
+            spThreadPool.execute(new Runnable() {
+                @Override
+                public void run() {
+                    String extend = getFixUrl(sourceBean.getExt());
+                    OkGo.<String>get(sourceBean.getApi())
+                            .tag(sourceBean.getKey() + "_sort")
+                            .params("filter", "true")
+                            .params("extend", extend)
+                            .execute(new AbsCallback<String>() {
+                                @Override
+                                public String convertResponse(okhttp3.Response response) throws Throwable {
+                                    if (response.body() != null) {
+                                        return response.body().string();
                                     } else {
-                                        getHomeRecList(sourceBean, null, new HomeRecCallback() {
-                                            @Override
-                                            public void done(List<Movie.Video> videos) {
-                                                sortXml.videoList = videos;
+                                        throw new IllegalStateException("网络请求错误");
+                                    }
+                                }
+
+                                @Override
+                                public void onSuccess(Response<String> response) {
+                                    String sortJson = response.body();
+                                    if (sortJson != null) {
+                                        final AbsSortXml sortXml = sortJson(sortResult, sortJson);
+                                        if (sortXml != null && Hawk.get(HawkConfig.HOME_REC, 0) == 1) {
+                                            AbsXml absXml = json(null, sortJson, sourceBean.getKey());
+                                            if (absXml != null && absXml.movie != null && absXml.movie.videoList != null && absXml.movie.videoList.size() > 0) {
+                                                sortXml.videoList = absXml.movie.videoList;
                                                 sortResult.postValue(sortXml);
                                                 sortCache.put(sourceKey, sortXml);
+                                            } else {
+                                                getHomeRecList(sourceBean, null, new HomeRecCallback() {
+                                                    @Override
+                                                    public void done(List<Movie.Video> videos) {
+                                                        sortXml.videoList = videos;
+                                                        sortResult.postValue(sortXml);
+                                                        sortCache.put(sourceKey, sortXml);
+                                                    }
+                                                });
                                             }
-                                        });
+                                        } else {
+                                            sortResult.postValue(sortXml);
+                                            sortCache.put(sourceKey, sortXml);
+                                        }
+                                    } else {
+                                        sortResult.postValue(null);
                                     }
-                                } else {
-                                    sortResult.postValue(sortXml);
-                                    sortCache.put(sourceKey, sortXml);
                                 }
-                            } else {
-                                sortResult.postValue(null);
-                            }
-                        }
 
-                        @Override
-                        public void onError(Response<String> response) {
-                            super.onError(response);
-                            sortResult.postValue(null);
-                        }
-                    });
+                                @Override
+                                public void onError(Response<String> response) {
+                                    super.onError(response);
+                                    sortResult.postValue(null);
+                                }
+                            });
+                }
+            });
         } else {
             sortResult.postValue(null);
         }
@@ -321,7 +345,8 @@ public class SourceViewModel extends ViewModel {
         SourceBean homeSourceBean = ApiConfig.get().getHomeSourceBean();
         int type = homeSourceBean.getType();
         if (type == 3) {
-            spThreadPool.execute(new Runnable() {
+            // categoryContent 含首次下载 + JsSpider 调用，放单线程池会阻塞其它请求（全局饥饿）
+            spiderCallExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -445,7 +470,8 @@ public class SourceViewModel extends ViewModel {
                     }
                 }
             };
-            spThreadPool.execute(waitResponse);
+            // homeVideoContent 含首次下载 + 15s 超时，放单线程池会阻塞其它请求（全局饥饿）
+            spiderCallExecutor.execute(waitResponse);
         } else if (type == 0 || type == 1) {
             OkGo.<String>get(sourceBean.getApi())
                     .tag("detail")
@@ -517,7 +543,9 @@ public class SourceViewModel extends ViewModel {
         }
         int type = sourceBean.getType();
         if (type == 3) {
-            spThreadPool.execute(new Runnable() {
+            // 用 cached 池而非 spThreadPool 单线程：detail 内含 checkPush 的 15s await 与
+            // 15s spider 超时，放在单线程池会阻塞其它 home/list/detail 请求（全局饥饿）
+            spiderCallExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
                     String json = callSpiderWithTimeout(new Callable<String>() {
@@ -539,42 +567,47 @@ public class SourceViewModel extends ViewModel {
                 }
             });
         } else if (type == 0 || type == 1|| type == 4) {
-            String extend=sourceBean.getExt();
-            extend=getFixUrl(extend);
-            OkGo.<String>get(sourceBean.getApi())
-                    .tag("detail")
-                    .params("ac", type == 0 ? "videolist" : "detail")
-                    .params("ids", id)
-                    .params("extend", extend)
-                    .execute(new AbsCallback<String>() {
+            // type4 的 getFixUrl 可能阻塞最长 5s，统一移到 spThreadPool 避免主线程 ANR
+            spThreadPool.execute(new Runnable() {
+                @Override
+                public void run() {
+                    String extend = getFixUrl(sourceBean.getExt());
+                    OkGo.<String>get(sourceBean.getApi())
+                            .tag("detail")
+                            .params("ac", type == 0 ? "videolist" : "detail")
+                            .params("ids", id)
+                            .params("extend", extend)
+                            .execute(new AbsCallback<String>() {
 
-                        @Override
-                        public String convertResponse(okhttp3.Response response) throws Throwable {
-                            if (response.body() != null) {
-                                return response.body().string();
-                            } else {
-                                throw new IllegalStateException("网络请求错误");
-                            }
-                        }
+                                @Override
+                                public String convertResponse(okhttp3.Response response) throws Throwable {
+                                    if (response.body() != null) {
+                                        return response.body().string();
+                                    } else {
+                                        throw new IllegalStateException("网络请求错误");
+                                    }
+                                }
 
-                        @Override
-                        public void onSuccess(Response<String> response) {
-                            if (type == 0) {
-                                String xml = response.body();
-                                xml(detailResult, xml, sourceBean.getKey());
-                            } else {
-                                String json = response.body();
-                                LOG.i(json);
-                                json(detailResult, json, sourceBean.getKey());
-                            }
-                        }
+                                @Override
+                                public void onSuccess(Response<String> response) {
+                                    if (type == 0) {
+                                        String xml = response.body();
+                                        xml(detailResult, xml, sourceBean.getKey());
+                                    } else {
+                                        String json = response.body();
+                                        LOG.i(json);
+                                        json(detailResult, json, sourceBean.getKey());
+                                    }
+                                }
 
-                        @Override
-                        public void onError(Response<String> response) {
-                            super.onError(response);
-                            json(detailResult, "", sourceBean.getKey());
-                        }
-                    });
+                                @Override
+                                public void onError(Response<String> response) {
+                                    super.onError(response);
+                                    json(detailResult, "", sourceBean.getKey());
+                                }
+                            });
+                }
+            });
         } else {
             detailResult.postValue(null);
         }
@@ -762,12 +795,14 @@ public class SourceViewModel extends ViewModel {
         Callable<JSONObject> callable = () -> {
             if (Thread.currentThread().isInterrupted()) return null;
             SourceBean sourceBean = ApiConfig.get().getSource(sourceKey);
+            // 源可能在请求期间被配置更新移除，判空避免 NPE（否则异常被下方 catch 吞成"无数据"）
+            if (sourceBean == null) return null;
             int type = sourceBean.getType();
             JSONObject result = null;
             if (type == 3) {
                 Spider sp = ApiConfig.get().getCSP(sourceBean);
                 String json = sp.playerContent(playFlag, url, ApiConfig.get().getVipParseFlags());
-                result = new JSONObject(json);
+                if (json != null) result = new JSONObject(json);
             } else if (type == 0 || type == 1) {
                 result = new JSONObject();
                 String playUrl = sourceBean.getPlayerUrl().trim();
@@ -780,8 +815,11 @@ public class SourceViewModel extends ViewModel {
                 String extend=sourceBean.getExt();
                 extend=getFixUrl(extend);
                 okhttp3.Response response = OkGo.<String>get(sourceBean.getApi()).params("play", url).params("flag", playFlag).params("extend", extend).tag("play").execute();
-                String json = response.body().string();
-                result = new JSONObject(json);
+                // body 判空，避免断网时 NPE 被当成"无数据"
+                if (response != null && response.body() != null) {
+                    String json = response.body().string();
+                    result = new JSONObject(json);
+                }
             }
             if (result != null) {
                 result.put("key", url);
@@ -803,16 +841,24 @@ public class SourceViewModel extends ViewModel {
             }
         });
     }
-    private static final ConcurrentHashMap<String, String> extendCache = new ConcurrentHashMap<>();
+    // extend 缓存：synchronizedMap 包装 accessOrder LinkedHashMap，超出 32 条淘汰最旧，
+    // 避免 static 缓存只增不减导致无界内存增长（key 为 extend URL 的 MD5，源更新后旧 key 不再命中）
+    private static final Map<String, String> extendCache = Collections.synchronizedMap(new LinkedHashMap<String, String>(16, 0.75f, true) {
+        @Override
+        protected boolean removeEldestEntry(Entry<String, String> eldest) {
+            return size() > 32;
+        }
+    });
     private String getFixUrl(final String extend) {
         if(!extend.startsWith("http"))return extend;
         final String key = MD5.string2MD5(extend);
-        if (extendCache.containsKey(key)) {
+        String cached = extendCache.get(key);
+        if (cached != null) {
             LOG.i("echo-getFixUrl Cache");
-            return extendCache.get(key);
+            return cached;
         }
         LOG.i("echo-getFixUrl load");
-        Future<String> future = spThreadPool.submit(new Callable<String>() {
+        Future<String> future = extendLoadExecutor.submit(new Callable<String>() {
             @Override
             public String call() {
                 String result = extend;

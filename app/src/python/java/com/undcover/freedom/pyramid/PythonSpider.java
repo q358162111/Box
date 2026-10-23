@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.chaquo.python.PyObject;
 import com.github.catvod.crawler.Spider;
+import com.github.tvbox.osc.server.RemoteServer;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -61,6 +62,11 @@ public class PythonSpider extends Spider {
             return;
         }
         PyObject retValue = app.callAttr("downloadPlugin", cachePath, url);
+        // 注入真实本地服务端口，替代 python 侧 localProxy.py 的硬编码 9978
+        try {
+            app.callAttr("setLocalProxyPort", RemoteServer.serverPort);
+        } catch (Exception ignored) {
+        }
         if (retValue == null) {
             PyToast.showCancelableToast(name + "下载插件返回为空");
             return;
@@ -76,31 +82,6 @@ public class PythonSpider extends Spider {
             if (pySpider == null) {
                 PyToast.showCancelableToast(name + "加载插件失败");
                 return;
-            }
-
-            List<PyObject> poList = app.callAttr("getDependence", pySpider).asList();
-            if (poList != null) {
-                for (PyObject po : poList) {
-                    if (po == null) continue;
-                    String api = po.toString();
-                    Log.i("PyLoader", "echo-init api: " +api);
-                    String depUrl = PythonLoader.getInstance().getUrlByApi(api);
-                    if (!depUrl.isEmpty()) {
-                        Log.i("PyLoader", "echo-init depUrl: " +depUrl);
-                        PyObject depRet = app.callAttr("downloadPlugin", cachePath, depUrl);
-                        if (depRet == null) {
-                            PyToast.showCancelableToast(api + "下载依赖返回为空");
-                            return;
-                        }
-                        String tmpPath = depRet.toString();
-                        if (!new File(tmpPath).exists()) {
-                            PyToast.showCancelableToast(api + "加载失败!");
-                            return;
-                        } else {
-                            PyLog.d(api + ": 加载插件依赖成功！");
-                        }
-                    }
-                }
             }
             app.callAttr("init", pySpider, extInfo);
             loadSuccess = true;
@@ -230,14 +211,6 @@ public class PythonSpider extends Spider {
         return new ByteArrayInputStream(content.getBytes());
     }
 
-    public String replaceLocalUrl(String content) {
-        if (content == null) return null;
-        String proxy = PythonLoader.getInstance().localProxyUrl();
-        // 防止 localProxyUrl 返回 null 导致 NPE
-        if (proxy == null) return content;
-        return content.replace("http://127.0.0.1:UndCover/proxy", proxy);
-    }
-
     /**
      * 首页数据内容
      *
@@ -327,7 +300,7 @@ public class PythonSpider extends Spider {
         if (!loadSuccess) return "{}";
         PyLog.nw("playerContent" + "-" + name, paramLog(flag, id, list2json(vipFlags).toString()));
         PyObject po = app.callAttr("playerContent", pySpider, flag, id, list2json(vipFlags).toString());
-        String rsp = replaceLocalUrl(po.toString());
+        String rsp = po.toString();
         PyLog.nw("playerContent" + "-" + name, rsp);
         return rsp;
     }

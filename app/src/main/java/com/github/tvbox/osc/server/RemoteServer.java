@@ -39,6 +39,7 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
@@ -60,7 +61,26 @@ public class RemoteServer extends NanoHTTPD {
     private ArrayList < RequestProcess > postRequestList = new ArrayList < > ();
     private static final String PATTERN_ETH_STR = "^eth\\d+$";
     private static final Pattern ETH_PATTERN = Pattern.compile(PATTERN_ETH_STR);
-    public static String m3u8Content;
+    // volatile：主线程写入、NanoHTTPD 服务端线程读取，保证跨线程可见性
+    public static volatile String m3u8Content;
+    // python 插件缓存端点（/cache）的内存存储：仅服务环回客户端（python 插件经本地回环访问）
+    private static final ConcurrentHashMap<String, String> pluginCache = new ConcurrentHashMap<>();
+    // 单个缓存值大小上限（字节），防止插件写入超大值撑爆内存
+    private static final int CACHE_VALUE_MAX_BYTES = 1024 * 1024;
+    // 单个缓存 key 长度上限
+    private static final int CACHE_KEY_MAX_LEN = 256;
+
+    /**
+     * 校验 /cache 的 key：非空、长度受限、不含控制字符（防日志/解析注入）
+     */
+    private static boolean isSafeCacheKey(String key) {
+        if (key == null || key.isEmpty() || key.length() > CACHE_KEY_MAX_LEN) return false;
+        for (int i = 0; i < key.length(); i++) {
+            char c = key.charAt(i);
+            if (c < 0x20 || c == 0x7f) return false;
+        }
+        return true;
+    }
 
     public RemoteServer(int port, Context context) {
         super(port);
@@ -173,9 +193,21 @@ public class RemoteServer extends NanoHTTPD {
             return NanoHTTPD.newFixedLengthResponse(Response.Status.INTERNAL_ERROR, NanoHTTPD.MIME_PLAINTEXT, "500");
         }
     }
+    /**
+     * 判断请求是否来自回环地址（本机/应用自身）。供 SSRF 过滤分支使用。
+     */
+    private boolean isLoopbackClient(IHTTPSession session) {
+        String host = session.getRemoteIpAddress();
+        return "127.0.0.1".equals(host) || "::1".equals(host) || "0:0:0:0:0:0:0:1".equals(host);
+    }
+
     @Override
     public Response serve(IHTTPSession session) {
         EventBus.getDefault().post(new ServerEvent(ServerEvent.SERVER_CONNECTION));
+        return handleRequest(session);
+    }
+
+    private Response handleRequest(IHTTPSession session) {
         if (!session.getUri().isEmpty()) {
             String fileName = session.getUri().trim();
             if (fileName.indexOf('?') >= 0) {
@@ -191,7 +223,12 @@ public class RemoteServer extends NanoHTTPD {
                     Map < String, String > params = session.getParms();
                     params.putAll(session.getHeaders());
                     params.put("request-headers", new Gson().toJson(session.getHeaders()));
+                    boolean fromLoopback = isLoopbackClient(session);
                     if (params.containsKey("do")) {
+                        // SSRF 防御：外部客户端不得经 proxyLocal 让 spider 网络栈抓取内网/回环地址
+                        if (!Proxy.isAllowedProxyUrl(params.get("url"), fromLoopback)) {
+                            return forbidden();
+                        }
                         Object[] rs = ApiConfig.get().proxyLocal(params);
                         return getProxy(rs);
                     }
@@ -217,10 +254,12 @@ public class RemoteServer extends NanoHTTPD {
                                 return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, NanoHTTPD.MIME_PLAINTEXT, fileList(root, f));
                             }
                         } else {
-                            return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR, NanoHTTPD.MIME_PLAINTEXT, "File " + file + " not found!");
+                            return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR, NanoHTTPD.MIME_PLAINTEXT, "File not found!");
                         }
                     } catch (Throwable th) {
-                        return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR, NanoHTTPD.MIME_PLAINTEXT, th.getMessage());
+                        // 异常消息可能含本地绝对路径，只进日志，不回显给局域网客户端
+                        android.util.Log.e("RemoteServer", "file read failed: " + fileName, th);
+                        return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR, NanoHTTPD.MIME_PLAINTEXT, "File read error");
                     }
                 } else if (fileName.equals("/dns-query")) {
                     String name = session.getParms().get("name");
@@ -231,12 +270,28 @@ public class RemoteServer extends NanoHTTPD {
                     try {
                         rs = OkGoHelper.lookupHttpsForwardSync(name);
                     } catch (Throwable th) {
-                        com.blankj.utilcode.util.LogUtils.e("RemoteServer", "dns lookup failed: " + name, th);
+                        android.util.Log.e("RemoteServer", "dns lookup failed: " + name, th);
                         rs = new byte[0];
                     }
                     return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/dns-message", new ByteArrayInputStream(rs), rs.length);
                 } else if (fileName.equals("/m3u8")) {
                     return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, NanoHTTPD.MIME_PLAINTEXT, m3u8Content == null ? "" : m3u8Content);
+                } else if (fileName.equals("/cache")) {
+                    // python 插件缓存读取（spider.py getCache）：仅 do=get，环回客户端
+                    Map < String, String > cacheParams = session.getParms();
+                    String doType = cacheParams.get("do");
+                    String key = cacheParams.get("key");
+                    if (!isSafeCacheKey(key)) {
+                        return forbidden();
+                    }
+                    if (!"get".equals(doType) && !"del".equals(doType)) {
+                        return createPlainTextResponse(Response.Status.BAD_REQUEST, "bad do");
+                    }
+                    String value = pluginCache.get(key);
+                    if ("del".equals(doType)) {
+                        pluginCache.remove(key);
+                    }
+                    return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, NanoHTTPD.MIME_PLAINTEXT, value == null ? "" : value);
                 } else if (fileName.startsWith("/dash/")) {
                     String dashData = App.getInstance().getDashData();
                     try {
@@ -266,9 +321,12 @@ public class RemoteServer extends NanoHTTPD {
                     }
                     session.parseBody(files);
                 } catch (IOException IOExc) {
-                    return createPlainTextResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR, "SERVER INTERNAL ERROR: IOException: " + IOExc.getMessage());
+                    // 异常消息可能含内部信息，只进日志
+                    android.util.Log.e("RemoteServer", "parse body failed", IOExc);
+                    return createPlainTextResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR, "SERVER INTERNAL ERROR: IOException");
                 } catch (NanoHTTPD.ResponseException rex) {
-                    return createPlainTextResponse(rex.getStatus(), rex.getMessage());
+                    android.util.Log.e("RemoteServer", "ResponseException", rex);
+                    return createPlainTextResponse(rex.getStatus(), "Request error");
                 }
                 for (RequestProcess process: postRequestList) {
                     if (process.isRequest(session, fileName)) {
@@ -348,11 +406,29 @@ public class RemoteServer extends NanoHTTPD {
                             file.delete();
                         }
                         return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, NanoHTTPD.MIME_PLAINTEXT, "OK");
+                    } else if (fileName.equals("/cache")) {
+                        // python 插件缓存写入（spider.py setCache）：do=set，value 从表单取
+                        String doType = params.get("do");
+                        String key = params.get("key");
+                        if (!isSafeCacheKey(key)) {
+                            return forbidden();
+                        }
+                        if (!"set".equals(doType)) {
+                            return createPlainTextResponse(Response.Status.BAD_REQUEST, "bad do");
+                        }
+                        String value = files.get("value");
+                        if (value != null && value.getBytes(java.nio.charset.StandardCharsets.UTF_8).length > CACHE_VALUE_MAX_BYTES) {
+                            return createPlainTextResponse(Response.Status.BAD_REQUEST, "value too large");
+                        }
+                        if (value != null) {
+                            pluginCache.put(key, value);
+                        }
+                        return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, NanoHTTPD.MIME_PLAINTEXT, "OK");
                     }
                 } catch (Throwable th) {
-                    // 记录真实错误并返回失败状态，不再伪装成功
-                    com.blankj.utilcode.util.LogUtils.e("RemoteServer", "file op failed: " + fileName, th);
-                    return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR, NanoHTTPD.MIME_PLAINTEXT, "ERROR: " + th.getMessage());
+                    // 记录真实错误并返回失败状态，不再伪装成功；消息只进日志，不回显
+                    android.util.Log.e("RemoteServer", "file op failed: " + fileName, th);
+                    return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR, NanoHTTPD.MIME_PLAINTEXT, "ERROR");
                 }
             }
         }

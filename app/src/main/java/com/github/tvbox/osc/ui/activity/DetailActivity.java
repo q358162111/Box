@@ -222,7 +222,8 @@ public class DetailActivity extends BaseActivity {
                 public void onReceive(Context context, Intent intent) {
                     String action = intent.getAction();
                     if (action != null && action.equals(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)) {
-                        openBackgroundPlay = Hawk.get(HawkConfig.BACKGROUND_PLAY_TYPE, 0) == 1 && playFragment.getPlayer() != null && playFragment.getPlayer().isPlaying();
+                        // showPreview=false 时 playFragment 恒为 null，必须先判空
+                        openBackgroundPlay = Hawk.get(HawkConfig.BACKGROUND_PLAY_TYPE, 0) == 1 && playFragment != null && playFragment.getPlayer() != null && playFragment.getPlayer().isPlaying();
                     }
                 }
             };
@@ -1098,6 +1099,14 @@ public class DetailActivity extends BaseActivity {
             unregisterReceiver(mHomeKeyReceiver);
             mHomeKeyReceiver = null;
         }
+        // PIP/后台播放操作接收器：销毁时统一注销，防止匿名内部类持有 Activity 泄漏
+        if (pipActionReceiver != null) {
+            try {
+                unregisterReceiver(pipActionReceiver);
+            } catch (IllegalArgumentException ignored) {
+            }
+            pipActionReceiver = null;
+        }
         try {
             if (searchExecutorService != null) {
                 searchExecutorService.shutdownNow();
@@ -1129,8 +1138,9 @@ public class DetailActivity extends BaseActivity {
                 return;
             }
             // Calculate Video Resolution
-            int vWidth = playFragment.mVideoView.getVideoSize()[0];
-            int vHeight = playFragment.mVideoView.getVideoSize()[1];
+            // mVideoView 在 fragment 视图销毁后可能为 null，判空避免 NPE
+            int vWidth = playFragment.mVideoView != null ? playFragment.mVideoView.getVideoSize()[0] : 0;
+            int vHeight = playFragment.mVideoView != null ? playFragment.mVideoView.getVideoSize()[1] : 0;
             Rational ratio = null;
             if (vWidth != 0) {
                 if ((((double) vWidth) / ((double) vHeight)) > 2.39) {
@@ -1201,10 +1211,14 @@ public class DetailActivity extends BaseActivity {
 
         } else {
             if (pipActionReceiver != null) {
-                unregisterReceiver(pipActionReceiver);
+                try {
+                    unregisterReceiver(pipActionReceiver);
+                } catch (IllegalArgumentException ignored) {
+                }
                 pipActionReceiver = null;
             }
-            if (playFragment.getPlayer().isPlaying()) {
+            // fragment 视图可能已销毁（getPlayer() 返回 null），必须先判空
+            if (playFragment != null && playFragment.getPlayer() != null && playFragment.getPlayer().isPlaying()) {
                 playFragment.getVodController().togglePlay();
             }
         }
@@ -1221,6 +1235,11 @@ public class DetailActivity extends BaseActivity {
      */
     private void playServerSwitch(boolean open) {
         if (open) {
+            // vodInfo 可能尚未加载完成；playFragment 在 showPreview=false 时为 null
+            if (vodInfo == null || vodInfo.seriesMap == null || vodInfo.seriesMap.get(vodInfo.playFlag) == null
+                    || playFragment == null || playFragment.getPlayer() == null) {
+                return;
+            }
             VodInfo.VodSeries vod = vodInfo.seriesMap.get(vodInfo.playFlag).get(vodInfo.playIndex);
             PlayService.start(playFragment.getPlayer(), vodInfo.name + "&&" + vod.name);
             registerActionReceiver(true);

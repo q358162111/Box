@@ -72,9 +72,12 @@ public class UpdateChecker {
                     CHECK_IN_PROGRESS.set(false);
                     return;
                 }
-                final AlertDialog progressDialog = showProgressDialog(ctx, ctx.getString(R.string.checking_for_updates));
-                final WeakReference<AlertDialog> dialogRef = new WeakReference<>(progressDialog);
-                EXECUTOR.execute(new Runnable() {
+                final AlertDialog progressDialog;
+                final WeakReference<AlertDialog> dialogRef;
+                try {
+                    progressDialog = showProgressDialog(ctx, ctx.getString(R.string.checking_for_updates));
+                    dialogRef = new WeakReference<>(progressDialog);
+                    EXECUTOR.execute(new Runnable() {
                     @Override
                     public void run() {
                         String latestVersion = null;
@@ -107,6 +110,11 @@ public class UpdateChecker {
                         });
                     }
                 });
+                } catch (Exception e) {
+                    // 对话框创建/任务提交异常时复位标志，否则进程内将永远无法再次检查更新
+                    Log.e(TAG, "检查更新启动失败", e);
+                    CHECK_IN_PROGRESS.set(false);
+                }
             }
         });
     }

@@ -1,5 +1,6 @@
 package com.github.tvbox.osc.util.parser;
 import android.util.Base64;
+import android.util.Log;
 import com.github.catvod.crawler.SpiderDebug;
 import org.json.JSONObject;
 import java.util.ArrayList;
@@ -196,7 +197,8 @@ public class JsonParallel {
                 }
                 reqHeaders.put("url", newUrl);
             } catch (Throwable th) {
-
+                // 解析 ext 失败时静默降级，但保留日志便于定位 cat_ext 配置问题
+                Log.e("JsonParallel", "解析 cat_ext 失败", th);
             }
         }
         return reqHeaders;

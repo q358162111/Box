@@ -225,6 +225,10 @@ public class SubtitleViewModel extends ViewModel {
             @Override
             public void onFailure(Call call, IOException e) {
                 e.printStackTrace();
+                // 请求失败必须回调，否则加载态永不结束
+                if (subtitleLoader != null) {
+                    subtitleLoader.fail(e.getMessage());
+                }
             }
 
             @Override

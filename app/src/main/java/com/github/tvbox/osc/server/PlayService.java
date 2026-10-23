@@ -26,7 +26,8 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.lang.ref.WeakReference;
 
 public class PlayService extends Service {
-	static String videoInfo = "TVBox&&第一集";
+	// volatile：主线程写入（start/refresh）、Service 线程读取（buildNotification），保证跨线程可见性
+	static volatile String videoInfo = "TVBox&&第一集";
 	// 使用弱引用避免 Service 生命周期内强持有 VideoView（其持有 Activity Context）导致 Activity 泄漏
     private static WeakReference<MyVideoView> videoViewRef;
 

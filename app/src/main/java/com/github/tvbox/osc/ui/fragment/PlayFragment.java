@@ -416,6 +416,19 @@ public class PlayFragment extends BaseLazyFragment {
                             }
                         });
                     }
+
+                    @Override
+                    public void fail(String msg) {
+                        if (!isAdded()) return;
+                        requireActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (getContext() != null) {
+                                    Toast.makeText(getContext(), "字幕加载失败", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
+                    }
                 });
               /*  EventBus.getDefault().register(searchSubtitleDialog);
                 searchSubtitleDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {

@@ -35,6 +35,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import okhttp3.Response;
@@ -139,6 +140,10 @@ public class FileUtils {
                 name = "模板.js";
             } else if (name.contains("cat.js")) {
                 name = "cat.js";
+            } else if (name.contains("cheerio.min.js") || name.contains("crypto-js.js")) {
+                // 内置 JS 库一律用 assets 自带版本：远程仓库的 cheerio.min.js 存在被折行损坏的
+                // 版本（正则字面量跨行），QuickJS 编译直接抛异常导致源无数据甚至崩溃
+                return getAsOpen("js/lib/" + name.substring(name.lastIndexOf('/') + 1));
             }
             //Matcher m = URLJOIN.matcher(name);
             LOG.i("echo-loadModule "+name);
@@ -199,22 +204,19 @@ public class FileUtils {
       //          if (fname.equals(name.trim())) {
        //             return true;
        //         }
-    private static final Map<String, Set<String>> cachedDirFiles = new HashMap<>();
+    private static final Map<String, Set<String>> cachedDirFiles = new ConcurrentHashMap<>();
     public static boolean isAsFile(String name,String dir) {
-        // 1. 先从缓存里取目录列表
-        Set<String> files = cachedDirFiles.get(dir);
-        if (files == null) {
+        // computeIfAbsent 原子初始化：isAsFile 会被多线程（JS spider 池）并发调用，
+        // 普通 HashMap 的 get-then-put 会触发并发扩容损坏
+        Set<String> files = cachedDirFiles.computeIfAbsent(dir, d -> {
             LOG.i("echo-读取AssetsList");
             try {
-                String[] list = App.getInstance().getAssets().list(dir);
-                files = new HashSet<>(Arrays.asList(list));
+                String[] list = App.getInstance().getAssets().list(d);
+                return new HashSet<>(Arrays.asList(list));
             } catch (IOException e) {
-                files = Collections.emptySet();
+                return Collections.emptySet();
             }
-      //  } catch (Exception e) {
-            //e.printStackTrace();
-            cachedDirFiles.put(dir, files);
-        }
+        });
         //return false;
         // 2. 内存查找
         return files.contains(name.trim());

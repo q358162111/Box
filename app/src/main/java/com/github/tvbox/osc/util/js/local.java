@@ -16,7 +16,7 @@ public class local {@Keep@Function
         try {
             return Hawk.get("jsRuntime_" + str + "_" + str2, "");
         } catch (Exception e) {
-            Hawk.delete(str);
+            Hawk.delete("jsRuntime_" + str + "_" + str2);
             return str2;
         }
     }@Keep@Function
