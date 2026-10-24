@@ -131,8 +131,9 @@ gParam = {
 
 # gParam 的三个 dict 会被 spider-init 线程写入(downloadPlugin)、代理线程读取/迭代
 # (loadFromDisk),并发写入与迭代会抛 "dictionary changed size during iteration";
-# 所有读写点必须持此锁
-gParamLock = threading.Lock()
+# 所有读写点必须持此锁。必须用 RLock:init() 持锁后内部调用 loadFromDisk() 会再次
+# 加锁,普通 Lock 会自死锁(每个插件的冷启动路径都会走到)
+gParamLock = threading.RLock()
 
 def getDependence(ru):
     result = ru.getDependence()

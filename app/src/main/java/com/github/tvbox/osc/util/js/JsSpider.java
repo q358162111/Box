@@ -269,19 +269,26 @@ public class JsSpider extends Spider {
         // 必须先停 executor 并等待其线程退出，再 destroy ctx：
         // shutdownNow() 无法中断正在 QuickJS native 层执行的调用，若先 ctx.destroy()，
         // executor 线程可能仍持有并操作已释放的 native 上下文（use-after-free → SIGSEGV/SIGABRT）
+        boolean executorDrained = false;
         if (executor != null) {
             executor.shutdownNow();
             try {
-                if (!executor.awaitTermination(3, TimeUnit.SECONDS)) {
-                    LOG.i("JsSpider destroy: executor 未在 3s 内退出，继续释放 ctx: " + key);
+                executorDrained = executor.awaitTermination(3, TimeUnit.SECONDS);
+                if (!executorDrained) {
+                    LOG.i("JsSpider destroy: executor 未在 3s 内退出，跳过 ctx.destroy 防 use-after-free: " + key);
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }
-        try {
-            if (ctx != null) ctx.destroy();
-        } catch (Throwable ignored) {
+        // 仅在 executor 线程确认退出后才能释放 native ctx;
+        // 线程仍在 QuickJS native 调用中时销毁 ctx 就是 use-after-free(SIGSEGV/SIGABRT),
+        // 此时宁可选择泄漏 ctx 也不能销毁
+        if (executorDrained) {
+            try {
+                if (ctx != null) ctx.destroy();
+            } catch (Throwable ignored) {
+            }
         }
         ctx = null;
         jsObject = null;

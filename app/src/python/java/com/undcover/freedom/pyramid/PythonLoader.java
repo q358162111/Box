@@ -127,8 +127,10 @@ public class PythonLoader {
             File privateRootInternal = app.getFilesDir();
             try {
                 String canonical = new File(config).getCanonicalPath();
-                boolean insideExternal = privateRoot != null && canonical.startsWith(privateRoot.getCanonicalPath());
-                boolean insideInternal = privateRootInternal != null && canonical.startsWith(privateRootInternal.getCanonicalPath());
+                // 用带分隔符的前缀比较:裸 startsWith 会放行同级兄弟目录
+                // (如 .../files_evil/、.../files2/),绕过私有目录限制
+                boolean insideExternal = privateRoot != null && canonical.startsWith(privateRoot.getCanonicalPath() + File.separator);
+                boolean insideInternal = privateRootInternal != null && canonical.startsWith(privateRootInternal.getCanonicalPath() + File.separator);
                 if (!insideExternal && !insideInternal) {
                     PyLog.e("setPluginConfig: 拒绝非应用私有目录，保留默认私有目录");
                     return this;
