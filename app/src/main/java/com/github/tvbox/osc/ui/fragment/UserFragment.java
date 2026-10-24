@@ -315,7 +315,7 @@ public class UserFragment extends BaseLazyFragment implements View.OnClickListen
             }
             String doubanHotURL = "https://movie.douban.com/j/new_search_subjects?sort=U&range=0,10&tags=&playable=1&start=0&year_range=" + year + "," + year;
             String userAgent = UA.random();
-            OkGo.<String>get(doubanHotURL).headers("User-Agent", userAgent).execute(new AbsCallback<String>() {
+            OkGo.<String>get(doubanHotURL).tag(this).headers("User-Agent", userAgent).execute(new AbsCallback<String>() {
                 @Override
                 public void onSuccess(Response<String> response) {
                     String netJson = response.body();
@@ -324,6 +324,8 @@ public class UserFragment extends BaseLazyFragment implements View.OnClickListen
                     mActivity.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            // Fragment 销毁/detach 后回调到达,操作失效视图会崩溃
+                            if (!isAdded() || isDetached()) return;
                             adapter.setNewData(loadHots(netJson));
                         }
                     });
@@ -401,7 +403,9 @@ public class UserFragment extends BaseLazyFragment implements View.OnClickListen
     @Override
     public void onDestroy() {
         super.onDestroy();
-        EventBus.getDefault().unregister(this);
+        // 取消以本 Fragment 为 tag 的未完成请求,防止销毁后回调仍触达
+        OkGo.getInstance().cancelTag(this);
+        if (EventBus.getDefault().isRegistered(this)) EventBus.getDefault().unregister(this);
         // 清理静态 View/Adapter 引用，防止持有已销毁 Activity 的 View 树导致内存泄漏
         homeHotVodAdapter = null;
         tvHotListForGrid = null;

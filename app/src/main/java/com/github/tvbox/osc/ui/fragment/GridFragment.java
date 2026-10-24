@@ -374,6 +374,16 @@ public class GridFragment extends BaseLazyFragment {
         mGridView.scrollToPosition(0);
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        // dialog 只创建一次缓存在成员变量,视图销毁不清理会持有旧视图树 Context
+        if (gridFilterDialog != null) {
+            if (gridFilterDialog.isShowing()) gridFilterDialog.dismiss();
+            gridFilterDialog = null;
+        }
+    }
+
     public void showFilter() {
     	if (sortData!=null && sortData.filters != null && !sortData.filters.isEmpty() && gridFilterDialog == null) {
             gridFilterDialog = new GridFilterDialog(mContext);

@@ -201,11 +201,15 @@ public class PlayFragment extends BaseLazyFragment {
             }
             executorService = Executors.newSingleThreadExecutor();
             executorService.execute(() -> {
-                mDanmuView.release();
-                mDanmuView.prepare(new Parser(danmuText), mDanmakuContext);
+                // onDestroyView 会 shutdownNow 并清视图,任务已开始时视图可能为 null,先判空
+                DanmakuView danmuView = mDanmuView;
+                if (danmuView == null) return;
+                danmuView.release();
+                danmuView.prepare(new Parser(danmuText), mDanmakuContext);
                 App.post(()->{
-                    if(mVideoView!=null && mVideoView.isPlaying()){
-                        mDanmuView.seekTo(mVideoView.getCurrentPosition());
+                    DanmakuView view = mDanmuView;
+                    if(view!=null && mVideoView!=null && mVideoView.isPlaying()){
+                        view.seekTo(mVideoView.getCurrentPosition());
                     }
                 });
             });
@@ -430,13 +434,6 @@ public class PlayFragment extends BaseLazyFragment {
                         });
                     }
                 });
-              /*  EventBus.getDefault().register(searchSubtitleDialog);
-                searchSubtitleDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                	@Override
-                    public void onDismiss(DialogInterface dialog) {
-                        EventBus.getDefault().unregister(dialog);
-                    }
-                });*/
                 if (mVodInfo.playFlag.contains("Ali") || mVodInfo.playFlag.contains("parse")) {
                     searchSubtitleDialog.setSearchWord(mVodInfo.playNote);
                 } else {
