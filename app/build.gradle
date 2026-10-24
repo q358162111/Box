@@ -36,14 +36,17 @@ android {
         exclude 'META-INF/DEPENDENCIES'
     }
 
+    // 签名配置：keystore 与密码均不落库，从 gradle.properties / 环境变量 / -P 传入。
+    // 只有 test.keystore 存在且 KEYSTORE_PASS 可用时才启用签名，否则 release 构建为未签名 APK。
+    def ksFile = rootProject.file("test.keystore")
+    def ksPass = (project.findProperty("KEYSTORE_PASS") ?: System.getenv("KEYSTORE_PASS")) ?: ""
     signingConfigs {
         release {
-            def ksFile = file("../test.keystore")
-            if (ksFile.exists()) {
+            if (ksFile.exists() && !ksPass.isEmpty()) {
                 storeFile ksFile
-                storePassword project.findProperty("KEYSTORE_PASS") ?: "900825"
-                keyAlias project.findProperty("KEYSTORE_ALIAS") ?: "key0"
-                keyPassword project.findProperty("KEYSTORE_KEY_PASS") ?: "900825"
+                storePassword ksPass
+                keyAlias (project.findProperty("KEYSTORE_ALIAS") ?: System.getenv("KEYSTORE_ALIAS")) ?: "key0"
+                keyPassword (project.findProperty("KEYSTORE_KEY_PASS") ?: System.getenv("KEYSTORE_KEY_PASS")) ?: ksPass
             }
         }
     }
@@ -52,7 +55,7 @@ android {
         release {
             minifyEnabled true
             shrinkResources true
-            signingConfig signingConfigs.release
+            signingConfig ksFile.exists() && !ksPass.isEmpty() ? signingConfigs.release : null
         }
     }
 

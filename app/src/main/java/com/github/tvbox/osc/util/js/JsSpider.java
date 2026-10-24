@@ -75,21 +75,32 @@ public class JsSpider extends Spider {
     // 某次调用超时后 executor 线程被僵尸任务永久占住，置 broken 让后续调用直接返回兜底，
     // 不再往队列堆积（队列里的任务会永远排在僵尸任务后面）
     private volatile boolean broken = false;
+    // broken 生效时间戳，用于冷却恢复：超时可能只是网络卡顿而非真死循环，冷却期后允许重试一次
+    private volatile long brokenAt = 0;
+    // 冷却时长（毫秒）：超过后下一次调用清掉 broken 重新试探
+    private static final long BROKEN_COOLDOWN_MS = 5 * 60 * 1000L;
 
     /**
      * 带超时地在 executor 上执行任务。
      * 超时后 cancel 外层任务并标记 broken：内层 JS 调用无法被真正中断，
      * 单线程 executor 会被占住，因此后续调用必须走 broken 短路而不是继续排队。
+     * broken 超过冷却期后允许再试探一次；若 executor 仍被僵尸任务占住，本次调用会再次超时并重新置 broken。
      */
     private <T> T callWithTimeout(Callable<T> callable) {
-        if (broken) return null;
+        if (broken) {
+            if (System.currentTimeMillis() - brokenAt < BROKEN_COOLDOWN_MS) return null;
+            // 冷却期满：重置 broken 试探一次。若 executor 仍被占住会再次超时并重新标记
+            broken = false;
+            LOG.i("JsSpider 冷却期满，重试探: " + key);
+        }
         Future<T> future = executor.submit(callable);
         try {
             return future.get(JS_CALL_TIMEOUT_SECONDS, TimeUnit.SECONDS);
         } catch (TimeoutException te) {
             future.cancel(true);
             broken = true;
-            LOG.i("JsSpider 调用超时，标记 spider 不可用: " + key);
+            brokenAt = System.currentTimeMillis();
+            LOG.i("JsSpider 调用超时，标记 spider 不可用（" + BROKEN_COOLDOWN_MS / 60000 + "分钟后重试）: " + key);
             return null;
         } catch (InterruptedException | ExecutionException e) {
             LOG.i("Executor 提交或等待失败" + e);

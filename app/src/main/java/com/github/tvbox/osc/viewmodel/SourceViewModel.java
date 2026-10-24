@@ -118,7 +118,8 @@ public class SourceViewModel extends ViewModel {
     // getFixUrl 专用线程池：getPlay 在 spThreadPool 内调用 getFixUrl，若 getFixUrl 也提交到
     // spThreadPool 会造成自死锁（单线程池内阻塞等待自己池里的任务，只能靠超时兜底）。
     // 独立池隔离两者，同时避免主线程同步阻塞。
-    private static final ExecutorService extendLoadExecutor = Executors.newSingleThreadExecutor(r -> {
+    // 固定 4 线程：单线程时多个源并发请求 detail/play，extend 下载（最长 5s）会串行排队。
+    private static final ExecutorService extendLoadExecutor = Executors.newFixedThreadPool(4, r -> {
         Thread t = new Thread(r, "extend-load");
         t.setDaemon(true);
         return t;

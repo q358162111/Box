@@ -277,7 +277,8 @@ public class RemoteServer extends NanoHTTPD {
                 } else if (fileName.equals("/m3u8")) {
                     return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, NanoHTTPD.MIME_PLAINTEXT, m3u8Content == null ? "" : m3u8Content);
                 } else if (fileName.equals("/cache")) {
-                    // python 插件缓存读取（spider.py getCache）：仅 do=get，环回客户端
+                    // python 插件缓存读取（spider.py getCache）：仅 do=get/del，且仅限环回客户端（应用自身插件）
+                    if (!isLoopbackClient(session)) return forbidden();
                     Map < String, String > cacheParams = session.getParms();
                     String doType = cacheParams.get("do");
                     String key = cacheParams.get("key");
@@ -407,7 +408,8 @@ public class RemoteServer extends NanoHTTPD {
                         }
                         return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, NanoHTTPD.MIME_PLAINTEXT, "OK");
                     } else if (fileName.equals("/cache")) {
-                        // python 插件缓存写入（spider.py setCache）：do=set，value 从表单取
+                        // python 插件缓存写入（spider.py setCache）：do=set，value 从表单取，仅限环回客户端
+                        if (!isLoopbackClient(session)) return forbidden();
                         String doType = params.get("do");
                         String key = params.get("key");
                         if (!isSafeCacheKey(key)) {
