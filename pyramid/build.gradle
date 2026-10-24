@@ -8,7 +8,8 @@ android {
     compileSdk 35
 
     defaultConfig {
-        minSdkVersion 21
+        // 与 app 的 python flavor(minSdk 27)保持一致:Chaquopy 运行要求
+        minSdkVersion 27
         targetSdkVersion 28
 
         python {

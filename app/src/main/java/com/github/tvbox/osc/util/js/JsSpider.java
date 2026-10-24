@@ -229,7 +229,8 @@ public class JsSpider extends Spider {
     //    return (Boolean) call("sniffer");
     public boolean manualVideoCheck()  {
         try {
-            return (Boolean) call("sniffer");
+            // call 超时/异常时返回 null，Boolean.TRUE.equals 避免拆箱 NPE
+            return Boolean.TRUE.equals(call("sniffer"));
         }catch (Exception e){
             return false;
         }
@@ -240,7 +241,8 @@ public class JsSpider extends Spider {
     //    return (Boolean) call("isVideo", url);
     public boolean isVideoFormat(String url) {
         try {
-            return (Boolean) call("isVideo", url);
+            // 同 manualVideoCheck：null 拆箱会 NPE，用 equals 兜底
+            return Boolean.TRUE.equals(call("isVideo", url));
         }catch (Exception e){
             return false;
         }
@@ -264,13 +266,22 @@ public class JsSpider extends Spider {
 
     @Override
     public void destroy() {
-        // 先 destroy QuickJSContext 再 shutdown executor，确保正在执行的 JS 调用被打断后 ctx 仍可安全释放
+        // 必须先停 executor 并等待其线程退出，再 destroy ctx：
+        // shutdownNow() 无法中断正在 QuickJS native 层执行的调用，若先 ctx.destroy()，
+        // executor 线程可能仍持有并操作已释放的 native 上下文（use-after-free → SIGSEGV/SIGABRT）
+        if (executor != null) {
+            executor.shutdownNow();
+            try {
+                if (!executor.awaitTermination(3, TimeUnit.SECONDS)) {
+                    LOG.i("JsSpider destroy: executor 未在 3s 内退出，继续释放 ctx: " + key);
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
         try {
             if (ctx != null) ctx.destroy();
         } catch (Throwable ignored) {
-        }
-        if (executor != null) {
-            executor.shutdownNow();
         }
         ctx = null;
         jsObject = null;

@@ -220,10 +220,15 @@ public class PythonSpider extends Spider {
     public String homeContent(boolean filter) {
         if (!loadSuccess) return "{}";
         PyLog.nw("homeContent" + "-" + name, paramLog(filter));
-        PyObject po = app.callAttr("homeContent", pySpider, filter);
-        String rsp = po.toString();
-        PyLog.nw("homeContent" + "-" + name, rsp);
-        return rsp;
+        try {
+            PyObject po = app.callAttr("homeContent", pySpider, filter);
+            String rsp = po.toString();
+            PyLog.nw("homeContent" + "-" + name, rsp);
+            return rsp;
+        } catch (Exception e) {
+            PyLog.e("homeContent-" + name + " : " + e);
+            return "{}";
+        }
     }
 
     /**
@@ -234,10 +239,15 @@ public class PythonSpider extends Spider {
     public String homeVideoContent() {
         if (!loadSuccess) return "{}";
         PyLog.nw("homeVideoContent" + "-" + name, "");
-        PyObject po = app.callAttr("homeVideoContent", pySpider);
-        String rsp = po.toString();
-        PyLog.nw("homeVideoContent" + "-" + name, rsp);
-        return rsp;
+        try {
+            PyObject po = app.callAttr("homeVideoContent", pySpider);
+            String rsp = po.toString();
+            PyLog.nw("homeVideoContent" + "-" + name, rsp);
+            return rsp;
+        } catch (Exception e) {
+            PyLog.e("homeVideoContent-" + name + " : " + e);
+            return "{}";
+        }
     }
 
     /**
@@ -252,10 +262,15 @@ public class PythonSpider extends Spider {
     public String categoryContent(String tid, String pg, boolean filter, HashMap<String, String> extend) {
         if (!loadSuccess) return "{}";
         PyLog.nw("categoryContent" + "-" + name, paramLog(tid, pg, filter, map2json(extend).toString()));
-        PyObject po = app.callAttr("categoryContent", pySpider, tid, pg, filter, map2json(extend).toString());
-        String rsp = po.toString();
-        PyLog.nw("categoryContent" + "-" + name, rsp);
-        return rsp;
+        try {
+            PyObject po = app.callAttr("categoryContent", pySpider, tid, pg, filter, map2json(extend).toString());
+            String rsp = po.toString();
+            PyLog.nw("categoryContent" + "-" + name, rsp);
+            return rsp;
+        } catch (Exception e) {
+            PyLog.e("categoryContent-" + name + " : " + e);
+            return "{}";
+        }
     }
 
     /**
@@ -267,10 +282,15 @@ public class PythonSpider extends Spider {
     public String detailContent(List<String> ids) {
         if (!loadSuccess) return "{}";
         PyLog.nw("detailContent" + "-" + name, paramLog(list2json(ids).toString()));
-        PyObject po = app.callAttr("detailContent", pySpider, list2json(ids).toString());
-        String rsp = po.toString();
-        PyLog.nw("detailContent" + "-" + name, rsp);
-        return rsp;
+        try {
+            PyObject po = app.callAttr("detailContent", pySpider, list2json(ids).toString());
+            String rsp = po.toString();
+            PyLog.nw("detailContent" + "-" + name, rsp);
+            return rsp;
+        } catch (Exception e) {
+            PyLog.e("detailContent-" + name + " : " + e);
+            return "{}";
+        }
     }
 
     /**
@@ -283,10 +303,15 @@ public class PythonSpider extends Spider {
     public String searchContent(String key, boolean quick) {
         if (!loadSuccess) return "{}";
         PyLog.nw("searchContent" + "-" + name, paramLog(key, quick));
-        PyObject po = app.callAttr("searchContent", pySpider, key, quick);
-        String rsp = po.toString();
-        PyLog.nw("searchContent" + "-" + name, rsp);
-        return rsp;
+        try {
+            PyObject po = app.callAttr("searchContent", pySpider, key, quick);
+            String rsp = po.toString();
+            PyLog.nw("searchContent" + "-" + name, rsp);
+            return rsp;
+        } catch (Exception e) {
+            PyLog.e("searchContent-" + name + " : " + e);
+            return "{}";
+        }
     }
 
     /**
@@ -299,10 +324,15 @@ public class PythonSpider extends Spider {
     public String playerContent(String flag, String id, List<String> vipFlags) {
         if (!loadSuccess) return "{}";
         PyLog.nw("playerContent" + "-" + name, paramLog(flag, id, list2json(vipFlags).toString()));
-        PyObject po = app.callAttr("playerContent", pySpider, flag, id, list2json(vipFlags).toString());
-        String rsp = po.toString();
-        PyLog.nw("playerContent" + "-" + name, rsp);
-        return rsp;
+        try {
+            PyObject po = app.callAttr("playerContent", pySpider, flag, id, list2json(vipFlags).toString());
+            String rsp = po.toString();
+            PyLog.nw("playerContent" + "-" + name, rsp);
+            return rsp;
+        } catch (Exception e) {
+            PyLog.e("playerContent-" + name + " : " + e);
+            return "{}";
+        }
     }
 
     /**
@@ -312,10 +342,15 @@ public class PythonSpider extends Spider {
     public String liveContent(String url) {
         if (!loadSuccess) return "{}";
         PyLog.nw("liveContent" + "-" + name, "");
-        PyObject po = app.callAttr("liveContent", pySpider,url);
-        String rsp = po.toString();
-        PyLog.nw("liveContent" + "-" + name, rsp);
-        return rsp;
+        try {
+            PyObject po = app.callAttr("liveContent", pySpider,url);
+            String rsp = po.toString();
+            PyLog.nw("liveContent" + "-" + name, rsp);
+            return rsp;
+        } catch (Exception e) {
+            PyLog.e("liveContent-" + name + " : " + e);
+            return "{}";
+        }
     }
 
     /**

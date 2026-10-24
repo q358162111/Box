@@ -87,6 +87,11 @@ public class UpdateChecker {
                         } catch (IOException | JSONException e) {
                             Log.e(TAG, "检查更新失败", e);
                             failed = true;
+                        } catch (Throwable t) {
+                            // 兜底:意外 RuntimeException/OOM 等若直接杀死本任务,
+                            // CHECK_IN_PROGRESS 将永远为 true,进程内再也无法检查更新
+                            Log.e(TAG, "检查更新意外异常", t);
+                            failed = true;
                         }
                         final String version = latestVersion;
                         final boolean checkFailed = failed;

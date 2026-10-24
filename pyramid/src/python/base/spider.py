@@ -7,6 +7,7 @@ from lxml import etree
 from abc import abstractmethod, ABCMeta
 from importlib.machinery import SourceFileLoader
 from base.localProxy import Proxy
+from urllib.parse import quote
 
 class Spider(metaclass=ABCMeta):
     _instance = None
@@ -133,7 +134,7 @@ class Spider(metaclass=ABCMeta):
             print(f'{msg}')
 
     def getCache(self, key):
-        value = self.fetch(f'http://127.0.0.1:{Proxy.getPort(self)}/cache?do=get&key={key}', timeout=5).text
+        value = self.fetch(f'http://127.0.0.1:{Proxy.getPort(self)}/cache?do=get&key={quote(str(key))}', timeout=5).text
         if len(value) > 0:
             if value.startswith('{') and value.endswith('}') or value.startswith('[') and value.endswith(']'):
                 try:
@@ -158,9 +159,9 @@ class Spider(metaclass=ABCMeta):
         if len(value) > 0:
             if type(value) == dict or type(value) == list:
                 value = json.dumps(value, ensure_ascii=False)
-        r = self.post(f'http://127.0.0.1:{Proxy.getPort(self)}/cache?do=set&key={key}', data={"value": value}, timeout=5)
+        r = self.post(f'http://127.0.0.1:{Proxy.getPort(self)}/cache?do=set&key={quote(str(key))}', data={"value": value}, timeout=5)
         return 'succeed' if r.status_code == 200 else 'failed'
 
     def delCache(self, key):
-        r = self.fetch(f'http://127.0.0.1:{Proxy.getPort(self)}/cache?do=del&key={key}', timeout=5)
+        r = self.fetch(f'http://127.0.0.1:{Proxy.getPort(self)}/cache?do=del&key={quote(str(key))}', timeout=5)
         return 'succeed' if r.status_code == 200 else 'failed'

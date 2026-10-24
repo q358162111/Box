@@ -221,7 +221,11 @@ public class RemoteServer extends NanoHTTPD {
                 }
                 if (fileName.equals("/proxy")) {
                     Map < String, String > params = session.getParms();
-                    params.putAll(session.getHeaders());
+                    // 反向合并:query 参数优先,header 仅作补充。
+                    // 若 putAll(headers),客户端可用 "url:"/"do:" 等请求头覆盖同名参数或凭空触发代理分支(参数污染)
+                    for (Map.Entry<String, String> h : session.getHeaders().entrySet()) {
+                        params.putIfAbsent(h.getKey(), h.getValue());
+                    }
                     params.put("request-headers", new Gson().toJson(session.getHeaders()));
                     boolean fromLoopback = isLoopbackClient(session);
                     if (params.containsKey("do")) {

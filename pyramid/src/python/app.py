@@ -3,6 +3,7 @@
 import os
 import requests
 import hashlib
+import threading
 from importlib.machinery import SourceFileLoader  ### 导入这个模块
 from urllib import parse
 import json
@@ -57,13 +58,11 @@ def downloadFile(name,url):
         finally:
             rsp.close()
     except Exception as e:
-        # 清理可能残留的临时文件；下载失败时删除已有的旧文件，
-        # 避免下次 init 继续加载上次失败留下的损坏/过期插件
+        # 仅清理临时文件;保留此前已正常工作的旧插件文件,
+        # 一次瞬时网络错误不应导致插件下次必须重新下载
         try:
             if os.path.exists(name + '.tmp'):
                 os.remove(name + '.tmp')
-            if os.path.exists(name):
-                os.remove(name)
         except OSError:
             pass
         print(name + ' =======================================> error: ' + str(e))
@@ -92,30 +91,34 @@ def downloadPlugin(basePath,url):
     else:
         pyName = basePath + name+'.py'
         downloadFile(pyName,url)
-    sPath = gParam['SpiderPath']
-    sPath[name] = pyName
-    sParam = gParam['SpiderParam']
-    paramList = parse.parse_qs(parse.urlparse(url).query).get('extend')
-    if paramList == None:
-        paramList = ['']
-    sParam[name] = paramList[0]
+    with gParamLock:
+        sPath = gParam['SpiderPath']
+        sPath[name] = pyName
+        sParam = gParam['SpiderParam']
+        paramList = parse.parse_qs(parse.urlparse(url).query).get('extend')
+        if paramList == None:
+            paramList = ['']
+        sParam[name] = paramList[0]
     return pyName
 
 def loadFromDisk(fileName):
-    spList = gParam['SpiderList']
-    sPath = gParam['SpiderPath']
-    # 优先按已注册路径反查唯一逻辑名：文件名现在带哈希，直接 split 出的名可能与注册名不一致
-    name = None
-    for regName, regPath in sPath.items():
-        if regPath == fileName:
-            name = regName
-            break
-    if name is None:
-        name = fileName.split('/')[-1].split('.')[0]
-    if name not in spList:
-        sp = SourceFileLoader(name, fileName).load_module().Spider()
-        spList[name] = sp
-    return spList[name]
+    # 全程持锁:spider-init 线程写、代理线程读,并发迭代普通 dict 会抛
+    # RuntimeError: dictionary changed size during iteration
+    with gParamLock:
+        spList = gParam['SpiderList']
+        sPath = gParam['SpiderPath']
+        # 优先按已注册路径反查唯一逻辑名：文件名现在带哈希，直接 split 出的名可能与注册名不一致
+        name = None
+        for regName, regPath in sPath.items():
+            if regPath == fileName:
+                name = regName
+                break
+        if name is None:
+            name = fileName.split('/')[-1].split('.')[0]
+        if name not in spList:
+            sp = SourceFileLoader(name, fileName).load_module().Spider()
+            spList[name] = sp
+        return spList[name]
 
 def str2json(content):
     return json.loads(content)
@@ -125,6 +128,11 @@ gParam = {
     "SpiderPath":{},
     "SpiderParam":{}
 }
+
+# gParam 的三个 dict 会被 spider-init 线程写入(downloadPlugin)、代理线程读取/迭代
+# (loadFromDisk),并发写入与迭代会抛 "dictionary changed size during iteration";
+# 所有读写点必须持此锁
+gParamLock = threading.Lock()
 
 def getDependence(ru):
     result = ru.getDependence()
@@ -136,18 +144,21 @@ def getName(ru):
 
 def init(ru,extend):
     spoList = []
-    spList = gParam['SpiderList']
-    sPath = gParam['SpiderPath']
-    sParam = gParam['SpiderParam']
-    for key in ru.getDependence():
-        sp = None
-        if key in spList.keys():
-            sp = spList[key]
-        elif key in sPath.keys():
-            sp = loadFromDisk(sPath[key])
-        if sp != None:
-            sp.setExtendInfo(sParam[key])
-            spoList.append(sp)
+    with gParamLock:
+        spList = gParam['SpiderList']
+        sPath = gParam['SpiderPath']
+        sParam = gParam['SpiderParam']
+        for key in ru.getDependence():
+            sp = None
+            if key in spList.keys():
+                sp = spList[key]
+            elif key in sPath.keys():
+                sp = loadFromDisk(sPath[key])
+            if sp != None:
+                # get 兜底:依赖名可能只注册在 SpiderPath(文件名派生)而无对应 Param,
+                # 直接 sParam[key] 会 KeyError 使整个插件 init 失败
+                sp.setExtendInfo(sParam.get(key, ''))
+                spoList.append(sp)
     ru.init(extend)
 
 def homeContent(ru,filter):

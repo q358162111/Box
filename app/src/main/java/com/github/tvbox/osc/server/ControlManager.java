@@ -133,11 +133,12 @@ public class ControlManager {
         }
     }
 
-    public void stopServer() {
-        if (mServer != null && mServer.isStarting()) {
-            mServer.stop();
-        }
-        // 置空以允许后续重新启动
+    // 与 startServer 同锁互斥:并发 stop/start 可能留下已启动但引用丢失的孤儿服务(端口被长期占用)
+    public synchronized void stopServer() {
+        RemoteServer server = mServer;
         mServer = null;
+        if (server != null && server.isStarting()) {
+            server.stop();
+        }
     }
 }
