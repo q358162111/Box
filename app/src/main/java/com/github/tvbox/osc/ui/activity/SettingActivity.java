@@ -152,6 +152,15 @@ public class SettingActivity extends BaseActivity {
 
     public static DevModeCallback callback = null;
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // 静态字段持有 Fragment 匿名实现,Activity 销毁不清理会挂住旧实例
+        callback = null;
+        // 清理延迟回调,防止销毁后回调访问已失效的 View
+        mHandler.removeCallbacksAndMessages(null);
+    }
+
     String devMode = "";
 
     @Override

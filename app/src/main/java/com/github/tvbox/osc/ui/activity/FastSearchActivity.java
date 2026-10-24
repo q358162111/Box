@@ -116,6 +116,8 @@ public class FastSearchActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        // Activity 已销毁时不得重放任务:回调会操作已失效的视图并 post EventBus
+        if (isFinishing() || isDestroyed()) return;
         if (pauseRunnable != null && pauseRunnable.size() > 0) {
             searchExecutorService = Executors.newFixedThreadPool(5);
             allRunCount.set(pauseRunnable.size());
@@ -513,6 +515,6 @@ public class FastSearchActivity extends BaseActivity {
         } catch (Throwable th) {
             th.printStackTrace();
         }
-        EventBus.getDefault().unregister(this);
+        if (EventBus.getDefault().isRegistered(this)) EventBus.getDefault().unregister(this);
     }
 }

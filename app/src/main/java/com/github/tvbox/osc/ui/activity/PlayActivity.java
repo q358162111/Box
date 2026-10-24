@@ -424,6 +424,7 @@ public class PlayActivity extends BaseActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
+                                if (isFinishing() || isDestroyed()) return;
                                 String zimuUrl = subtitle.getUrl();
                                 LOG.i("Remote SubtitleBean Url: " + zimuUrl);
                                 setSubtitle(zimuUrl); //设置字幕
@@ -653,6 +654,7 @@ public class PlayActivity extends BaseActivity {
         runOnUiThread(new Runnable() { //影魔 解决解析偶发闪退
             @Override
             public void run() {
+                if (isFinishing() || isDestroyed()) return;
                 mPlayLoadTip.setText(msg);
                 mPlayLoadTip.setVisibility(View.VISIBLE);
                 mPlayLoading.setVisibility(loading ? View.VISIBLE : View.GONE);
@@ -672,6 +674,7 @@ public class PlayActivity extends BaseActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    if (isFinishing() || isDestroyed()) return;
                     if (finish) {
                         Toast.makeText(mContext, err, Toast.LENGTH_SHORT).show();
                         finish();

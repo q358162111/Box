@@ -654,6 +654,8 @@ public class SearchActivity extends BaseActivity {
                                 emoji = Arrays.asList("\uD83E\uDD47", "\uD83E\uDD48", "\uD83E\uDD49", "4\uFE0F⃣", "5\uFE0F⃣", "6\uFE0F⃣", "7\uFE0F⃣", "8\uFE0F⃣", "9\uFE0F⃣", "\uD83D\uDD1F", " ⑪ ", " ⑫ ", " ⑬ ", " ⑭ ", " ⑮ ", " ⑯ ", " ⑰ ", " ⑱ ", " ⑲ ", " ⑳ ");
                             JsonArray itemList = mapResult.get("0").getAsJsonObject()
                                     .get("listInfo").getAsJsonArray();
+                            // static 集合跨 Activity 实例共享,先清空防止重复堆叠
+                            hots.clear();
                             for (int i = 0; i < 10; i++) {
                                 JsonObject obj = itemList.get(i).getAsJsonObject();
                                 String hotKey = obj.get("title").getAsString().trim().replaceAll("<|>|《|》|-", "").split(" ")[0];
@@ -738,7 +740,8 @@ public class SearchActivity extends BaseActivity {
 
         List<SourceBean> searchRequestList = new ArrayList<>();
 
-        boolean equals = this.sKey.equals("filter__home");
+        // 常量放前:sKey 可能因 Hawk 反序列化异常返回 null,直接调用会 NPE
+        boolean equals = "filter__home".equals(this.sKey);
         if (equals) {
             SourceBean home = ApiConfig.get().getHomeSourceBean();
             if (home.isSearchable()) {
@@ -836,7 +839,7 @@ public class SearchActivity extends BaseActivity {
         } catch (Throwable th) {
             th.printStackTrace();
         }
-        EventBus.getDefault().unregister(this);
+        if (EventBus.getDefault().isRegistered(this)) EventBus.getDefault().unregister(this);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

@@ -551,7 +551,7 @@ public class DriveActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        EventBus.getDefault().unregister(this);
+        if (EventBus.getDefault().isRegistered(this)) EventBus.getDefault().unregister(this);
         // 清理挂起的延时任务，避免销毁后回调访问已失效的 View
         if (mHandler != null) mHandler.removeCallbacksAndMessages(null);
     }
