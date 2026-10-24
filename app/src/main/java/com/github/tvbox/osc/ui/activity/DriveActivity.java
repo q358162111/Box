@@ -372,7 +372,10 @@ public class DriveActivity extends BaseActivity {
         webdavDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialog) {
-                EventBus.getDefault().unregister(dialog);
+                // unregister 必须传注册时的 Dialog 对象本身,传 DialogInterface 参数注销不到 subscriber
+                if (EventBus.getDefault().isRegistered(webdavDialog)) {
+                    EventBus.getDefault().unregister(webdavDialog);
+                }
             }
         });
         webdavDialog.show();
@@ -383,8 +386,11 @@ public class DriveActivity extends BaseActivity {
         // AlistDriveDialog 构造函数内已自行注册 EventBus，此处不可重复注册（会抛 already registered 崩溃）
         dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
-            public void onDismiss(DialogInterface dialog) {
-                EventBus.getDefault().unregister(dialog);
+            public void onDismiss(DialogInterface dismissed) {
+                // 同上:注销 AlistDriveDialog 本身
+                if (EventBus.getDefault().isRegistered(dialog)) {
+                    EventBus.getDefault().unregister(dialog);
+                }
             }
         });
         dialog.show();

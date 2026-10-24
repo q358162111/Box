@@ -49,6 +49,9 @@ public class SearchSubtitleDialog extends BaseDialog {
 
     private List<SubtitleBean> zipSubtitles = new ArrayList<>();
     private boolean isSearchPag = true;
+    // observer 挂在 Activity 的 Lifecycle 上,Dialog dismiss 后不会自动移除,
+    // 会形成 Activity→ViewModel→Observer→Dialog→Activity 强引用环;dismiss 时手动移除
+    private Observer<SubtitleData> searchObserver;
 
 
     public SearchSubtitleDialog(@NonNull @NotNull Context context) {
@@ -60,6 +63,11 @@ public class SearchSubtitleDialog extends BaseDialog {
         setContentView(R.layout.dialog_search_subtitle);
         initView(context);
         initViewModel();
+        setOnDismissListener(dialog -> {
+            if (searchObserver != null && subtitleViewModel != null) {
+                subtitleViewModel.searchResult.removeObserver(searchObserver);
+            }
+        });
     }
 
     protected void initView(Context context) {
@@ -157,7 +165,7 @@ public class SearchSubtitleDialog extends BaseDialog {
 
     private void initViewModel() {
         subtitleViewModel = new ViewModelProvider((ViewModelStoreOwner) mContext).get(SubtitleViewModel.class);
-        subtitleViewModel.searchResult.observe((LifecycleOwner) mContext, new Observer<SubtitleData>() {
+        searchObserver = new Observer<SubtitleData>() {
             @Override
             public void onChanged(SubtitleData subtitleData) {
                 List<SubtitleBean> data = subtitleData.getSubtitleList();
@@ -206,7 +214,9 @@ public class SearchSubtitleDialog extends BaseDialog {
                 }
 
             }
-        });
+        };
+        // observer 挂 Activity 生命周期,dismiss 时由 setOnDismissListener 移除(防 Dialog 泄漏)
+        subtitleViewModel.searchResult.observe((LifecycleOwner) mContext, searchObserver);
     }
 
     private void loadSubtitle(SubtitleBean subtitle) {
