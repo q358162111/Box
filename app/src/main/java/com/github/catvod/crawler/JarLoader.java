@@ -3,6 +3,7 @@ package com.github.catvod.crawler;
 
 import android.content.Context;
 import android.util.Log;
+import com.github.tvbox.osc.util.LOG;
 
 
 import com.github.tvbox.osc.base.App;
@@ -96,14 +97,13 @@ public class JarLoader {
                             Method proxyMethod = proxy.getMethod("proxy", Map.class);
                             proxyMethods.put(key, proxyMethod);
                         } catch (Throwable th) {
-                            // 可以记录错误日志
-                            th.printStackTrace();
+                            LOG.e("JarLoader proxy class " + key, th);
                         }
                         break;
                     }
                     Thread.sleep(200);
                 } catch (Throwable th) {
-                    th.printStackTrace();
+                    LOG.e("JarLoader spider class load", th);
                 }
                 count++;
             } while (count < 2);
@@ -156,7 +156,7 @@ public class JarLoader {
             loadClassLoader(cache.getAbsolutePath(), key);
             return classLoaders.get(key);
         } catch (Throwable e) {
-            e.printStackTrace();
+            LOG.e("JarLoader loadJarInternal " + key, e);
             // 下载失败时清理半成品，避免损坏文件残留
             cache.delete();
         }
@@ -215,7 +215,7 @@ public class JarLoader {
             spiders.put(key, sp);
             return sp;
         } catch (Throwable th) {
-            th.printStackTrace();
+            LOG.e("JarLoader getSpider init " + key, th);
         }
         return new SpiderNull();
     }

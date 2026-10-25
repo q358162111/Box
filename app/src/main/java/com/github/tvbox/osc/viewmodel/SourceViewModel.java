@@ -354,7 +354,7 @@ public class SourceViewModel extends ViewModel {
                         Spider sp = ApiConfig.get().getCSP(homeSourceBean);
                         json(listResult, sp.categoryContent(sortData.id, page + "", true, sortData.filterSelect), homeSourceBean.getKey());
                     } catch (Throwable th) {
-                        th.printStackTrace();
+                        LOG.e("categoryContent " + homeSourceBean.getKey(), th);
                         listResult.postValue(null);
                     }
                 }
@@ -633,7 +633,7 @@ public class SourceViewModel extends ViewModel {
                     json(searchResult, "", sourceBean.getKey());
                 }
             } catch (Throwable th) {
-                th.printStackTrace();
+                LOG.e("searchContent " + sourceBean.getKey(), th);
                 json(searchResult, "", sourceBean.getKey());
             }
         } else if (type == 0 || type == 1) {
@@ -719,7 +719,7 @@ public class SourceViewModel extends ViewModel {
                 String search = callSpiderWithTimeout(() -> sp.searchContent(wd, true), 15);
                 json(quickSearchResult, search, sourceBean.getKey());
             } catch (Throwable th) {
-                th.printStackTrace();
+                LOG.e("quickSearch " + sourceBean.getKey(), th);
             }
         } else if (type == 0 || type == 1) {
             OkGo.<String>get(sourceBean.getApi())

@@ -79,7 +79,7 @@ public class JsLoader {
                     }
                     Thread.sleep(200);
                 } catch (Throwable th) {
-                    th.printStackTrace();
+                    LOG.e("JsLoader jsapi loadClass", th);
                 }
                 count++;
             } while (count < 5);
@@ -89,7 +89,7 @@ public class JsLoader {
                 classes.put(key, classInit);
             }
         } catch (Throwable th) {
-            th.printStackTrace();
+            LOG.e("JsLoader loadClassLoader " + key, th);
         }
         return success;
     }
@@ -178,7 +178,7 @@ public class JsLoader {
             spiders.put(key, sp);
             return sp;
         } catch (Throwable th) {
-            th.printStackTrace();
+            LOG.e("JsLoader getSpider init " + key, th);
             LOG.e("QuJS", th);
         }
         return new SpiderNull();
