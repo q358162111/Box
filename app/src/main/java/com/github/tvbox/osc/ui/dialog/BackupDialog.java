@@ -52,7 +52,11 @@ public class BackupDialog extends BaseDialog {
         TvRecyclerView tvRecyclerView = findViewById(R.id.list);
         BackupAdapter adapter = new BackupAdapter();
         tvRecyclerView.setAdapter(adapter);
-        adapter.setNewData(allBackup());
+        // 构造函数里的 listFiles + 可能的递归清理属磁盘 IO，移后台执行，完成后回主线程渲染
+        ioExecutor.execute(() -> {
+            final List<String> list = allBackup();
+            new Handler(android.os.Looper.getMainLooper()).post(() -> adapter.setNewData(list));
+        });
         adapter.setOnItemChildClickListener(new BaseQuickAdapter.OnItemChildClickListener() {
             @Override
             public void onItemChildClick(BaseQuickAdapter adapter, View view, int position) {

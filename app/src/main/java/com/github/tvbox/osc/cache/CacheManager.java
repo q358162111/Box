@@ -1,6 +1,7 @@
 package com.github.tvbox.osc.cache;
 
 import com.github.tvbox.osc.data.AppDataManager;
+import com.github.tvbox.osc.subtitle.runtime.AppTaskExecutor;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -9,6 +10,7 @@ import java.io.InvalidClassException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.util.List;
 
 /**
  * 类描述:
@@ -69,25 +71,71 @@ public class CacheManager {
         return new byte[0];
     }
 
+    // 内存镜像：key -> 反序列化后的对象。allowMainThreadQueries 移除后，
+    // 同步读路径（播放进度起播判断等）从镜像取值；DB 只在后台线程读写
+    private static final java.util.concurrent.ConcurrentHashMap<String, Object> memoryMirror =
+            new java.util.concurrent.ConcurrentHashMap<>();
+    // 镜像是否已完成初始全量加载（懒加载，首次 getCache 时在后台预热）
+    private static volatile boolean mirrorLoaded = false;
+
+    private static void warmMirrorIfNeed() {
+        if (mirrorLoaded) return;
+        synchronized (CacheManager.class) {
+            if (mirrorLoaded) return;
+            // 后台全量预读 cache 表到内存镜像；完成后镜像与 DB 一致
+            AppTaskExecutor.deskIO().execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        List<Cache> all = AppDataManager.get().getCacheDao().getAll();
+                        for (Cache cache : all) {
+                            Object value = toObject(cache.data);
+                            if (value != null) memoryMirror.put(cache.key, value);
+                        }
+                    } catch (Throwable ignored) {
+                    }
+                    mirrorLoaded = true;
+                }
+            });
+        }
+    }
+
     public static <T> void delete(String key, T body) {
-        Cache cache = new Cache();
-        cache.key = key;
-        cache.data = toByteArray(body);
-        AppDataManager.get().getCacheDao().delete(cache);
+        memoryMirror.remove(key);
+        AppTaskExecutor.deskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Cache cache = new Cache();
+                    cache.key = key;
+                    cache.data = toByteArray(body);
+                    AppDataManager.get().getCacheDao().delete(cache);
+                } catch (Throwable ignored) {
+                }
+            }
+        });
     }
 
     public static <T> void save(String key, T body) {
-        Cache cache = new Cache();
-        cache.key = key;
-        cache.data = toByteArray(body);
-        AppDataManager.get().getCacheDao().save(cache);
+        memoryMirror.put(key, body);
+        AppTaskExecutor.deskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Cache cache = new Cache();
+                    cache.key = key;
+                    cache.data = toByteArray(body);
+                    AppDataManager.get().getCacheDao().save(cache);
+                } catch (Throwable ignored) {
+                }
+            }
+        });
     }
 
     public static Object getCache(String key) {
-        Cache cache = AppDataManager.get().getCacheDao().getCache(key);
-        if (cache != null && cache.data != null) {
-            return toObject(cache.data);
-        }
-        return null;
+        warmMirrorIfNeed();
+        // 同步读走内存镜像，不触碰 Room（主线程纪律）；镜像未预热完成时短暂返回 null，
+        // 调用方（进度起播判断）对此已有 null 兜底
+        return memoryMirror.get(key);
     }
 }

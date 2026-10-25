@@ -43,6 +43,7 @@ import com.github.tvbox.osc.bean.SourceBean;
 import com.github.tvbox.osc.bean.VodInfo;
 import com.github.tvbox.osc.bean.VodSeriesGroup;
 import com.github.tvbox.osc.cache.RoomDataManger;
+import com.github.tvbox.osc.subtitle.runtime.AppTaskExecutor;
 import com.github.tvbox.osc.event.RefreshEvent;
 import com.github.tvbox.osc.player.controller.VodController;
 import com.github.tvbox.osc.server.PlayService;
@@ -124,6 +125,9 @@ public class DetailActivity extends BaseActivity {
     private SourceViewModel sourceViewModel;
     private Movie.Video mVideo;
     private VodInfo vodInfo;
+    // loadDetail 时异步预读的历史记录与收藏状态（DB 读移出主线程）
+    private VodInfo cachedVodRecord;
+    private boolean cachedIsCollected = false;
     private SeriesFlagAdapter seriesFlagAdapter;
     private SeriesAdapter seriesAdapter;
     public String vodId;
@@ -373,12 +377,21 @@ public class DetailActivity extends BaseActivity {
             @Override
             public void onClick(View v) {
                 String text = tvCollect.getText().toString();
+                // 收藏/取消收藏的 DB 写移后台，UI 状态立即切换
+                AppTaskExecutor.deskIO().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (getString(R.string.det_fav_unstar).equals(text)) {
+                            RoomDataManger.insertVodCollect(sourceKey, vodInfo);
+                        } else {
+                            RoomDataManger.deleteVodCollect(sourceKey, vodInfo);
+                        }
+                    }
+                });
                 if (getString(R.string.det_fav_unstar).equals(text)) {
-                    RoomDataManger.insertVodCollect(sourceKey, vodInfo);
                     Toast.makeText(DetailActivity.this, getString(R.string.det_fav_add), Toast.LENGTH_SHORT).show();
                     tvCollect.setText(getString(R.string.det_fav_star));
                 } else {
-                    RoomDataManger.deleteVodCollect(sourceKey, vodInfo);
                     Toast.makeText(DetailActivity.this, getString(R.string.det_fav_del), Toast.LENGTH_SHORT).show();
                     tvCollect.setText(getString(R.string.det_fav_unstar));
                 }
@@ -773,7 +786,8 @@ public class DetailActivity extends BaseActivity {
                         mGridView.setVisibility(View.VISIBLE);
                         mEmptyPlayList.setVisibility(View.GONE);
 
-                        VodInfo vodInfoRecord = RoomDataManger.getVodInfo(sourceKey, vodId);
+                        // 使用 loadDetail 时异步预读的历史记录（避免主线程 DB 读）
+                        VodInfo vodInfoRecord = cachedVodRecord;
                         // 读取历史记录
                         if (vodInfoRecord != null) {
                             vodInfo.playIndex = Math.max(vodInfoRecord.playIndex, 0);
@@ -858,16 +872,27 @@ public class DetailActivity extends BaseActivity {
         if (vid != null) {
             vodId = vid;
             sourceKey = key;
+            // 历史记录/收藏状态改为在加载详情时异步预读（DB 读移出主线程），
+            // 结果缓存到字段供 detailResult 观察者与收藏按钮使用
+            final String sk = key, vidKey = vid;
+            AppTaskExecutor.deskIO().execute(new Runnable() {
+                @Override
+                public void run() {
+                    final VodInfo record = RoomDataManger.getVodInfo(sk, vidKey);
+                    final boolean collected = RoomDataManger.isVodCollect(sk, vidKey);
+                    AppTaskExecutor.mainThread().execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            cachedVodRecord = record;
+                            cachedIsCollected = collected;
+                            tvCollect.setText(collected ? getString(R.string.det_fav_star) : getString(R.string.det_fav_unstar));
+                        }
+                    });
+                }
+            });
             firstsourceKey = key;
             showLoading();
             sourceViewModel.getDetail(sourceKey, vodId);
-
-            boolean isVodCollect = RoomDataManger.isVodCollect(sourceKey, vodId);
-            if (isVodCollect) {
-                tvCollect.setText(getString(R.string.det_fav_star));
-            } else {
-                tvCollect.setText(getString(R.string.det_fav_unstar));
-            }
         }
     }
 
@@ -1087,8 +1112,19 @@ public class DetailActivity extends BaseActivity {
         } catch (Throwable th) {
             vodInfo.playNote = "";
         }
-        RoomDataManger.insertVodRecord(sourceKey, vodInfo);
-        EventBus.getDefault().post(new RefreshEvent(RefreshEvent.TYPE_HISTORY_REFRESH));
+        // 历史记录写库移后台（Gson 序列化 + DB IO），完成后回主线程发刷新事件
+        AppTaskExecutor.deskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                RoomDataManger.insertVodRecord(sourceKey, vodInfo);
+                AppTaskExecutor.mainThread().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        EventBus.getDefault().post(new RefreshEvent(RefreshEvent.TYPE_HISTORY_REFRESH));
+                    }
+                });
+            }
+        });
     }
 
     @Override

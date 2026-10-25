@@ -8,6 +8,7 @@ import com.github.tvbox.osc.R;
 import com.github.tvbox.osc.bean.VodInfo;
 import com.github.tvbox.osc.cache.RoomDataManger;
 import com.github.tvbox.osc.ui.adapter.HistoryAdapter;
+import com.github.tvbox.osc.subtitle.runtime.AppTaskExecutor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,20 +37,37 @@ public class HistoryActivity extends BaseVodListActivity<VodInfo> {
 
     @Override
     protected void loadData() {
-        List<VodInfo> allVodRecord = RoomDataManger.getAllVodRecord(100);
-        List<VodInfo> vodInfoList = new ArrayList<>();
-        for (VodInfo vodInfo : allVodRecord) {
-            if (vodInfo.playNote != null && !vodInfo.playNote.isEmpty()) {
-                vodInfo.note = "看到" + vodInfo.playNote;
+        // 观看记录全表读（含 Gson 反序列化）移后台，完成后回主线程渲染
+        AppTaskExecutor.deskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                List<VodInfo> allVodRecord = RoomDataManger.getAllVodRecord(100);
+                final List<VodInfo> vodInfoList = new ArrayList<>();
+                for (VodInfo vodInfo : allVodRecord) {
+                    if (vodInfo.playNote != null && !vodInfo.playNote.isEmpty()) {
+                        vodInfo.note = "看到" + vodInfo.playNote;
+                    }
+                    vodInfoList.add(vodInfo);
+                }
+                AppTaskExecutor.mainThread().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        listAdapter.setNewData(vodInfoList);
+                    }
+                });
             }
-            vodInfoList.add(vodInfo);
-        }
-        listAdapter.setNewData(vodInfoList);
+        });
     }
 
     @Override
     protected void onItemDeleted(VodInfo vodInfo) {
-        RoomDataManger.deleteVodRecord(vodInfo.sourceKey, vodInfo);
+        // 删除写库移后台
+        AppTaskExecutor.deskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                RoomDataManger.deleteVodRecord(vodInfo.sourceKey, vodInfo);
+            }
+        });
     }
 
     @Override

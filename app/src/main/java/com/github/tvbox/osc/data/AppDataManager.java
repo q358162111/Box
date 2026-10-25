@@ -101,7 +101,8 @@ public class AppDataManager {
                             super.onOpen(db);
 //                        LOG.i("数据库打开成功");
                         }
-                    }).allowMainThreadQueries()//可以在主线程操作
+                    })// allowMainThreadQueries 已移除：Room 将拒绝主线程 DB 访问，
+                    // 编译期/运行期暴露遗漏的主线程调用点（主线程纪律强制化）
                     .build();
         return dbInstance;
     }

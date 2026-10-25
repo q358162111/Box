@@ -9,7 +9,10 @@ import com.github.tvbox.osc.R;
 import com.github.tvbox.osc.api.ApiConfig;
 import com.github.tvbox.osc.cache.RoomDataManger;
 import com.github.tvbox.osc.cache.VodCollect;
+import com.github.tvbox.osc.subtitle.runtime.AppTaskExecutor;
 import com.github.tvbox.osc.ui.adapter.CollectAdapter;
+
+import java.util.List;
 
 public class CollectActivity extends BaseVodListActivity<VodCollect> {
 
@@ -30,12 +33,30 @@ public class CollectActivity extends BaseVodListActivity<VodCollect> {
 
     @Override
     protected void loadData() {
-        listAdapter.setNewData(RoomDataManger.getAllVodCollect());
+        // 收藏全表读移后台，完成后回主线程渲染
+        AppTaskExecutor.deskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                final List<VodCollect> data = RoomDataManger.getAllVodCollect();
+                AppTaskExecutor.mainThread().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        listAdapter.setNewData(data);
+                    }
+                });
+            }
+        });
     }
 
     @Override
     protected void onItemDeleted(VodCollect vodInfo) {
-        RoomDataManger.deleteVodCollect(vodInfo.getId());
+        // 删除写库移后台
+        AppTaskExecutor.deskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                RoomDataManger.deleteVodCollect(vodInfo.getId());
+            }
+        });
     }
 
     @Override

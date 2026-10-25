@@ -34,6 +34,10 @@ public interface CacheDao {
     @Query("select *from cache where `key`=:key")
     Cache getCache(String key);
 
+    // 供 CacheManager 内存镜像全量预载
+    @Query("select *from cache")
+    List<Cache> getAll();
+
     //只能传递对象昂,删除时根据Cache中的主键 来比对的
     @Delete
     int delete(Cache cache);

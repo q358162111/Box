@@ -13,6 +13,7 @@ import com.github.tvbox.osc.cache.RoomDataManger;
 import com.github.tvbox.osc.cache.StorageDrive;
 import com.github.tvbox.osc.event.InputMsgEvent;
 import com.github.tvbox.osc.event.RefreshEvent;
+import com.github.tvbox.osc.subtitle.runtime.AppTaskExecutor;
 import com.github.tvbox.osc.util.StorageDriveType;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -100,12 +101,26 @@ public class WebdavDialog extends BaseDialog {
                 if(drive != null) {
                     drive.name = name;
                     drive.configJson = config.toString();
-                    RoomDataManger.updateDriveRecord(drive);
-                } else {
-                    RoomDataManger.insertDriveRecord(name, StorageDriveType.TYPE.WEBDAV, config);
                 }
-                EventBus.getDefault().post(new RefreshEvent(RefreshEvent.TYPE_DRIVE_REFRESH));
-                WebdavDialog.this.dismiss();
+                // DB 写移后台，完成后回主线程发刷新事件并关窗
+                final StorageDrive finalDrive = drive;
+                AppTaskExecutor.deskIO().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (finalDrive != null) {
+                            RoomDataManger.updateDriveRecord(finalDrive);
+                        } else {
+                            RoomDataManger.insertDriveRecord(name, StorageDriveType.TYPE.WEBDAV, config);
+                        }
+                        AppTaskExecutor.mainThread().execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                EventBus.getDefault().post(new RefreshEvent(RefreshEvent.TYPE_DRIVE_REFRESH));
+                                WebdavDialog.this.dismiss();
+                            }
+                        });
+                    }
+                });
             }
         });
         findViewById(R.id.btnCancel).setOnClickListener(new View.OnClickListener() {

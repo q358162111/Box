@@ -259,7 +259,8 @@ public class PlayActivity extends BaseActivity {
             @Override
             public void saveProgress(String url, long progress) {
                 if (videoDuration == 0) return;
-                CacheManager.save(MD5.string2MD5(url), progress);
+                // DB 写移后台（每几秒回调一次，主线程写库会造成持续 GC/IO 压力）
+                AppTaskExecutor.deskIO().execute(() -> CacheManager.save(MD5.string2MD5(url), progress));
             }
 
             @Override
@@ -271,10 +272,12 @@ public class PlayActivity extends BaseActivity {
                     e.printStackTrace();
                 }
                 long skip = st * 1000L;
-                if (CacheManager.getCache(MD5.string2MD5(url)) == null) {
+                // 播放器起播路径需要同步返回值，这里保留同步读（单条主键查询，开销可控）
+                Object cached = CacheManager.getCache(MD5.string2MD5(url));
+                if (cached == null) {
                     return skip;
                 }
-                long rec = (long) CacheManager.getCache(MD5.string2MD5(url));
+                long rec = (long) cached;
                 if (rec < skip)
                     return skip;
                 return rec;
@@ -306,7 +309,7 @@ public class PlayActivity extends BaseActivity {
                     String preProgressKey = progressKey;
                     PlayActivity.this.playNext(rmProgress);
                     if (rmProgress && preProgressKey != null)
-                        CacheManager.delete(MD5.string2MD5(preProgressKey), 0);
+                        AppTaskExecutor.deskIO().execute(() -> CacheManager.delete(MD5.string2MD5(preProgressKey), 0));
                 }
             }
 
@@ -1451,10 +1454,13 @@ public class PlayActivity extends BaseActivity {
         if (mVideoView != null) mVideoView.release();
         subtitleCacheKey = mVodInfo.sourceKey + "-" + mVodInfo.id + "-" + mVodInfo.playFlag + "-" + mVodInfo.getplayIndex() + "-" + vs.name + "-subt";
         progressKey = mVodInfo.sourceKey + mVodInfo.id + mVodInfo.playFlag + mVodInfo.getplayIndex();
-        //重新播放清除现有进度
+        // 重新播放清除现有进度（DB 删除移后台）
         if (reset) {
-            CacheManager.delete(MD5.string2MD5(progressKey), 0);
-            CacheManager.delete(MD5.string2MD5(subtitleCacheKey), "");
+            final String pk = progressKey, sk = subtitleCacheKey;
+            AppTaskExecutor.deskIO().execute(() -> {
+                CacheManager.delete(MD5.string2MD5(pk), 0);
+                CacheManager.delete(MD5.string2MD5(sk), "");
+            });
         }
         if (vs.url.startsWith("tvbox-drive://")) {
             progressKey = vs.url.replace("tvbox-drive://", "");
