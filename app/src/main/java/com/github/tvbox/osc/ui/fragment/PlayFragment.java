@@ -60,6 +60,7 @@ import com.github.tvbox.osc.player.MyVideoView;
 import com.github.tvbox.osc.player.TrackInfo;
 import com.github.tvbox.osc.player.TrackInfoBean;
 import com.github.tvbox.osc.player.controller.VodController;
+import com.github.tvbox.osc.play.TrackSelector;
 import com.github.tvbox.osc.player.danmu.Parser;
 import com.github.tvbox.osc.player.thirdparty.Kodi;
 import com.github.tvbox.osc.player.thirdparty.MXPlayer;
@@ -143,6 +144,7 @@ public class PlayFragment extends BaseLazyFragment {
     private ImageView mPlayLoadErr;
     private ProgressBar mPlayLoading;
     private VodController mController;
+    private TrackSelector trackSelector;
     private SourceViewModel sourceViewModel;
     private Handler mHandler;
 
@@ -244,6 +246,17 @@ public class PlayFragment extends BaseLazyFragment {
         mPlayLoading = findViewById(R.id.play_loading);
         mPlayLoadErr = findViewById(R.id.play_load_error);
         mController = new VodController(requireContext());
+        trackSelector = new TrackSelector(new TrackSelector.Host() {
+            @Override
+            public Context context() {
+                return requireContext();
+            }
+
+            @Override
+            public Handler handler() {
+                return mHandler;
+            }
+        }, mController);
         mController.setCanChangePosition(true);
         mController.setEnableInNormal(true);
         mController.setGestureEnabled(true);
@@ -471,158 +484,11 @@ public class PlayFragment extends BaseLazyFragment {
     }
 
     void selectMyInternalSubtitle() {
-        AbstractPlayer mediaPlayer = mVideoView.getMediaPlayer();
-        TrackInfo trackInfo = null;
-
-        if (mediaPlayer instanceof EXOmPlayer) {
-            trackInfo = ((EXOmPlayer) mediaPlayer).getTrackInfo();
-        }
-        if (mediaPlayer instanceof IjkmPlayer) {
-            trackInfo = ((IjkmPlayer) mediaPlayer).getTrackInfo();
-        }
-
-        if (trackInfo == null) {
-            Toast.makeText(mContext, getString(R.string.vod_sub_na), Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        List<TrackInfoBean> bean = trackInfo.getSubtitle();
-        if (bean.size() < 1) {
-            Toast.makeText(mContext, getString(R.string.vod_sub_na), Toast.LENGTH_SHORT).show();
-            return;
-        }
-        SelectDialog<TrackInfoBean> dialog = new SelectDialog<>(getActivity());
-        dialog.setTip(getString(R.string.vod_sub_sel));
-        dialog.setAdapter(null, new SelectDialogAdapter.SelectDialogInterface<TrackInfoBean>() {
-            @Override
-            public void click(TrackInfoBean value, int pos) {
-                mController.mSubtitleView.setVisibility(View.VISIBLE);
-                try {
-                    for (TrackInfoBean subtitle : bean) {
-                        subtitle.selected = subtitle.trackId == value.trackId;
-                    }
-                    mediaPlayer.pause();
-                    long progress = mediaPlayer.getCurrentPosition();//保存当前进度，ijk 切换轨道 会有快进几秒
-                    if (mediaPlayer instanceof IjkmPlayer) {
-                        mController.mSubtitleView.destroy();
-                        mController.mSubtitleView.clearSubtitleCache();
-                        mController.mSubtitleView.isInternal = true;
-                        ((IjkmPlayer) mediaPlayer).setTrack(value.trackId);
-                        mHandler.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                mediaPlayer.seekTo(progress);
-                                mediaPlayer.start();
-                                mController.startProgress();
-                            }
-                        }, 800);
-                    }
-                    if (mediaPlayer instanceof EXOmPlayer) {
-                        mController.mSubtitleView.destroy();
-                        mController.mSubtitleView.clearSubtitleCache();
-                        mController.mSubtitleView.isInternal = true;
-                        ((EXOmPlayer) mediaPlayer).selectExoTrack(value);
-                        mHandler.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                mediaPlayer.seekTo(progress);
-                                mediaPlayer.start();
-                                mController.startProgress();
-                            }
-                        }, 800);
-                    }
-                    dialog.dismiss();
-                } catch (Exception e) {
-                    LOG.e("切换内置字幕出错");
-                }
-            }
-
-            @Override
-            public String getDisplay(TrackInfoBean val) {
-                return val.name + (StringUtils.isEmpty(val.language) ? "" : " " + val.language);
-            }
-        }, new DiffUtil.ItemCallback<TrackInfoBean>() {
-            @Override
-            public boolean areItemsTheSame(@NonNull @NotNull TrackInfoBean oldItem, @NonNull @NotNull TrackInfoBean newItem) {
-                return oldItem.trackId == newItem.trackId;
-            }
-
-            @Override
-            public boolean areContentsTheSame(@NonNull @NotNull TrackInfoBean oldItem, @NonNull @NotNull TrackInfoBean newItem) {
-                return oldItem.trackId == newItem.trackId;
-            }
-        }, bean, trackInfo.getSubtitleSelected(false));
-        dialog.show();
+        trackSelector.selectInternalSubtitle(mVideoView.getMediaPlayer());
     }
 
     void selectMyAudioTrack() {
-        AbstractPlayer mediaPlayer = mVideoView.getMediaPlayer();
-
-        TrackInfo trackInfo = null;
-        if (mediaPlayer instanceof IjkmPlayer) {
-            trackInfo = ((IjkmPlayer) mediaPlayer).getTrackInfo();
-        }
-        if (mediaPlayer instanceof EXOmPlayer) {
-            trackInfo = ((EXOmPlayer) mediaPlayer).getTrackInfo();
-        }
-
-        if (trackInfo == null) {
-            Toast.makeText(mContext, getString(R.string.vod_no_audio), Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        List<TrackInfoBean> bean = trackInfo.getAudio();
-        if (bean.size() < 1) return;
-        SelectDialog<TrackInfoBean> dialog = new SelectDialog<>(getActivity());
-        dialog.setTip(getString(R.string.vod_audio));
-        dialog.setAdapter(null, new SelectDialogAdapter.SelectDialogInterface<TrackInfoBean>() {
-            @Override
-            public void click(TrackInfoBean value, int pos) {
-                try {
-                    for (TrackInfoBean audio : bean) {
-                        audio.selected = audio.trackId == value.trackId;
-                    }
-                    mediaPlayer.pause();
-                    long progress = mediaPlayer.getCurrentPosition();//保存当前进度，ijk 切换轨道 会有快进几秒
-                    if (mediaPlayer instanceof IjkmPlayer) {
-                        ((IjkmPlayer) mediaPlayer).setTrack(value.trackId);
-                    }
-                    if (mediaPlayer instanceof EXOmPlayer) {
-                        ((EXOmPlayer) mediaPlayer).selectExoTrack(value);
-                    }
-                    mHandler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            mediaPlayer.seekTo(progress);
-                            mediaPlayer.start();
-                            mController.startProgress();
-                        }
-                    }, 800);
-                    dialog.dismiss();
-                } catch (Exception e) {
-                    LOG.e("切换音轨出错");
-                }
-            }
-
-            @Override
-            public String getDisplay(TrackInfoBean val) {
-                String name = val.name.replace("AUDIO,", "");
-                name = name.replace("N/A,", "");
-                name = name.replace(" ", "");
-                return name + (StringUtils.isEmpty(val.language) ? "" : " " + val.language);
-            }
-        }, new DiffUtil.ItemCallback<TrackInfoBean>() {
-            @Override
-            public boolean areItemsTheSame(@NonNull @NotNull TrackInfoBean oldItem, @NonNull @NotNull TrackInfoBean newItem) {
-                return oldItem.trackId == newItem.trackId;
-            }
-
-            @Override
-            public boolean areContentsTheSame(@NonNull @NotNull TrackInfoBean oldItem, @NonNull @NotNull TrackInfoBean newItem) {
-                return oldItem.trackId == newItem.trackId;
-            }
-        }, bean, trackInfo.getAudioSelected(false));
-        dialog.show();
+        trackSelector.selectAudioTrack(mVideoView.getMediaPlayer());
     }
 
     void openMyVideo() {
