@@ -119,15 +119,30 @@ public class RemoteServer extends NanoHTTPD {
     }
 
     /**
-     * 读取文件全部字节，供 /file 端点以内存流方式返回，避免持有 FileInputStream 导致 fd 泄漏
+     * /file 端点读入内存的大小上限，防止局域网请求几 GB 的视频文件导致 OOM
+     */
+    private static final long MAX_FILE_RESPONSE_BYTES = 64L * 1024 * 1024;
+
+    /**
+     * 读取文件全部字节，供 /file 端点以内存流方式返回，避免持有 FileInputStream 导致 fd 泄漏。
+     * 超过 {@link #MAX_FILE_RESPONSE_BYTES} 时抛 IOException，由调用方拒绝响应。
      */
     private static byte[] readFileBytes(File file) throws IOException {
+        if (file.length() > MAX_FILE_RESPONSE_BYTES) {
+            throw new IOException("File too large for /file endpoint: " + file.length());
+        }
         FileInputStream fis = new FileInputStream(file);
         try {
             byte[] buffer = new byte[8192];
             java.io.ByteArrayOutputStream bos = new java.io.ByteArrayOutputStream();
             int n;
+            long total = 0;
             while ((n = fis.read(buffer)) != -1) {
+                total += n;
+                // 文件大小可能在读取期间变化，读取中再次校验
+                if (total > MAX_FILE_RESPONSE_BYTES) {
+                    throw new IOException("File too large for /file endpoint");
+                }
                 bos.write(buffer, 0, n);
             }
             return bos.toByteArray();

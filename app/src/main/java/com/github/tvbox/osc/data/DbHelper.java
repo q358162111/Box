@@ -28,6 +28,10 @@ public class DbHelper {
     }
 
     public static void addKeywords(String keyword) {
+        // 去重：重复关键词不再重复入库（原实现 check-then-act 全表读，历史表会堆积重复项）
+        if (checkKeyWords(keyword)) {
+            return;
+        }
         ArrayList<SearchHistory> allHistory = getAllHistory();
         if (allHistory.size() > 29) {
             AppDataManager.get().getSearchDao().delete(allHistory.get(0));

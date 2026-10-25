@@ -47,6 +47,7 @@ public class JsSpider extends Spider {
     private final Class<?> dex;
     private QuickJSContext ctx;
     private JSObject jsObject;
+    private Global global;
     private final String key;
     private final String api;
     private boolean cat;
@@ -266,25 +267,43 @@ public class JsSpider extends Spider {
 
     @Override
     public void destroy() {
-        // 必须先停 executor 并等待其线程退出，再 destroy ctx：
-        // shutdownNow() 无法中断正在 QuickJS native 层执行的调用，若先 ctx.destroy()，
-        // executor 线程可能仍持有并操作已释放的 native 上下文（use-after-free → SIGSEGV/SIGABRT）
-        boolean executorDrained = false;
+        // ctx 绑定在 executor 线程上（QuickJSContext 有 checkSameThread 校验），
+        // 外部线程直接调 ctx.destroy() 必抛异常且被 catch 吞掉 → native runtime 永不释放。
+        // 正确顺序：先把销毁任务投递回绑定线程执行并等待完成，再关停线程池。
+        boolean ctxDestroyed = false;
+        if (executor != null && !executor.isShutdown()) {
+            try {
+                executor.submit(() -> {
+                    try {
+                        if (ctx != null) ctx.destroy();
+                    } catch (Throwable ignored) {
+                    }
+                }).get(3, TimeUnit.SECONDS);
+                ctxDestroyed = true;
+            } catch (Throwable ignored) {
+                // 提交失败/超时（线程被僵尸任务占住）：此时线程仍在 QuickJS native 调用中，
+                // 直接销毁 ctx 是 use-after-free（SIGSEGV/SIGABRT），宁可选择泄漏也不能销毁
+            }
+        }
+        // 先释放 Global 持有的 Timer 线程与 setTimeout 的 native 引用（须在 ctx 销毁前、绑定线程上）
+        if (global != null) {
+            try {
+                global.destroy();
+            } catch (Throwable ignored) {
+            }
+            global = null;
+        }
         if (executor != null) {
             executor.shutdownNow();
             try {
-                executorDrained = executor.awaitTermination(3, TimeUnit.SECONDS);
-                if (!executorDrained) {
-                    LOG.i("JsSpider destroy: executor 未在 3s 内退出，跳过 ctx.destroy 防 use-after-free: " + key);
-                }
+                executor.awaitTermination(3, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }
-        // 仅在 executor 线程确认退出后才能释放 native ctx;
-        // 线程仍在 QuickJS native 调用中时销毁 ctx 就是 use-after-free(SIGSEGV/SIGABRT),
-        // 此时宁可选择泄漏 ctx 也不能销毁
-        if (executorDrained) {
+        // 兜底：销毁任务未能投递到绑定线程时（池已关闭/提交失败），尝试直接销毁；
+        // 若被 checkSameThread 拒绝则仅泄漏 native ctx，不会崩溃
+        if (!ctxDestroyed) {
             try {
                 if (ctx != null) ctx.destroy();
             } catch (Throwable ignored) {
@@ -405,7 +424,8 @@ public class JsSpider extends Spider {
             }
         });
 
-        ctx.getGlobalObject().bind(new Global(executor));
+        global = new Global(executor);
+        ctx.getGlobalObject().bind(global);
 
         JSObject local = ctx.createJSObject();
         ctx.getGlobalObject().set("local", local);

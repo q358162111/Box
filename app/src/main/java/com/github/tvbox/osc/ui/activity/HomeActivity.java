@@ -114,14 +114,20 @@ public class HomeActivity extends BaseActivity {
     public View sortFocusView = null;
     private final Handler mHandler = new Handler();
     private long mExitTime = 0;
+    // 每秒刷新的日期格式，缓存为字段避免每秒新建。
+    // 不能在字段初始化器中调用 getString()——Activity 构造阶段 base Context 未 attach 会 NPE 闪退，
+    // 因此首次使用时（onCreate 之后的主线程 Runnable 里）惰性初始化
+    @SuppressLint("SimpleDateFormat")
+    private SimpleDateFormat mDateFormat;
     private final Runnable mRunnable = new Runnable() {
         @SuppressLint({"DefaultLocale", "SetTextI18n"})
         @Override
         public void run() {
             Date date = new Date();
-            @SuppressLint("SimpleDateFormat")
-            SimpleDateFormat timeFormat = new SimpleDateFormat(getString(R.string.hm_date1) + ", " + getString(R.string.hm_date2));
-            tvDate.setText(timeFormat.format(date));
+            if (mDateFormat == null) {
+                mDateFormat = new SimpleDateFormat(getString(R.string.hm_date1) + ", " + getString(R.string.hm_date2));
+            }
+            tvDate.setText(mDateFormat.format(date));
             mHandler.postDelayed(this, 1000);
         }
     };
@@ -426,11 +432,14 @@ public class HomeActivity extends BaseActivity {
         // takagen99: If network available, check connected Wifi or Lan
         if (isNetworkAvailable()) {
             ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
-            if (cm.getActiveNetworkInfo().getType() == ConnectivityManager.TYPE_WIFI) {
+            // getActiveNetworkInfo 可能刚断网变为 null，判空防御
+            NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+            if (activeNetwork == null) return;
+            if (activeNetwork.getType() == ConnectivityManager.TYPE_WIFI) {
                 tvWifi.setImageDrawable(res.getDrawable(R.drawable.hm_wifi));
-            } else if (cm.getActiveNetworkInfo().getType() == ConnectivityManager.TYPE_MOBILE) {
+            } else if (activeNetwork.getType() == ConnectivityManager.TYPE_MOBILE) {
                 tvWifi.setImageDrawable(res.getDrawable(R.drawable.hm_mobile));
-            } else if (cm.getActiveNetworkInfo().getType() == ConnectivityManager.TYPE_ETHERNET) {
+            } else if (activeNetwork.getType() == ConnectivityManager.TYPE_ETHERNET) {
                 tvWifi.setImageDrawable(res.getDrawable(R.drawable.hm_lan));
             }
         }

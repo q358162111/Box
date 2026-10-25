@@ -27,8 +27,10 @@
     </queries>
 
     <application
+        xmlns:tools="http://schemas.android.com/tools"
         android:name=".base.App"
-        android:allowBackup="true"
+        android:allowBackup="false"
+        tools:replace="android:allowBackup"
         android:configChanges="orientation|keyboardHidden|screenSize"
         android:hardwareAccelerated="true"
         android:icon="@drawable/app_icon"
@@ -104,19 +106,19 @@
             android:foregroundServiceType="mediaPlayback" />    
 
         <receiver android:name=".receiver.SearchReceiver"
-            android:exported="true">
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.content.movie.search.Action" />
             </intent-filter>
         </receiver>
         <receiver android:name=".receiver.DetailReceiver"
-            android:exported="true">
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.content.movie.detail.Action" />
             </intent-filter>
         </receiver>
         <receiver android:name=".receiver.CustomWebReceiver"
-            android:exported="true">
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.content.movie.custom.web.Action" />
             </intent-filter>

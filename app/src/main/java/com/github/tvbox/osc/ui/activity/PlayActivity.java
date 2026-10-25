@@ -1199,7 +1199,8 @@ public class PlayActivity extends BaseActivity {
 
             mController.hideBottom();
             mVideoView.postDelayed(() -> {
-                if (!mVideoView.isPlaying()) {
+                // 400ms 窗口内 activity 可能已销毁，mVideoView 置空后 NPE
+                if (mVideoView != null && !mVideoView.isPlaying()) {
                     mController.togglePlay();
                 }
             }, 400);
@@ -1362,8 +1363,11 @@ public class PlayActivity extends BaseActivity {
             return;
         }
         mVodInfo.playIndex++;
-        mVodInfo.playGroup += mVodInfo.playIndex / mVodInfo.playGroupCount;
-        mVodInfo.playIndex = mVodInfo.playIndex % mVodInfo.playGroupCount;
+        // playGroupCount 来自外部数据，为 0 时除零崩溃（与 PlayFragment 同步的修复）
+        if (mVodInfo.playGroupCount > 0) {
+            mVodInfo.playGroup += mVodInfo.playIndex / mVodInfo.playGroupCount;
+            mVodInfo.playIndex = mVodInfo.playIndex % mVodInfo.playGroupCount;
+        }
         play(false);
     }
 
@@ -1429,8 +1433,9 @@ public class PlayActivity extends BaseActivity {
 
     void initParseLoadFound() {
         loadFoundCount.set(0);
-        loadFoundVideoUrls = new LinkedList<String>();
-        loadFoundVideoUrlsHeader = new HashMap<String, HashMap<String, String>>();
+        // WebView IO 线程 add 与主线程 poll 并发访问，必须使用线程安全容器
+        loadFoundVideoUrls = new java.util.concurrent.ConcurrentLinkedQueue<String>();
+        loadFoundVideoUrlsHeader = new java.util.concurrent.ConcurrentHashMap<String, HashMap<String, String>>();
     }
 
     public void play(boolean reset) {
@@ -1589,6 +1594,18 @@ public class PlayActivity extends BaseActivity {
 
     ExecutorService parseThreadPool;
 
+    /**
+     * 线程池可能在 stopParse 中被并发置空/关闭，提交任务时做防护（与 PlayFragment 同步的修复）
+     */
+    void safeParseExecute(Runnable task) {
+        ExecutorService pool = parseThreadPool;
+        if (pool == null || pool.isShutdown()) return;
+        try {
+            pool.execute(task);
+        } catch (java.util.concurrent.RejectedExecutionException ignored) {
+        }
+    }
+
     private String encodeUrl(String url) {
         try {
             return URLEncoder.encode(url, "UTF-8");
@@ -1711,7 +1728,7 @@ public class PlayActivity extends BaseActivity {
                     jxs.put(p.getName(), p.mixUrl());
                 }
             }
-            parseThreadPool.execute(new Runnable() {
+            safeParseExecute(new Runnable() {
                 @Override
                 public void run() {
                     JSONObject rs = ApiConfig.get().jsonExt(pb.getUrl(), jxs, webUrl);
@@ -1780,7 +1797,7 @@ public class PlayActivity extends BaseActivity {
             jxs.put(p.getName(), data);
         }
         String finalExtendName = extendName;
-        parseThreadPool.execute(new Runnable() {
+        safeParseExecute(new Runnable() {
             @Override
             public void run() {
                 if(isSuper){
@@ -1803,7 +1820,7 @@ public class PlayActivity extends BaseActivity {
                                     loadWebView(mixParseUrl);
                                 }
                             });
-                            parseThreadPool.execute(new Runnable() {
+                            safeParseExecute(new Runnable() {
                                 @Override
                                 public void run() {
                                     JSONObject res = SuperParse.doJsonJx(webUrl);
@@ -1881,8 +1898,9 @@ public class PlayActivity extends BaseActivity {
     private WebView mSysWebView;
     private SysWebClient mSysWebClient;
     private final Map<String, Boolean> loadedUrls = new HashMap<>();
-    private LinkedList<String> loadFoundVideoUrls = new LinkedList<>();
-    private HashMap<String, HashMap<String, String>> loadFoundVideoUrlsHeader = new HashMap<>();
+    // WebView IO 线程 add 与主线程 poll 并发访问，使用线程安全容器（与 PlayFragment 同步的修复）
+    private java.util.concurrent.ConcurrentLinkedQueue<String> loadFoundVideoUrls = new java.util.concurrent.ConcurrentLinkedQueue<>();
+    private java.util.concurrent.ConcurrentHashMap<String, HashMap<String, String>> loadFoundVideoUrlsHeader = new java.util.concurrent.ConcurrentHashMap<>();
     private final AtomicInteger loadFoundCount = new AtomicInteger(0);
 
     void loadWebView(String url) {

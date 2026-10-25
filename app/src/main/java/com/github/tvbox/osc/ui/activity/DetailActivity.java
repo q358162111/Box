@@ -1163,7 +1163,8 @@ public class DetailActivity extends BaseActivity {
             enterPictureInPictureMode(params);
             playFragment.getVodController().hideBottom();
             playFragment.getPlayer().postDelayed(() -> {
-                if (!playFragment.getPlayer().isPlaying()) {
+                // 400ms 窗口内 fragment 视图可能已销毁，getPlayer() 可为 null
+                if (playFragment.getPlayer() != null && !playFragment.getPlayer().isPlaying()) {
                     playFragment.getVodController().togglePlay();
                 }
             }, 400);

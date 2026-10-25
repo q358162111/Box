@@ -1117,6 +1117,14 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
                 case MEDIA_TIMED_TEXT:
                     if (msg.obj == null) {
                         player.notifyOnTimedText(null);
+                    } else if (msg.arg1 == 2) { // bitmap, obj 为 int[]，需在 String 强转前分支
+                        IjkTimedText text;
+                        if (msg.arg2 > 0 && (msg.obj instanceof int[]) && ((int[]) msg.obj).length == msg.arg2) {
+                            text = new IjkTimedText((int[]) msg.obj);
+                        } else {
+                            text = new IjkTimedText(null, "");
+                        }
+                        player.notifyOnTimedText(text);
                     } else {
                         String msg_text=(String) msg.obj;
                         if(msg_text.contains("{\\fad")){
@@ -1128,14 +1136,6 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
                             player.notifyOnTimedText(text);
                         } else if (msg.arg1 == 1) { // ass
                             IjkTimedText text = new IjkTimedText(new Rect(0, 0, 1, 1), msg_text);
-                            player.notifyOnTimedText(text);
-                        } else if (msg.arg1 == 2) { // bitmap
-                            IjkTimedText text;
-                            if (msg.arg2 > 0 && ((int[]) msg.obj).length == msg.arg2) {
-                                text = new IjkTimedText((int[]) msg.obj);
-                            } else {
-                                text = new IjkTimedText(null, "");
-                            }
                             player.notifyOnTimedText(text);
                         }
                     }

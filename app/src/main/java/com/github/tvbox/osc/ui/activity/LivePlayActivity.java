@@ -566,7 +566,7 @@ public class LivePlayActivity extends BaseActivity {
         } else if (tvRightSettingLayout.getVisibility() == View.VISIBLE) {
             mHandler.removeCallbacks(mHideSettingLayoutRun);
             mHandler.post(mHideSettingLayoutRun);
-        } else if (tvLeftChannelListLayout.getVisibility() == View.INVISIBLE & tvRightSettingLayout.getVisibility() == View.INVISIBLE) {
+        } else if (tvLeftChannelListLayout.getVisibility() == View.INVISIBLE && tvRightSettingLayout.getVisibility() == View.INVISIBLE) {
             //重新载入上一次状态
             liveChannelItemAdapter.setNewData(getLiveChannels(currentChannelGroupIndex));
             if (currentLiveChannelIndex > -1)
@@ -762,16 +762,17 @@ public class LivePlayActivity extends BaseActivity {
         }
     }
 
+    // 每秒刷新的系统时间格式，缓存为字段避免每秒新建（SimpleDateFormat 只在主线程使用）
+    private final SimpleDateFormat mSysTimeFormat = new SimpleDateFormat("hh:mm aa", Locale.ENGLISH);
     private final Runnable tv_sys_timeRunnable = new Runnable() {
         @Override
         public void run() {
             Date date = new Date();
-            SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm aa", Locale.ENGLISH);
-            tv_sys_time.setText(timeFormat.format(date));
+            tv_sys_time.setText(mSysTimeFormat.format(date));
             mHandler.postDelayed(this, 1000);
 
             // takagen99 : Update SeekBar
-            if (mVideoView != null & !mIsDragging) {
+            if (mVideoView != null && !mIsDragging) {
                 int currentPosition = (int) mVideoView.getCurrentPosition();
                 mCurrentTime.setText(stringForTimeVod(currentPosition));
                 mSeekBar.setProgress(currentPosition);
@@ -795,7 +796,7 @@ public class LivePlayActivity extends BaseActivity {
                     Date date = new Date();
                     int size = arrayList.size() - 1;
                     while (size >= 0) {
-                        if (date.after(((Epginfo) arrayList.get(size)).startdateTime) & date.before(((Epginfo) arrayList.get(size)).enddateTime)) {
+                        if (date.after(((Epginfo) arrayList.get(size)).startdateTime) && date.before(((Epginfo) arrayList.get(size)).enddateTime)) {
 //                            if (new Date().compareTo(((Epginfo) arrayList.get(size)).startdateTime) >= 0) {
                             tv_curr_time.setText(((Epginfo) arrayList.get(size)).start + " - " + ((Epginfo) arrayList.get(size)).end);
                             tv_curr_name.setText(((Epginfo) arrayList.get(size)).title);
@@ -881,7 +882,8 @@ public class LivePlayActivity extends BaseActivity {
                 showEpg(date, arrayList);
 
                 String savedEpgKey = channelName + "_" + epgDateAdapter.getItem(epgDateAdapter.getSelectedIndex()).getDatePresented();
-                if (!hsEpg.contains(savedEpgKey)) {
+                // Hashtable.contains 查的是 value 不是 key，恒为 false 导致重复加载，应为 containsKey
+                if (!hsEpg.containsKey(savedEpgKey)) {
                     // 防御：hsEpg 是无界 Hashtable，长时间使用可致 OOM；超过 200 项按插入顺序清理最早一半
                     if (hsEpg.size() >= 200) {
                         java.util.Enumeration keys = hsEpg.keys();
@@ -916,6 +918,8 @@ public class LivePlayActivity extends BaseActivity {
         livePlayerManager.getLiveChannelPlayer(mVideoView, currentLiveChannelItem.getChannelName());
         channel_Name = currentLiveChannelItem;
         currentLiveChannelItem.setinclude_back(currentLiveChannelItem.getUrl().indexOf("PLTV/8888") != -1);
+        // tv_sys_timeRunnable 每秒自循环 postDelayed，换 N 次台前不先移除会叠加 N 个实例，永不自愈
+        mHandler.removeCallbacks(tv_sys_timeRunnable);
         mHandler.post(tv_sys_timeRunnable);
         tv_channelname.setText(channel_Name.getChannelName());
         tv_channelnum.setText("" + channel_Name.getChannelNum());
@@ -955,6 +959,8 @@ public class LivePlayActivity extends BaseActivity {
         currentLiveChannelItem.setinclude_back(currentLiveChannelItem.getUrl().indexOf("PLTV/8888") != -1);
 
         // takagen99 : Moved update of Channel Info here before getting EPG (no dependency on EPG)
+        // tv_sys_timeRunnable 每秒自循环 postDelayed，换 N 次台前不先移除会叠加 N 个实例，永不自愈
+        mHandler.removeCallbacks(tv_sys_timeRunnable);
         mHandler.post(tv_sys_timeRunnable);
 
         // Channel Name & No. + Source No.
@@ -2076,7 +2082,9 @@ public class LivePlayActivity extends BaseActivity {
                         }
                     } while (!liveChannelGroupList.get(channelGroupIndex).getGroupPassword().isEmpty() || channelGroupIndex == currentChannelGroupIndex);
                 }
-                liveChannelIndex = getLiveChannels(channelGroupIndex).size() - 1;
+                // 未解锁密码分组返回空 list，size()-1 == -1 会越界，钳制到 0
+                int lastIdx = getLiveChannels(channelGroupIndex).size() - 1;
+                liveChannelIndex = lastIdx < 0 ? 0 : lastIdx;
             }
         }
 

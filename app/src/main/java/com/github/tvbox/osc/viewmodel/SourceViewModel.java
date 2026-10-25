@@ -625,7 +625,8 @@ public class SourceViewModel extends ViewModel {
         if (type == 3) {
             try {
                 Spider sp = ApiConfig.get().getCSP(sourceBean);
-                String search = sp.searchContent(wd, false);
+                // 搜索路径套超时：卡死源不能占满搜索线程池导致全局搜索无响应
+                String search = callSpiderWithTimeout(() -> sp.searchContent(wd, false), 15);
                 if (!TextUtils.isEmpty(search)) {
                     json(searchResult, search, sourceBean.getKey());
                 } else {
@@ -714,7 +715,9 @@ public class SourceViewModel extends ViewModel {
         if (type == 3) {
             try {
                 Spider sp = ApiConfig.get().getCSP(sourceBean);
-                json(quickSearchResult, sp.searchContent(wd, true), sourceBean.getKey());
+                // 搜索路径套超时：卡死源不能占满搜索线程池导致全局搜索无响应
+                String search = callSpiderWithTimeout(() -> sp.searchContent(wd, true), 15);
+                json(quickSearchResult, search, sourceBean.getKey());
             } catch (Throwable th) {
                 th.printStackTrace();
             }
@@ -791,8 +794,12 @@ public class SourceViewModel extends ViewModel {
     public ExecutorService threadPoolGetPlay = null;
 
     public void getPlay(String sourceKey, String playFlag, String progressKey, String url, String subtitleKey) {
-        if (threadPoolGetPlay != null) threadPoolGetPlay.shutdownNow();
-        threadPoolGetPlay = Executors.newFixedThreadPool(2);
+        // 旧池先关停；新池用局部 final 引用，任务 lambda 只读局部变量，
+        // 避免旧任务读可变字段把任务提交到新池、两个 playerContent() 并发执行（Spider 非线程安全）
+        ExecutorService oldPool = threadPoolGetPlay;
+        if (oldPool != null) oldPool.shutdownNow();
+        final ExecutorService pool = Executors.newFixedThreadPool(2);
+        threadPoolGetPlay = pool;
         Callable<JSONObject> callable = () -> {
             if (Thread.currentThread().isInterrupted()) return null;
             SourceBean sourceBean = ApiConfig.get().getSource(sourceKey);
@@ -831,8 +838,8 @@ public class SourceViewModel extends ViewModel {
             }
             return result;
         };
-        threadPoolGetPlay.execute(() -> {
-            Future<JSONObject> future = threadPoolGetPlay.submit(callable);
+        pool.execute(() -> {
+            Future<JSONObject> future = pool.submit(callable);
             try {
                 JSONObject jsonObject = future.get(15, TimeUnit.SECONDS);
                 playResult.postValue(jsonObject);
@@ -1024,7 +1031,9 @@ public class SourceViewModel extends ViewModel {
                 for (int i = 0; i < video.urlBean.infoList.size(); i++) {
                     Movie.Video.UrlBean.UrlInfo urlinfo = video.urlBean.infoList.get(i);
                     if (urlinfo != null && urlinfo.beanList != null && !urlinfo.beanList.isEmpty()) {
-                        for (Movie.Video.UrlBean.UrlInfo.InfoBean infoBean : urlinfo.beanList) {
+                        // 索引遍历：循环体内可能 remove(infoBean)，for-each 迭代器会抛 CME
+                        for (int j = 0; j < urlinfo.beanList.size(); j++) {
+                            Movie.Video.UrlBean.UrlInfo.InfoBean infoBean = urlinfo.beanList.get(j);
                             if (infoBean.url.startsWith("push://")) {
                                 String pushUrl = infoBean.url.substring(7);
                                 if (pushUrl.startsWith("b64:")) {

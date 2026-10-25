@@ -338,6 +338,20 @@ public class QuickJSContext {
         nativeCleaner.register(jsObj, jsObj.getPointer());
     }
 
+    /**
+     * 释放已被 GC 回收的 JS 对象的 native 引用（NativeCleaner 的 PhantomReference 队列）。
+     * 必须在创建本 context 的线程上调用；若从不调用，注册集合无界增长，
+     * setTimeout hold 的 JS 对象 native 引用永不释放。
+     */
+    public void cleanHeldObjects() {
+        try {
+            checkSameThread();
+            if (destroyed) return;
+            nativeCleaner.clean();
+        } catch (Throwable ignored) {
+        }
+    }
+
     public JSObject createJSObject() {
         return (JSObject) parse("{}");
     }

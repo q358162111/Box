@@ -458,7 +458,8 @@ public class FileUtils {
     }
 
     public static boolean isWeekAgo(File file) {
-        long oneWeekMillis = 15L * 24 * 60 * 60 * 1000;
+        // 修复：原阈值 15 天与方法名 "week" 语义差一倍，改为 7 天
+        long oneWeekMillis = 7L * 24 * 60 * 60 * 1000;
         long timeDiff = System.currentTimeMillis() - file.lastModified();
         return timeDiff > oneWeekMillis;
     }

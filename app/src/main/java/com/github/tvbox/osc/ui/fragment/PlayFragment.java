@@ -958,7 +958,9 @@ public class PlayFragment extends BaseLazyFragment {
 
     private void initViewModel() {
         sourceViewModel = new ViewModelProvider(this).get(SourceViewModel.class);
-        sourceViewModel.playResult.observeForever(mObserverPlayResult);
+        // 用 viewLifecycleOwner 订阅：视图销毁自动退订、视图重建自动重挂，
+        // 避免 observeForever 只注册一次、onDestroyView 注销后视图重建即失联的问题
+        sourceViewModel.playResult.observe(getViewLifecycleOwner(), mObserverPlayResult);
     }
 
     private final Observer<JSONObject> mObserverPlayResult= new Observer<JSONObject>() {
@@ -1175,8 +1177,7 @@ public class PlayFragment extends BaseLazyFragment {
         if (mHandler != null) {
             mHandler.removeCallbacksAndMessages(null);
         }
-        //手动注销
-        sourceViewModel.playResult.removeObserver(mObserverPlayResult);
+        // playResult 订阅已绑定 viewLifecycleOwner，随视图销毁自动退订，无需手动 remove
         EventBus.getDefault().unregister(this);
         if (mVideoView != null) {
             mVideoView.release();

@@ -47,6 +47,8 @@ public class BackupDialog extends BaseDialog {
     public BackupDialog(@NonNull @NotNull Context context) {
         super(context);
         setContentView(R.layout.dialog_backup);
+        // 对话框关闭后线程池不再需要，shutdown 释放线程（已提交任务会执行完）
+        setOnDismissListener(dialog -> ioExecutor.shutdown());
         TvRecyclerView tvRecyclerView = findViewById(R.id.list);
         BackupAdapter adapter = new BackupAdapter();
         tvRecyclerView.setAdapter(adapter);
@@ -119,7 +121,9 @@ public class BackupDialog extends BaseDialog {
         try {
             String root = Environment.getExternalStorageDirectory().getAbsolutePath();
             File file = new File(root + "/tvbox_backup/");
+            // listFiles 目录不存在时返回 null，必须先判空再排序
             File[] list = file.listFiles();
+            if (list == null) return result;
             Arrays.sort(list, new Comparator<File>() {
                 @Override
                 public int compare(File o1, File o2) {
@@ -166,14 +170,16 @@ public class BackupDialog extends BaseDialog {
                                 sharedPreferences.edit().putString(key, value).commit();
                             }
                         }
-                        Toast.makeText(getContext(), HomeActivity.getRes().getString(R.string.set_rest_ok), Toast.LENGTH_SHORT).show();
+                        // ioExecutor 线程无 Looper，Toast 必须切主线程
+                        App.post(() -> Toast.makeText(getContext(), HomeActivity.getRes().getString(R.string.set_rest_ok), Toast.LENGTH_SHORT).show());
                         // 恢复成功后延迟重启;App.post 复用应用级 Handler,重复触发时自动移除旧任务
+                        // 重启必须无条件执行（DB 已换新，若不重启 Hawk 内存缓存与磁盘不一致）
                         App.post(restartAppRunnable, 3000);
                     } else {
-                        Toast.makeText(getContext(), HomeActivity.getRes().getString(R.string.set_rest_fail_hk), Toast.LENGTH_SHORT).show();
+                        App.post(() -> Toast.makeText(getContext(), HomeActivity.getRes().getString(R.string.set_rest_fail_hk), Toast.LENGTH_SHORT).show());
                     }
                 } else {
-                    Toast.makeText(getContext(), HomeActivity.getRes().getString(R.string.set_rest_fail_db), Toast.LENGTH_SHORT).show();
+                    App.post(() -> Toast.makeText(getContext(), HomeActivity.getRes().getString(R.string.set_rest_fail_db), Toast.LENGTH_SHORT).show());
                 }
             }
         } catch (Throwable e) {

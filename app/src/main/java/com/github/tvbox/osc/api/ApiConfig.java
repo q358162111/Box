@@ -64,7 +64,8 @@ import com.github.tvbox.osc.util.LOG;
  * @description:
  */
 public class ApiConfig {
-    private static ApiConfig instance;
+    // DCL 双检锁必须 volatile，否则指令重排可能让其他线程读到未完全构造的实例
+    private static volatile ApiConfig instance;
     private final LinkedHashMap<String, SourceBean> sourceBeanList;
     private SourceBean mHomeSource;
     private ParseBean mDefaultParse;
@@ -189,7 +190,7 @@ public class ApiConfig {
         } else {
             configUrl = apiUrl;
         }
-        System.out.println("API URL :" + configUrl);
+        LOG.i("API URL :" + configUrl);
         String configKey = TempKey;
         OkGo.<String>get(configUrl)
                 .headers("User-Agent", userAgent)
@@ -350,7 +351,7 @@ public class ApiConfig {
     }
 
     private void parseJson(String apiUrl, File f) throws Throwable {
-        System.out.println("从本地缓存加载" + f.getAbsolutePath());
+        LOG.i("从本地缓存加载" + f.getAbsolutePath());
         StringBuilder sb = new StringBuilder();
         try (BufferedReader bReader = new BufferedReader(new InputStreamReader(new FileInputStream(f), "UTF-8"))) {
             String s;
@@ -497,7 +498,7 @@ public class ApiConfig {
                         }
 
                         // takagen99: Capture Live URL into Config
-                        System.out.println("Live URL :" + extUrlFix);
+                        LOG.i("Live URL :" + extUrlFix);
                         putLiveHistory(extUrlFix);
                         // Overwrite with Live URL from Settings
                         if (StringUtils.isBlank(liveURL)) {
@@ -517,7 +518,7 @@ public class ApiConfig {
                     // takagen99 : Getting EPG URL from File Config & put into Settings
                     if (livesOBJ.has("epg")) {
                         String epg = livesOBJ.get("epg").getAsString();
-                        System.out.println("EPG URL :" + epg);
+                        LOG.i("EPG URL :" + epg);
                         putEPGHistory(epg);
                         // Overwrite with EPG URL from Settings
                         if (StringUtils.isBlank(epgURL)) {
@@ -547,7 +548,7 @@ public class ApiConfig {
                             // takagen99 : Getting EPG URL from File Config & put into Settings
                             if (fengMiLives.has("epg")) {
                                 String epg = fengMiLives.get("epg").getAsString();
-                                System.out.println("EPG URL :" + epg);
+                                LOG.i("EPG URL :" + epg);
                                 putEPGHistory(epg);
                                 // Overwrite with EPG URL from Settings
                                 if (StringUtils.isBlank(epgURL)) {
@@ -559,7 +560,7 @@ public class ApiConfig {
 
                             if (url.startsWith("http")) {
                                 // takagen99: Capture Live URL into Settings
-                                System.out.println("Live URL :" + url);
+                                LOG.i("Live URL :" + url);
                                 putLiveHistory(url);
                                 // Overwrite with Live URL from Settings
                                 if (StringUtils.isBlank(liveURL)) {
@@ -598,7 +599,9 @@ public class ApiConfig {
         if (infoJson.has("rules")) {
             VideoParseRuler.clearRule();
             for(JsonElement oneHostRule : infoJson.getAsJsonArray("rules")) {
-                JsonObject obj = (JsonObject) oneHostRule;
+                // 畸形元素（非对象）跳过，避免 ClassCastException 击穿整个配置加载
+                if (oneHostRule == null || !oneHostRule.isJsonObject()) continue;
+                JsonObject obj = oneHostRule.getAsJsonObject();
                 //嗅探过滤规则
                 if (obj.has("host")) {
                     String host = obj.get("host").getAsString();
@@ -682,13 +685,18 @@ public class ApiConfig {
             ijkCodes = new ArrayList<>();
             boolean foundOldSelect = false;
             String ijkCodec = Hawk.get(HawkConfig.IJK_CODEC, "");
-            JsonArray ijkJsonArray = infoJson.has("ijk") ? infoJson.get("ijk").getAsJsonArray() : defaultJson.get("ijk").getAsJsonArray();
+            JsonArray ijkJsonArray = infoJson.has("ijk") ? infoJson.getAsJsonArray("ijk") : defaultJson.getAsJsonArray("ijk");
             for (JsonElement opt : ijkJsonArray) {
-                JsonObject obj = (JsonObject) opt;
+                // 单个畸形元素跳过而不是击穿整个配置加载
+                if (opt == null || !opt.isJsonObject()) continue;
+                JsonObject obj = opt.getAsJsonObject();
+                if (!obj.has("group") || !obj.has("options") || !obj.get("options").isJsonArray()) continue;
                 String name = obj.get("group").getAsString();
                 LinkedHashMap<String, String> baseOpt = new LinkedHashMap<>();
-                for (JsonElement cfg : obj.get("options").getAsJsonArray()) {
-                    JsonObject cObj = (JsonObject) cfg;
+                for (JsonElement cfg : obj.getAsJsonArray("options")) {
+                    if (cfg == null || !cfg.isJsonObject()) continue;
+                    JsonObject cObj = cfg.getAsJsonObject();
+                    if (!cObj.has("category") || !cObj.has("name") || !cObj.has("value")) continue;
                     String key = cObj.get("category").getAsString() + "|" + cObj.get("name").getAsString();
                     String val = cObj.get("value").getAsString();
                     baseOpt.put(key, val);

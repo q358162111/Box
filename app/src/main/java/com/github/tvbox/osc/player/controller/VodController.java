@@ -323,13 +323,15 @@ public class VodController extends BaseController {
     TvRecyclerView mGridView;
 
     // takagen99 : To get system time
+    // SimpleDateFormat 非线程安全但此 Runnable 只在主线程执行，缓存为字段避免每秒新建
+    private final SimpleDateFormat mTimeFormat = new SimpleDateFormat("hh:mm aa", Locale.ENGLISH);
+    private final SimpleDateFormat mTimeEndFormat = new SimpleDateFormat("hh:mm aa", Locale.ENGLISH);
     private final Runnable mTimeRunnable = new Runnable() {
         @Override
         public void run() {
             Date date = new Date();
-            SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm aa", Locale.ENGLISH);
-            mPlayPauseTime.setText(timeFormat.format(date));
-            mTime.setText(timeFormat.format(date));
+            mPlayPauseTime.setText(mTimeFormat.format(date));
+            mTime.setText(mTimeFormat.format(date));
             mHandler.postDelayed(this, 1000);
         }
     };
@@ -1152,11 +1154,10 @@ public class VodController extends BaseController {
         Calendar date = Calendar.getInstance();
         long t = date.getTimeInMillis();
         Date afterAdd = new Date(t + TimeRemaining);
-        SimpleDateFormat timeEnd = new SimpleDateFormat("hh:mm aa", Locale.ENGLISH);
         if (isPaused) {
-            mTimeEnd.setText(getContext().getString(R.string.vod_remaining_time) + " " + PlayerUtils.stringForTime((int) TimeRemaining) + " | " + getContext().getString(R.string.vod_ends_at) + " " + timeEnd.format(afterAdd));
+            mTimeEnd.setText(getContext().getString(R.string.vod_remaining_time) + " " + PlayerUtils.stringForTime((int) TimeRemaining) + " | " + getContext().getString(R.string.vod_ends_at) + " " + mTimeEndFormat.format(afterAdd));
         } else {
-            mTimeEnd.setText(getContext().getString(R.string.vod_ends_at) + " " + timeEnd.format(afterAdd));
+            mTimeEnd.setText(getContext().getString(R.string.vod_ends_at) + " " + mTimeEndFormat.format(afterAdd));
         }
         mCurrentTime.setText(PlayerUtils.stringForTimeVod(position));
         mTotalTime.setText(PlayerUtils.stringForTimeVod(duration));
@@ -1284,8 +1285,7 @@ public class VodController extends BaseController {
                     mPlayerResolution.setText(mControlWrapper.getVideoSize()[0] + " x " + mControlWrapper.getVideoSize()[1]);
                     initLandscapePortraitBtnInfo();
                 }
-            case VideoView.STATE_BUFFERED:
-                break;
+                break; // 缺 break 会 fall-through 到 STATE_BUFFERED
             case VideoView.STATE_PREPARING:
             case VideoView.STATE_BUFFERING:
                 break;
@@ -1658,6 +1658,8 @@ public class VodController extends BaseController {
 
 
     public void evaluateScript(SourceBean sourceBean,String url, WebView web_view, XWalkView xWalk_view){
+        // sourceBean 可能在异步回调期间被配置切换置空，判空防御
+        if (sourceBean == null) return;
         String clickSelector = sourceBean.getClickSelector().trim();
         clickSelector=clickSelector.isEmpty()?VideoParseRuler.getHostScript(url):clickSelector;
         if (!clickSelector.isEmpty()) {

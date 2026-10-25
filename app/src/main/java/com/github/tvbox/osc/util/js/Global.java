@@ -303,9 +303,24 @@ public class Global {
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                if (!executor.isShutdown()) executor.submit(() -> {func.call();});
+                try {
+                    // RejectedExecutionException 未捕获会杀死 Timer 线程，该源所有 setTimeout 静默失效
+                    if (!executor.isShutdown()) executor.submit(() -> {func.call();});
+                } catch (Throwable ignored) {
+                }
             }
         }, delay);
+    }
+
+    /**
+     * 释放 Timer 线程与 native 引用，随 JsSpider.destroy 一起调用
+     */
+    public void destroy() {
+        timer.cancel();
+        try {
+            runtime.cleanHeldObjects();
+        } catch (Throwable ignored) {
+        }
     }
 
     private Callback getCallback(JSFunction complete, Req req) {

@@ -32,9 +32,10 @@ public class OkHttp {
     private static final int TIMEOUT = 30 * 1000;
     private static final int CACHE = 100 * 1024 * 1024;
 
-    private DnsOverHttps dns;
-    private OkHttpClient client;
-    private ProxySelector selector;
+    // 懒初始化字段可能被多线程读写，volatile 防止半初始化实例可见
+    private volatile DnsOverHttps dns;
+    private volatile OkHttpClient client;
+    private volatile ProxySelector selector;
 
     private static class Loader {
         static volatile OkHttp INSTANCE = new OkHttp();

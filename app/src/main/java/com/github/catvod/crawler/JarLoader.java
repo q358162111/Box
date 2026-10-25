@@ -29,6 +29,10 @@ public class JarLoader {
     private final ConcurrentHashMap<String, DexClassLoader> classLoaders = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Method> proxyMethods = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Spider> spiders = new ConcurrentHashMap<>();
+    // siteKey -> jarKey 映射，供 proxyInvoke 按 params 中的 siteKey 精确路由，避免多源并发时按「最后加载的源」串数据
+    private final ConcurrentHashMap<String, String> siteJarKeys = new ConcurrentHashMap<>();
+    // getSpider 的 check-then-act 竞态防护锁
+    private final Object spiderLoadLock = new Object();
     private volatile String recentJarKey = "";
 
     /**
@@ -42,6 +46,14 @@ public class JarLoader {
     }
 
     public void clear() {
+        // 切换配置是高频操作：只清 Map 会导致每个 jar 源泄漏，必须逐个 destroy
+        for (Spider spider : spiders.values()) {
+            try {
+                spider.cancelByTag();
+                spider.destroy();
+            } catch (Throwable ignored) {
+            }
+        }
         spiders.clear();
         proxyMethods.clear();
         classLoaders.clear();
@@ -152,10 +164,20 @@ public class JarLoader {
     }
 
     public Spider getSpider(String key, String cls, String ext, String jar) {
-        if (spiders.containsKey(key)) {
+        Spider cached = spiders.get(key);
+        if (cached != null) {
             Log.i("JarLoader", "echo-getSpider spider缓存: " + key);
-            return spiders.get(key);
+            return cached;
         }
+        // check-then-put 竞态防护：多源并发首次加载同一 key 时只创建一个实例
+        synchronized (spiderLoadLock) {
+            Spider doubleChecked = spiders.get(key);
+            if (doubleChecked != null) return doubleChecked;
+            return createSpider(key, cls, ext, jar);
+        }
+    }
+
+    private Spider createSpider(String key, String cls, String ext, String jar) {
         String clsKey = cls.replace("csp_", "");
         // 仅允许字母数字下划线，防止加载任意类
         if (!clsKey.matches("[A-Za-z0-9_]+")) {
@@ -174,6 +196,8 @@ public class JarLoader {
             jarMd5 = urls.length > 1 ? urls[1].trim() : "";
         }
         recentJarKey = jarKey;
+        // 记录 siteKey -> jarKey 路由，proxyInvoke 用它精确定位该源的 proxy 方法
+        siteJarKeys.put(key, jarKey);
         // release 构建中 assert 会被禁用，使用显式校验
         if (jarKey == null) {
             Log.w("JarLoader", "echo-getSpider jarKey 为空，返回 SpiderNull");
@@ -228,7 +252,15 @@ public class JarLoader {
 
     public Object[] proxyInvoke(Map<String,String> params) {
         try {
-            Method proxyFun = proxyMethods.get(recentJarKey);
+            // 多源并发时按 params 中的 siteKey 精确路由到对应 jar 的 proxy，
+            // 避免按「最后加载的源」(recentJarKey) 路由导致串源
+            String jarKey = null;
+            Object siteKey = params != null ? params.get("siteKey") : null;
+            if (siteKey != null) {
+                jarKey = siteJarKeys.get(siteKey.toString());
+            }
+            if (jarKey == null) jarKey = recentJarKey;
+            Method proxyFun = proxyMethods.get(jarKey);
             if (proxyFun != null) {
                 return (Object[]) proxyFun.invoke(null, params);
             }

@@ -67,6 +67,8 @@ public class App extends android.app.Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        // 初始化第三方 jar 生态的宿主上下文（Path.cache()/Util.getDeviceId()/OkHttp.setDoh() 依赖）
+        com.github.catvod.Init.set(this);
         SubtitleHelper.initSubtitleColor(this);
         initParams();
         // takagen99 : Initialize Locale

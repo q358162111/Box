@@ -12,6 +12,7 @@ import com.github.tvbox.osc.cache.CacheManager;
 import com.github.tvbox.osc.player.EXOmPlayer;
 import com.github.tvbox.osc.subtitle.model.Subtitle;
 import com.github.tvbox.osc.subtitle.model.Time;
+import com.github.tvbox.osc.subtitle.runtime.AppTaskExecutor;
 import com.github.tvbox.osc.util.FileUtils;
 import com.github.tvbox.osc.util.MD5;
 import com.github.tvbox.osc.util.SubtitleHelper;
@@ -39,6 +40,11 @@ public class DefaultSubtitleEngine implements SubtitleEngine {
     private Handler mWorkHandler;
     @Nullable
     private List<Subtitle> mSubtitles;
+    // 未应用偏移的原始时间轴，用于每次从原始值重新应用总偏移
+    @Nullable
+    private List<Subtitle> mOriginalSubtitles;
+    // 累计偏移（毫秒）
+    private int currentDelayMillis = 0;
     private UIRenderTask mUIRenderTask;
     private AbstractPlayer mMediaPlayer;
     private OnSubtitlePreparedListener mOnSubtitlePreparedListener;
@@ -82,28 +88,35 @@ public class DefaultSubtitleEngine implements SubtitleEngine {
                 setSubtitleDelay(SubtitleHelper.getTimeDelay());
                 notifyPrepared();
 
-                String subtitlePath = subtitleLoadSuccessResult.subtitlePath;
-                if (subtitlePath.startsWith("http://") || subtitlePath.startsWith("https://")) {
-                    String subtitleFileCacheDir = App.getInstance().getCacheDir().getAbsolutePath() + "/zimu/";
-                    File cacheDir = new File(subtitleFileCacheDir);
-                    if (!cacheDir.exists()) {
-                        cacheDir.mkdirs();
-                    }
-                    // 防御目录穿越：仅取 fileName 的 basename 部分，且要求仅包含安全字符
-                    String safeFileName = sanitizeFileName(subtitleLoadSuccessResult.fileName);
-                    if (safeFileName == null) {
-                        Log.w(TAG, "onSuccess: illegal subtitle fileName, skip cache write.");
-                    } else {
-                        String subtitleFile = subtitleFileCacheDir + safeFileName;
-                        File cacheSubtitleFile = new File(subtitleFile);
-                        boolean writeResult = FileUtils.writeSimple(subtitleLoadSuccessResult.content.getBytes(), cacheSubtitleFile);
-                        if (writeResult && playSubtitleCacheKey != null) {
-                            CacheManager.save(MD5.string2MD5(getPlaySubtitleCacheKey()), subtitleFile);
+                // 写盘与 CacheManager 落盘移到后台线程：数 MB 字幕 getBytes()+写文件在主线程可触发 ANR
+                final String finalPath = path;
+                AppTaskExecutor.deskIO().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        String subtitlePath = subtitleLoadSuccessResult.subtitlePath;
+                        if (subtitlePath.startsWith("http://") || subtitlePath.startsWith("https://")) {
+                            String subtitleFileCacheDir = App.getInstance().getCacheDir().getAbsolutePath() + "/zimu/";
+                            File cacheDir = new File(subtitleFileCacheDir);
+                            if (!cacheDir.exists()) {
+                                cacheDir.mkdirs();
+                            }
+                            // 防御目录穿越：仅取 fileName 的 basename 部分，且要求仅包含安全字符
+                            String safeFileName = sanitizeFileName(subtitleLoadSuccessResult.fileName);
+                            if (safeFileName == null) {
+                                Log.w(TAG, "onSuccess: illegal subtitle fileName, skip cache write.");
+                                return;
+                            }
+                            String subtitleFile = subtitleFileCacheDir + safeFileName;
+                            File cacheSubtitleFile = new File(subtitleFile);
+                            boolean writeResult = FileUtils.writeSimple(subtitleLoadSuccessResult.content.getBytes(), cacheSubtitleFile);
+                            if (writeResult && playSubtitleCacheKey != null) {
+                                CacheManager.save(MD5.string2MD5(getPlaySubtitleCacheKey()), subtitleFile);
+                            }
+                        } else {
+                            CacheManager.save(MD5.string2MD5(getPlaySubtitleCacheKey()), finalPath);
                         }
                     }
-                } else {
-                    CacheManager.save(MD5.string2MD5(getPlaySubtitleCacheKey()), path);
-                }
+                });
             }
 
             @Override
@@ -115,28 +128,40 @@ public class DefaultSubtitleEngine implements SubtitleEngine {
 
     @Override
     public void setSubtitleDelay(Integer milliseconds) {
-        if (milliseconds == null || milliseconds == 0) {
+        if (milliseconds == null) {
             return;
         }
         if (mSubtitles == null || mSubtitles.size() == 0) {
             return;
         }
-        List<Subtitle> thisSubtitles = mSubtitles;
-        mSubtitles = null;
-        for (int i = 0; i < thisSubtitles.size(); i++) {
-            Subtitle subtitle = thisSubtitles.get(i);
-            Time start = subtitle.start;
-            Time end = subtitle.end;
-            start.mseconds += milliseconds;
-            end.mseconds += milliseconds;
+        // 调用方传的是本次增量（±0.5s），SubtitleHelper 持久化的是累计总偏移；
+        // 这里在引擎内累计，每次从原始时间轴重新应用总偏移，避免偏移永久漂移、无法归零
+        if (mOriginalSubtitles == null) {
+            mOriginalSubtitles = new ArrayList<>(mSubtitles);
+        }
+        currentDelayMillis += milliseconds;
+        List<Subtitle> thisSubtitles = new ArrayList<>();
+        for (Subtitle original : mOriginalSubtitles) {
+            // Subtitle 无拷贝构造，手动深拷贝时间轴（Time 仅含 mseconds 状态）
+            Subtitle subtitle = new Subtitle();
+            subtitle.style = original.style;
+            subtitle.region = original.region;
+            subtitle.content = original.content;
+            Time start = new Time("", null);
+            start.mseconds = original.start.mseconds;
+            Time end = new Time("", null);
+            end.mseconds = original.end.mseconds;
+            subtitle.start = start;
+            subtitle.end = end;
+            start.mseconds += currentDelayMillis;
+            end.mseconds += currentDelayMillis;
             if (start.mseconds <= 0) {
                 start.mseconds = 0;
             }
             if (end.mseconds <= 0) {
                 end.mseconds = 0;
             }
-            subtitle.start = start;
-            subtitle.end = end;
+            thisSubtitles.add(subtitle);
         }
         mSubtitles = thisSubtitles;
     }
@@ -168,6 +193,8 @@ public class DefaultSubtitleEngine implements SubtitleEngine {
     public void reset() {
         stop();
         mSubtitles = null;
+        mOriginalSubtitles = null;
+        currentDelayMillis = 0;
         mUIRenderTask = null;
     }
 

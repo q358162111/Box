@@ -248,7 +248,9 @@ public class FormatTTML implements TimedTextFileFormat {
                 if (validCaption) {
                     int key = caption.start.mseconds;
                     //in case the key is already there, we increase it by a millisecond, since no duplicates are allowed
-                    while (tto.captions.containsKey(key)) key++;
+                    // 与 FormatSCC/SRT 一致加 1000 次上限，防畸形字幕死循环
+                    int collisionTries = 0;
+                    while (tto.captions.containsKey(key) && collisionTries++ < 1000) key++;
                     tto.captions.put(key, caption);
                 }
 

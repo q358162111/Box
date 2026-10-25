@@ -39,8 +39,16 @@ public class JsLoader {
         }
     }
     public void clear() {
+        // 切换配置是高频操作：只清 Map 会导致每个 JS 源泄漏
+        // （1 个 executor 线程 + QuickJS native runtime），必须逐个 destroy
+        for (Spider spider : spiders.values()) {
+            try {
+                spider.cancelByTag();
+                spider.destroy();
+            } catch (Throwable ignored) {
+            }
+        }
         spiders.clear();
-        //classs.clear();
         classes.clear();
     }
 
@@ -136,11 +144,24 @@ public class JsLoader {
     }
 
 
+    // siteKey -> ext/api 路由由 spiders 自身承担；此锁防护 getSpider 的 check-then-act 竞态
+    private static final Object spiderLoadLock = new Object();
+
     public Spider getSpider(String key, String api, String ext, String jar) {
-        if (spiders.containsKey(key)){
+        Spider cached = spiders.get(key);
+        if (cached != null) {
             Log.i("JSLoader", "echo-getSpider cached");
-            return spiders.get(key);
+            return cached;
         }
+        // check-then-put 竞态防护：多源并发首次加载同一 key 时只创建一个实例
+        synchronized (spiderLoadLock) {
+            Spider doubleChecked = spiders.get(key);
+            if (doubleChecked != null) return doubleChecked;
+            return createSpider(key, api, ext, jar);
+        }
+    }
+
+    private Spider createSpider(String key, String api, String ext, String jar) {
         Class<?> classLoader = null;
         if (!jar.isEmpty()) {
             String[] urls = jar.split(";md5;");
@@ -149,9 +170,6 @@ public class JsLoader {
             String jarMd5 = urls.length > 1 ? urls[1].trim() : "";
             classLoader = loadJarInternal(jarUrl, jarMd5, jarKey);
         }
-        //recentJarKey = key;
-        //if (spiders.containsKey(key))
-        //    return spiders.get(key);
         recentKey = key;
         try {
             Log.i("JSLoader", "echo-getSpider load");
@@ -168,8 +186,15 @@ public class JsLoader {
 
     public Object[] proxyInvoke(Map<String, String> params) {
         try {
-            //Spider proxyFun = spiders.get(recentJarKey);
-            Spider proxyFun = spiders.get(recentKey);
+            // 优先按 params 中的 siteKey 精确路由，多源并发时避免按「最后加载的源」串数据
+            Spider proxyFun = null;
+            Object siteKey = params != null ? params.get("siteKey") : null;
+            if (siteKey != null) {
+                proxyFun = spiders.get(siteKey.toString());
+            }
+            if (proxyFun == null) {
+                proxyFun = spiders.get(recentKey);
+            }
             if (proxyFun != null) {
                 return proxyFun.proxyLocal(params);
             }

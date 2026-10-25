@@ -72,9 +72,9 @@ public class Thunder {
         }
         if(bool){
             torrentFileInfoArrayList = null;
-            // del cache file
+            // del cache file（复用 FileUtils 的递归删除）
             File cache = new File(task_url.isEmpty()?cacheRoot:localPath);
-            recursiveDelete(cache);
+            FileUtils.recursiveDelete(cache);
             if (!cache.exists())
                 cache.mkdirs();
             if (threadPool != null) {
@@ -434,16 +434,7 @@ public class Thunder {
         return url.toLowerCase().startsWith("ftp://");
     }
 
-    static void recursiveDelete(File file) {
-        if (!file.exists())
-            return;
-        if (file.isDirectory()) {
-            for (File f : file.listFiles()) {
-                recursiveDelete(f);
-            }
-        }
-        file.delete();
-    }
+    // 递归删除已由 FileUtils.recursiveDelete 实现（带异常防护），删除重复实现
 
     static ArrayList<String> formats = new ArrayList<>();
 

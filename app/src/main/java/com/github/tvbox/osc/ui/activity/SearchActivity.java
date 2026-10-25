@@ -572,6 +572,7 @@ public class SearchActivity extends BaseActivity {
      */
     private void loadRec(String key) {
         OkGo.get("https://tv.aiseet.atianqi.com/i-tvbin/qtv_video/search/get_search_smart_box")
+                .tag(this)
                 .params("format", "json")
                 .params("page_num", 0)
                 .params("page_size", 50) //随便改
