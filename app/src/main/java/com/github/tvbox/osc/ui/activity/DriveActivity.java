@@ -17,6 +17,7 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.DiffUtil;
 
 import com.github.tvbox.osc.R;
+import com.github.tvbox.osc.subtitle.runtime.AppTaskExecutor;
 import com.github.tvbox.osc.base.App;
 import com.github.tvbox.osc.base.BaseActivity;
 import com.github.tvbox.osc.bean.DriveFolderFile;
@@ -195,8 +196,20 @@ public class DriveActivity extends BaseActivity {
                     List<DriveFolderFile> data = adapter.getData();
                     if (position < 0 || position >= data.size()) return;
                     DriveFolderFile selectedDrive = data.get(position);
-                    RoomDataManger.deleteDrive(selectedDrive.getDriveData().getId());
-                    EventBus.getDefault().post(new RefreshEvent(RefreshEvent.TYPE_DRIVE_REFRESH));
+                    // DB 删除移后台，完成后回主线程发刷新事件
+                    final int driveId = selectedDrive.getDriveData().getId();
+                    AppTaskExecutor.deskIO().execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            RoomDataManger.deleteDrive(driveId);
+                            AppTaskExecutor.mainThread().execute(new Runnable() {
+                                @Override
+                                public void run() {
+                                    EventBus.getDefault().post(new RefreshEvent(RefreshEvent.TYPE_DRIVE_REFRESH));
+                                }
+                            });
+                        }
+                    });
                     return;
                 }
                 btnAddServer.setVisibility(View.GONE);
@@ -346,8 +359,19 @@ public class DriveActivity extends BaseActivity {
                                 return;
                             }
                         }
-                        RoomDataManger.insertDriveRecord(absPath, StorageDriveType.TYPE.LOCAL, null);
-                        EventBus.getDefault().post(new RefreshEvent(RefreshEvent.TYPE_DRIVE_REFRESH));
+                        // DB 写移后台，完成后回主线程发刷新事件
+                        AppTaskExecutor.deskIO().execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                RoomDataManger.insertDriveRecord(absPath, StorageDriveType.TYPE.LOCAL, null);
+                                AppTaskExecutor.mainThread().execute(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        EventBus.getDefault().post(new RefreshEvent(RefreshEvent.TYPE_DRIVE_REFRESH));
+                                    }
+                                });
+                            }
+                        });
                     }
                 }).show();
     }
@@ -400,16 +424,36 @@ public class DriveActivity extends BaseActivity {
         btnSort.setVisibility(View.GONE);
         if (drives == null) {
             drives = new ArrayList<>();
-            List<StorageDrive> storageDrives = RoomDataManger.getAllDrives();
-            for (StorageDrive storageDrive : storageDrives) {
-                DriveFolderFile drive = new DriveFolderFile(storageDrive);
-                if (delMode)
-                    drive.isDelMode = true;
-                drives.add(drive);
-            }
+            // 磁盘列表全表读移后台，完成后回主线程渲染
+            AppTaskExecutor.deskIO().execute(new Runnable() {
+                @Override
+                public void run() {
+                    List<StorageDrive> storageDrives = RoomDataManger.getAllDrives();
+                    final List<DriveFolderFile> loaded = new ArrayList<>();
+                    for (StorageDrive storageDrive : storageDrives) {
+                        DriveFolderFile drive = new DriveFolderFile(storageDrive);
+                        if (delMode)
+                            drive.isDelMode = true;
+                        loaded.add(drive);
+                    }
+                    AppTaskExecutor.mainThread().execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            drives.addAll(loaded);
+                            adapter.setNewData(drives);
+                            DriveActivity.this.setSelectedItem(drives);
+                        }
+                    });
+                }
+            });
         }
-        adapter.setNewData(drives);
-        this.setSelectedItem(drives);
+        if (drives.isEmpty()) {
+            adapter.setNewData(drives);
+            this.setSelectedItem(drives);
+        } else {
+            adapter.setNewData(drives);
+            this.setSelectedItem(drives);
+        }
         this.btnAddServer.setVisibility(View.VISIBLE);
         this.btnRemoveServer.setVisibility(View.VISIBLE);
         showSuccess();

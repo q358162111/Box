@@ -38,6 +38,7 @@ import com.github.tvbox.osc.bean.Movie;
 import com.github.tvbox.osc.bean.SourceBean;
 import com.github.tvbox.osc.cache.SearchHistory;
 import com.github.tvbox.osc.data.SearchPresenter;
+import com.github.tvbox.osc.subtitle.runtime.AppTaskExecutor;
 import com.github.tvbox.osc.event.InputMsgEvent;
 import com.github.tvbox.osc.event.RefreshEvent;
 import com.github.tvbox.osc.event.ServerEvent;
@@ -378,8 +379,12 @@ public class SearchActivity extends BaseActivity {
             }
         });
         clearHistory.setOnClickListener(v -> {
-            searchPresenter.clearSearchHistory();
-            initSearchHistory();
+            // 清库与重读都移后台，完成后回主线程刷新
+            AppTaskExecutor.deskIO().execute(() -> {
+                searchPresenter.clearSearchHistory();
+                ArrayList<SearchHistory> history = searchPresenter.getSearchHistory();
+                AppTaskExecutor.mainThread().execute(() -> renderSearchHistory(history));
+            });
         });
 
         keyboard.setOnSearchKeyListener(new SearchKeyboard.OnSearchKeyListener() {
@@ -533,14 +538,20 @@ public class SearchActivity extends BaseActivity {
     }
 
     private void refreshSearchHistory(String keyword2) {
-        if (!this.searchPresenter.keywordsExist(keyword2)) {
-            this.searchPresenter.addKeyWordsTodb(keyword2);
-            initSearchHistory();
-        }
+        // DB 读写移后台线程，完成后回主线程刷新 UI
+        AppTaskExecutor.deskIO().execute(() -> {
+            boolean exists = this.searchPresenter.keywordsExist(keyword2);
+            if (!exists) {
+                this.searchPresenter.addKeyWordsTodb(keyword2);
+            }
+            ArrayList<SearchHistory> history = this.searchPresenter.getSearchHistory();
+            AppTaskExecutor.mainThread().execute(() -> {
+                renderSearchHistory(history);
+            });
+        });
     }
 
-    private void initSearchHistory() {
-        ArrayList<SearchHistory> searchHistory = this.searchPresenter.getSearchHistory();
+    private void renderSearchHistory(ArrayList<SearchHistory> searchHistory) {
         List<String> historyList = new ArrayList<>();
         for (SearchHistory history : searchHistory) {
             historyList.add(history.searchKeyWords);
@@ -618,7 +629,11 @@ public class SearchActivity extends BaseActivity {
         mGridView.setVisibility(View.GONE);
         refreshQRCode();
         initCheckedSourcesForSearch();
-        initSearchHistory();
+        // 搜索历史 DB 读取移后台，完成后回主线程渲染
+        AppTaskExecutor.deskIO().execute(() -> {
+            ArrayList<SearchHistory> history = searchPresenter.getSearchHistory();
+            AppTaskExecutor.mainThread().execute(() -> renderSearchHistory(history));
+        });
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra("title")) {
             String title = intent.getStringExtra("title");
