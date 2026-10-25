@@ -95,6 +95,25 @@ public class SourceViewModel extends ViewModel {
         return searchExecutorService == null ? new ArrayList<>() : searchExecutorService.shutdownNow();
     }
 
+    /**
+     * 暂停搜索：关停线程池并返回未执行任务（原 Search/FastSearch 各自维护 pauseRunnable 的重复逻辑收敛于此）。
+     */
+    public List<Runnable> pauseAll() {
+        return shutdownNow();
+    }
+
+    /**
+     * 恢复搜索：重建线程池并重放暂停时挂起的任务。
+     */
+    public void resumeAll(List<Runnable> paused) {
+        if (paused == null || paused.isEmpty()) return;
+        initExecutor();
+        for (Runnable runnable : paused) {
+            execute(runnable);
+        }
+        paused.clear();
+    }
+
     public void destroyExecutor() {
         if (searchExecutorService != null) {
             // 置 null 前先 shutdown，避免 5 个线程常驻到进程结束

@@ -24,6 +24,14 @@ public class pyLoader implements IPyLoader {
 
     @Override
     public void clear() {
+        // 切换配置是高频操作：只清 Map 会泄漏每个 Python 源的资源，必须逐个 destroy
+        for (Spider spider : spiders.values()) {
+            try {
+                spider.cancelByTag();
+                spider.destroy();
+            } catch (Throwable ignored) {
+            }
+        }
         spiders.clear();
         // 联动清空 PythonLoader 内层缓存，避免配置切换后内层仍返回绑定旧配置的 Spider
         pythonLoader.clearSpiders();

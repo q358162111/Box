@@ -118,13 +118,10 @@ public class FastSearchActivity extends BaseActivity {
         super.onResume();
         // Activity 已销毁时不得重放任务:回调会操作已失效的视图并 post EventBus
         if (isFinishing() || isDestroyed()) return;
-        if (pauseRunnable != null && pauseRunnable.size() > 0) {
-            searchExecutorService = Executors.newFixedThreadPool(5);
+        // 暂停任务的重放逻辑收敛到 SourceViewModel.resumeAll
+        if (pauseRunnable != null && pauseRunnable.size() > 0 && sourceViewModel != null) {
             allRunCount.set(pauseRunnable.size());
-            for (Runnable runnable : pauseRunnable) {
-                searchExecutorService.execute(runnable);
-            }
-            pauseRunnable.clear();
+            sourceViewModel.resumeAll(pauseRunnable);
             pauseRunnable = null;
         }
     }
@@ -190,7 +187,8 @@ public class FastSearchActivity extends BaseActivity {
                 if (video != null) {
                     try {
                         if (searchExecutorService != null) {
-                            pauseRunnable = searchExecutorService.shutdownNow();
+                            // 暂停搜索的关停逻辑收敛到 SourceViewModel.pauseAll
+                            pauseRunnable = sourceViewModel.pauseAll();
                             searchExecutorService = null;
                             JsLoader.stopAll();
                         }
@@ -216,7 +214,8 @@ public class FastSearchActivity extends BaseActivity {
                 if (video != null) {
                     try {
                         if (searchExecutorService != null) {
-                            pauseRunnable = searchExecutorService.shutdownNow();
+                            // 暂停搜索的关停逻辑收敛到 SourceViewModel.pauseAll
+                            pauseRunnable = sourceViewModel.pauseAll();
                             searchExecutorService = null;
                             JsLoader.stopAll();
                         }

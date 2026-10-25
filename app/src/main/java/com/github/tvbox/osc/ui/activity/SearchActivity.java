@@ -182,15 +182,10 @@ public class SearchActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (pauseRunnable != null && pauseRunnable.size() > 0) {
+        // 暂停任务的重放逻辑收敛到 SourceViewModel.resumeAll
+        if (pauseRunnable != null && pauseRunnable.size() > 0 && sourceViewModel != null) {
             allRunCount.set(pauseRunnable.size());
-            if (sourceViewModel != null) {
-                sourceViewModel.initExecutor();
-                for (Runnable runnable : pauseRunnable) {
-                    sourceViewModel.execute(runnable);
-                }
-            }
-            pauseRunnable.clear();
+            sourceViewModel.resumeAll(pauseRunnable);
             pauseRunnable = null;
         }
     }
@@ -271,7 +266,8 @@ public class SearchActivity extends BaseActivity {
                 if (video != null) {
                     try {
                         if (sourceViewModel != null) {
-                            pauseRunnable = sourceViewModel.shutdownNow();
+                            // 暂停搜索的关停逻辑收敛到 SourceViewModel.pauseAll
+                            pauseRunnable = sourceViewModel.pauseAll();
                             JsLoader.stopAll();
                             sourceViewModel.destroyExecutor();
                         }
