@@ -64,6 +64,7 @@ import tv.danmaku.ijk.media.player.IjkMediaPlayer;
  * @description:
  */
 public class ModelSettingFragment extends BaseLazyFragment {
+
     private TextView tvDebugOpen;
     private TextView tvApi;
     // Home Section
@@ -290,31 +291,19 @@ public class ModelSettingFragment extends BaseLazyFragment {
                 types.add(0);
                 types.add(1);
                 types.add(2);
-                SelectDialog<Integer> dialog = new SelectDialog<>(mActivity);
-                dialog.setTip(getString(R.string.dia_hm_type));
-                dialog.setAdapter(null, new SelectDialogAdapter.SelectDialogInterface<Integer>() {
-                    @Override
-                    public void click(Integer value, int pos) {
-                        Hawk.put(HawkConfig.HOME_REC, value);
-                        tvHomeRec.setText(getHomeRecName(value));
-                    }
+                showIntSelectDialog(getString(R.string.dia_hm_type), types, defaultPos,
+                        new SelectDialogAdapter.SelectDialogInterface<Integer>() {
+                            @Override
+                            public void click(Integer value, int pos) {
+                                Hawk.put(HawkConfig.HOME_REC, value);
+                                tvHomeRec.setText(getHomeRecName(value));
+                            }
 
-                    @Override
-                    public String getDisplay(Integer val) {
-                        return getHomeRecName(val);
-                    }
-                }, new DiffUtil.ItemCallback<Integer>() {
-                    @Override
-                    public boolean areItemsTheSame(@NonNull @NotNull Integer oldItem, @NonNull @NotNull Integer newItem) {
-                        return oldItem.intValue() == newItem.intValue();
-                    }
-
-                    @Override
-                    public boolean areContentsTheSame(@NonNull @NotNull Integer oldItem, @NonNull @NotNull Integer newItem) {
-                        return oldItem.intValue() == newItem.intValue();
-                    }
-                }, types, defaultPos);
-                dialog.show();
+                            @Override
+                            public String getDisplay(Integer val) {
+                                return getHomeRecName(val);
+                            }
+                        });
             }
         });
         // History to Keep ------------------------------------------
@@ -329,31 +318,19 @@ public class ModelSettingFragment extends BaseLazyFragment {
                 types.add(2);
                 types.add(3);
                 types.add(4);
-                SelectDialog<Integer> dialog = new SelectDialog<>(mActivity);
-                dialog.setTip(getString(R.string.dia_history));
-                dialog.setAdapter(null, new SelectDialogAdapter.SelectDialogInterface<Integer>() {
-                    @Override
-                    public void click(Integer value, int pos) {
-                        Hawk.put(HawkConfig.HOME_NUM, value);
-                        tvHomeNum.setText(HistoryHelper.getHomeRecName(value));
-                    }
+                showIntSelectDialog(getString(R.string.dia_history), types, defaultPos,
+                        new SelectDialogAdapter.SelectDialogInterface<Integer>() {
+                            @Override
+                            public void click(Integer value, int pos) {
+                                Hawk.put(HawkConfig.HOME_NUM, value);
+                                tvHomeNum.setText(HistoryHelper.getHomeRecName(value));
+                            }
 
-                    @Override
-                    public String getDisplay(Integer val) {
-                        return HistoryHelper.getHomeRecName(val);
-                    }
-                }, new DiffUtil.ItemCallback<Integer>() {
-                    @Override
-                    public boolean areItemsTheSame(@NonNull @NotNull Integer oldItem, @NonNull @NotNull Integer newItem) {
-                        return oldItem.intValue() == newItem.intValue();
-                    }
-
-                    @Override
-                    public boolean areContentsTheSame(@NonNull @NotNull Integer oldItem, @NonNull @NotNull Integer newItem) {
-                        return oldItem.intValue() == newItem.intValue();
-                    }
-                }, types, defaultPos);
-                dialog.show();
+                            @Override
+                            public String getDisplay(Integer val) {
+                                return HistoryHelper.getHomeRecName(val);
+                            }
+                        });
             }
         });
         // 2. PLAYER Configuration -------------------------------------------------------------- //
@@ -379,31 +356,19 @@ public class ModelSettingFragment extends BaseLazyFragment {
                 players.add(3);
                 players.add(4);
                 players.add(5);
-                SelectDialog<Integer> dialog = new SelectDialog<>(mActivity);
-                dialog.setTip(getString(R.string.dia_ratio));
-                dialog.setAdapter(null, new SelectDialogAdapter.SelectDialogInterface<Integer>() {
-                    @Override
-                    public void click(Integer value, int pos) {
-                        Hawk.put(HawkConfig.PLAY_SCALE, value);
-                        tvScale.setText(PlayerHelper.getScaleName(value));
-                    }
+                showIntSelectDialog(getString(R.string.dia_ratio), players, defaultPos,
+                        new SelectDialogAdapter.SelectDialogInterface<Integer>() {
+                            @Override
+                            public void click(Integer value, int pos) {
+                                Hawk.put(HawkConfig.PLAY_SCALE, value);
+                                tvScale.setText(PlayerHelper.getScaleName(value));
+                            }
 
-                    @Override
-                    public String getDisplay(Integer val) {
-                        return PlayerHelper.getScaleName(val);
-                    }
-                }, new DiffUtil.ItemCallback<Integer>() {
-                    @Override
-                    public boolean areItemsTheSame(@NonNull @NotNull Integer oldItem, @NonNull @NotNull Integer newItem) {
-                        return oldItem.intValue() == newItem.intValue();
-                    }
-
-                    @Override
-                    public boolean areContentsTheSame(@NonNull @NotNull Integer oldItem, @NonNull @NotNull Integer newItem) {
-                        return oldItem.intValue() == newItem.intValue();
-                    }
-                }, players, defaultPos);
-                dialog.show();
+                            @Override
+                            public String getDisplay(Integer val) {
+                                return PlayerHelper.getScaleName(val);
+                            }
+                        });
             }
         });
         //后台播放
@@ -462,32 +427,20 @@ public class ModelSettingFragment extends BaseLazyFragment {
                 if (Kodi.getPackageInfo() != null){
                     players.add(12);
                 }
-                SelectDialog<Integer> dialog = new SelectDialog<>(mActivity);
-                dialog.setTip(getString(R.string.dia_player));
-                dialog.setAdapter(null, new SelectDialogAdapter.SelectDialogInterface<Integer>() {
-                    @Override
-                    public void click(Integer value, int pos) {
-                        Hawk.put(HawkConfig.PLAY_TYPE, value);
-                        tvPlay.setText(PlayerHelper.getPlayerName(value));
-                        PlayerHelper.init();
-                    }
+                showIntSelectDialog(getString(R.string.dia_player), players, defaultPos,
+                        new SelectDialogAdapter.SelectDialogInterface<Integer>() {
+                            @Override
+                            public void click(Integer value, int pos) {
+                                Hawk.put(HawkConfig.PLAY_TYPE, value);
+                                tvPlay.setText(PlayerHelper.getPlayerName(value));
+                                PlayerHelper.init();
+                            }
 
-                    @Override
-                    public String getDisplay(Integer val) {
-                        return PlayerHelper.getPlayerName(val);
-                    }
-                }, new DiffUtil.ItemCallback<Integer>() {
-                    @Override
-                    public boolean areItemsTheSame(@NonNull @NotNull Integer oldItem, @NonNull @NotNull Integer newItem) {
-                        return oldItem.intValue() == newItem.intValue();
-                    }
-
-                    @Override
-                    public boolean areContentsTheSame(@NonNull @NotNull Integer oldItem, @NonNull @NotNull Integer newItem) {
-                        return oldItem.intValue() == newItem.intValue();
-                    }
-                }, players, defaultPos);
-                dialog.show();
+                            @Override
+                            public String getDisplay(Integer val) {
+                                return PlayerHelper.getPlayerName(val);
+                            }
+                        });
             }
         });
 
@@ -537,32 +490,20 @@ public class ModelSettingFragment extends BaseLazyFragment {
                 ArrayList<Integer> renders = new ArrayList<>();
                 renders.add(0);
                 renders.add(1);
-                SelectDialog<Integer> dialog = new SelectDialog<>(mActivity);
-                dialog.setTip(getString(R.string.dia_render));
-                dialog.setAdapter(null, new SelectDialogAdapter.SelectDialogInterface<Integer>() {
-                    @Override
-                    public void click(Integer value, int pos) {
-                        Hawk.put(HawkConfig.PLAY_RENDER, value);
-                        tvRender.setText(PlayerHelper.getRenderName(value));
-                        PlayerHelper.init();
-                    }
+                showIntSelectDialog(getString(R.string.dia_render), renders, defaultPos,
+                        new SelectDialogAdapter.SelectDialogInterface<Integer>() {
+                            @Override
+                            public void click(Integer value, int pos) {
+                                Hawk.put(HawkConfig.PLAY_RENDER, value);
+                                tvRender.setText(PlayerHelper.getRenderName(value));
+                                PlayerHelper.init();
+                            }
 
-                    @Override
-                    public String getDisplay(Integer val) {
-                        return PlayerHelper.getRenderName(val);
-                    }
-                }, new DiffUtil.ItemCallback<Integer>() {
-                    @Override
-                    public boolean areItemsTheSame(@NonNull @NotNull Integer oldItem, @NonNull @NotNull Integer newItem) {
-                        return oldItem.intValue() == newItem.intValue();
-                    }
-
-                    @Override
-                    public boolean areContentsTheSame(@NonNull @NotNull Integer oldItem, @NonNull @NotNull Integer newItem) {
-                        return oldItem.intValue() == newItem.intValue();
-                    }
-                }, renders, defaultPos);
-                dialog.show();
+                            @Override
+                            public String getDisplay(Integer val) {
+                                return PlayerHelper.getRenderName(val);
+                            }
+                        });
             }
         });
         // Select DNS ---------------------------------------------
@@ -897,6 +838,28 @@ public class ModelSettingFragment extends BaseLazyFragment {
         getActivity().getApplicationContext().startActivity(intent);
         //  android.os.Process.killProcess(android.os.Process.myPid());
         //  System.exit(0);
+    }
+
+    /**
+     * Integer 选择弹窗的通用样板：原九处设置弹窗仅 tip/选项/回调 不同，
+     * DiffUtil.ItemCallback 等模板代码收敛到这里。
+     */
+    void showIntSelectDialog(String tip, ArrayList<Integer> items, int defaultPos,
+                             SelectDialogAdapter.SelectDialogInterface<Integer> listener) {
+        SelectDialog<Integer> dialog = new SelectDialog<>(mActivity);
+        dialog.setTip(tip);
+        dialog.setAdapter(null, listener, new DiffUtil.ItemCallback<Integer>() {
+            @Override
+            public boolean areItemsTheSame(@NonNull @NotNull Integer oldItem, @NonNull @NotNull Integer newItem) {
+                return oldItem.intValue() == newItem.intValue();
+            }
+
+            @Override
+            public boolean areContentsTheSame(@NonNull @NotNull Integer oldItem, @NonNull @NotNull Integer newItem) {
+                return oldItem.intValue() == newItem.intValue();
+            }
+        }, items, defaultPos);
+        dialog.show();
     }
 
 }

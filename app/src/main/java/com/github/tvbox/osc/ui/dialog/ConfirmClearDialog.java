@@ -7,12 +7,10 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 
 import com.github.tvbox.osc.R;
-import com.github.tvbox.osc.bean.VodInfo;
 import com.github.tvbox.osc.cache.RoomDataManger;
-import com.github.tvbox.osc.cache.VodCollect;
-import com.github.tvbox.osc.ui.activity.CollectActivity;
-import com.github.tvbox.osc.ui.activity.HistoryActivity;
+import com.github.tvbox.osc.event.RefreshEvent;
 
+import org.greenrobot.eventbus.EventBus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -34,17 +32,14 @@ public class ConfirmClearDialog extends BaseDialog {
             public void onClick(View v) {
                 // if removing all Favorites
                 if ("Collect".equals(type)) {
-                    List<VodCollect> vodInfoList = new ArrayList<>();
-                    CollectActivity.collectAdapter.setNewData(vodInfoList);
-                    CollectActivity.collectAdapter.notifyDataSetChanged();
                     RoomDataManger.deleteVodCollectAll();
                     // if removing all History
                 } else if ("History".equals(type)) {
-                    List<VodInfo> vodInfoList = new ArrayList<>();
-                    HistoryActivity.historyAdapter.setNewData(vodInfoList);
-                    HistoryActivity.historyAdapter.notifyDataSetChanged();
                     RoomDataManger.deleteVodRecordAll();
                 }
+                // 清空 DB 后通知页面重载（此时读到空列表，adapter 自然清空），
+                // 不再依赖页面的静态 Adapter 引用
+                EventBus.getDefault().post(new RefreshEvent(RefreshEvent.TYPE_HISTORY_REFRESH));
 
                 ConfirmClearDialog.this.dismiss();
             }
