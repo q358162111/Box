@@ -77,19 +77,13 @@ public class JarLoader {
                     final Class<?> classInit = classLoader.loadClass("com.github.catvod.spider.Init");
                     if (classInit != null) {
                         final Method initMethod = classInit.getMethod("init", Context.class);
-                        // 在子线程中调用 init 方法，避免网络请求在主线程中执行
-                        Thread initThread = new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    initMethod.invoke(null, App.getInstance());
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        });
-                        initThread.start();
-                        initThread.join();
+                        // 原实现起子线程后立即 join()，是假异步：调用方（getSpider/spiderCallExecutor）
+                        // 本就运行在后台线程，直接在当前线程执行即可，行为等价、语义诚实
+                        try {
+                            initMethod.invoke(null, App.getInstance());
+                        } catch (Throwable e) {
+                            LOG.e("JarLoader spider init " + key, e);
+                        }
                         Log.i("JarLoader", "echo-自定义爬虫代码加载成功!");
                         success = true;
                         try {

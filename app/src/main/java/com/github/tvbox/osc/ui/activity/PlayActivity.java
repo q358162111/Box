@@ -139,9 +139,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import master.flame.danmaku.danmaku.model.BaseDanmaku;
-import master.flame.danmaku.danmaku.model.IDisplayer;
-import master.flame.danmaku.danmaku.model.android.DanmakuContext;
 import master.flame.danmaku.ui.widget.DanmakuView;
 import me.jessyan.autosize.AutoSize;
 import tv.danmaku.ijk.media.player.IMediaPlayer;
@@ -171,7 +168,6 @@ public class PlayActivity extends BaseActivity {
 
     ExecutorService executorService;
     private DanmakuView mDanmuView;
-    private DanmakuContext mDanmakuContext;
     private DanmuPresenter danmuPresenter;
     private String danmuText;
 

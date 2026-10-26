@@ -63,26 +63,33 @@ public class Thunder {
         cacheRoot = context.getCacheDir().getAbsolutePath() + File.separator + "thunder";
     }
 
+    // 共享可变状态（currentTask/threadPool/task_url 等）的操作锁：
+    // stop() 由主线程调用，parse/play 任务在 threadPool 线程读写同一状态，
+    // 无同步时 stop 可能停错/删错任务
+    private static final Object stateLock = new Object();
+
     public static void stop(Boolean bool) {
         // 代际自增：使所有在跑的旧 parse/play 任务立即失效退出
         parseGeneration++;
-        if (currentTask > 0) {
-            XLTaskHelper.instance().stopTask(currentTask);
-            currentTask = 0L;
-        }
-        if(bool){
-            torrentFileInfoArrayList = null;
-            // del cache file（复用 FileUtils 的递归删除）
-            File cache = new File(task_url.isEmpty()?cacheRoot:localPath);
-            FileUtils.recursiveDelete(cache);
-            if (!cache.exists())
-                cache.mkdirs();
-            if (threadPool != null) {
-                try {
-                    threadPool.shutdownNow();
-                    threadPool = null;
-                } catch (Throwable th) {
+        synchronized (stateLock) {
+            if (currentTask > 0) {
+                XLTaskHelper.instance().stopTask(currentTask);
+                currentTask = 0L;
+            }
+            if (bool) {
+                torrentFileInfoArrayList = null;
+                // del cache file（复用 FileUtils 的递归删除）
+                File cache = new File(task_url.isEmpty() ? cacheRoot : localPath);
+                FileUtils.recursiveDelete(cache);
+                if (!cache.exists())
+                    cache.mkdirs();
+                if (threadPool != null) {
+                    try {
+                        threadPool.shutdownNow();
+                        threadPool = null;
+                    } catch (Throwable th) {
 
+                    }
                 }
             }
         }
@@ -135,13 +142,15 @@ public class Thunder {
                                 String fileName = XLTaskHelper.instance().getFileName(link);
                                 File cache = new File(cacheRoot + File.separator + fileName);
                                 try {
-                                    if (currentTask > 0) {
-                                        XLTaskHelper.instance().stopTask(currentTask);
-                                        currentTask = 0L;
+                                    synchronized (stateLock) {
+                                        if (currentTask > 0) {
+                                            XLTaskHelper.instance().stopTask(currentTask);
+                                            currentTask = 0L;
+                                        }
+                                        currentTask = isMagnet(url) ?
+                                                XLTaskHelper.instance().addMagentTask(url, cacheRoot, fileName) :
+                                                XLTaskHelper.instance().addThunderTask(url, cacheRoot, fileName);
                                     }
-                                    currentTask = isMagnet(url) ?
-                                            XLTaskHelper.instance().addMagentTask(url, cacheRoot, fileName) :
-                                            XLTaskHelper.instance().addThunderTask(url, cacheRoot, fileName);
                                 } catch (Exception exception) {
                                     exception.printStackTrace();
                                     currentTask = 0;
@@ -243,9 +252,11 @@ public class Thunder {
             }
             if (threadPool == null) return false;
             TorrentFileInfo info = torrentFileInfoArrayList.get(idx);
-            if (currentTask > 0) {
-                XLTaskHelper.instance().stopTask(currentTask);
-                currentTask = 0L;
+            synchronized (stateLock) {
+                if (currentTask > 0) {
+                    XLTaskHelper.instance().stopTask(currentTask);
+                    currentTask = 0L;
+                }
             }
             threadPool.execute(new Runnable() {
                 @Override
@@ -253,7 +264,9 @@ public class Thunder {
                     String torrentName = new File(info.torrentPath).getName();
                     int dot = torrentName.lastIndexOf(".");
                     String cache = cacheRoot + File.separator + (dot > 0 ? torrentName.substring(0, dot) : torrentName);
-                    currentTask = XLTaskHelper.instance().addTorrentTask(info.torrentPath, cache, info.mFileIndex);
+                    synchronized (stateLock) {
+                        currentTask = XLTaskHelper.instance().addTorrentTask(info.torrentPath, cache, info.mFileIndex);
+                    }
                     if (currentTask < 0) {
                         callback.status(-1, "下载出错");
                         return;
@@ -306,7 +319,9 @@ public class Thunder {
             task_url=ed2kList.get(idx);
             name = XLTaskHelper.instance().getFileName(task_url);
             localPath = (new File(cacheRoot+File.separator+"temp",FileUtils.getFileNameWithoutExt(name)))+"/";
-            currentTask = XLTaskHelper.instance().addThunderTask(task_url, localPath, null);
+            synchronized (stateLock) {
+                currentTask = XLTaskHelper.instance().addThunderTask(task_url, localPath, null);
+            }
 
             threadPool.execute(new Runnable() {
                 @Override
@@ -339,14 +354,18 @@ public class Thunder {
                 init(App.getInstance());
                 threadPool = Executors.newSingleThreadExecutor();
             }
-            if (currentTask > 0) {
-                XLTaskHelper.instance().stopTask(currentTask);
-                currentTask = 0L;
+            synchronized (stateLock) {
+                if (currentTask > 0) {
+                    XLTaskHelper.instance().stopTask(currentTask);
+                    currentTask = 0L;
+                }
             }
             task_url=url;
             name = XLTaskHelper.instance().getFileName(task_url);
             localPath = (new File(cacheRoot+File.separator+"temp",FileUtils.getFileNameWithoutExt(name)))+"/";
-            currentTask = XLTaskHelper.instance().addThunderTask(task_url, localPath, null);
+            synchronized (stateLock) {
+                currentTask = XLTaskHelper.instance().addThunderTask(task_url, localPath, null);
+            }
 
             threadPool.execute(new Runnable() {
                 @Override
