@@ -25,8 +25,27 @@ public class HtmlParser {
     private static final Pattern NOADD_INDEX = Pattern.compile(":eq|:lt|:gt|:first|:last|^body$|^#"); // 不自动加eq下标索引
     private static final Pattern URLJOIN_ATTR = Pattern.compile("(url|src|href|-original|-src|-play|-url|style)$", Pattern.MULTILINE | Pattern.CASE_INSENSITIVE); // 需要自动urljoin的属性
     private static final Pattern SPECIAL_URL = Pattern.compile("^(ftp|magnet|thunder|ws):", Pattern.MULTILINE | Pattern.CASE_INSENSITIVE); // 过滤特殊链接,不走urlJoin
-    private static final ThreadLocal<Document> pdfh_doc = new ThreadLocal<>();
-    private static final ThreadLocal<Document> pdfa_doc = new ThreadLocal<>();
+    private static final ThreadLocal<java.lang.ref.WeakReference<Document>> pdfh_docRef = new ThreadLocal<>();
+    private static final ThreadLocal<java.lang.ref.WeakReference<Document>> pdfa_docRef = new ThreadLocal<>();
+
+    /**
+     * 取缓存的 Jsoup Document（命中条件：html 未变且弱引用未被 GC 回收）。
+     * cachedThreadPool 的线程长期存活，ThreadLocal 直接持有数 MB 的 Document 会常驻内存；
+     * WeakReference 包装后内存压力时可被 GC 回收，代价只是偶发一次重新 parse。
+     */
+    private static Document getCachedParseDoc(ThreadLocal<String> htmlKey,
+                                              ThreadLocal<java.lang.ref.WeakReference<Document>> docRef,
+                                              String html) {
+        String cachedHtml = htmlKey.get();
+        java.lang.ref.WeakReference<Document> ref = docRef.get();
+        Document doc = ref != null ? ref.get() : null;
+        if (doc == null || cachedHtml == null || !cachedHtml.equals(html)) {
+            doc = Jsoup.parse(html);
+            htmlKey.set(html);
+            docRef.set(new java.lang.ref.WeakReference<>(doc));
+        }
+        return doc;
+    }
 
     public static String joinUrl(String parent, String child) {
         if (StringUtils.isEmpty(parent)) {
@@ -172,16 +191,7 @@ public class HtmlParser {
     }
 
     public static String parseDomForUrl(String html, String rule, String add_url) {
-        String cachedHtml = pdfh_html.get();
-        if (cachedHtml == null || !cachedHtml.equals(html)) {
-            pdfh_html.set(html);
-            pdfh_doc.set(Jsoup.parse(html));
-        }
-        Document doc = pdfh_doc.get();
-        if (doc == null) {
-            doc = Jsoup.parse(html);
-            pdfh_doc.set(doc);
-        }
+        Document doc = getCachedParseDoc(pdfh_html, pdfh_docRef, html);
         if (rule.equals("body&&Text") || rule.equals("Text")) {
             return doc.text();
         } else if (rule.equals("body&&Html") || rule.equals("Html")) {
@@ -247,16 +257,7 @@ public class HtmlParser {
     }
 
     public static List < String > parseDomForArray(String html, String rule) {
-        String cachedHtml = pdfa_html.get();
-        if (cachedHtml == null || !cachedHtml.equals(html)) {
-            pdfa_html.set(html);
-            pdfa_doc.set(Jsoup.parse(html));
-        }
-        Document doc = pdfa_doc.get();
-        if (doc == null) {
-            doc = Jsoup.parse(html);
-            pdfa_doc.set(doc);
-        }
+        Document doc = getCachedParseDoc(pdfa_html, pdfa_docRef, html);
         rule = parseHikerToJq(rule, false);
         String[] parses = rule.split(" ");
         Elements ret = new Elements();
@@ -302,16 +303,7 @@ public class HtmlParser {
     }
 
     public static List < String > parseDomForList(String html, String p1, String list_text, String list_url, String add_url) {
-        String cachedHtml = pdfa_html.get();
-        if (cachedHtml == null || !cachedHtml.equals(html)) {
-            pdfa_html.set(html);
-            pdfa_doc.set(Jsoup.parse(html));
-        }
-        Document doc = pdfa_doc.get();
-        if (doc == null) {
-            doc = Jsoup.parse(html);
-            pdfa_doc.set(doc);
-        }
+        Document doc = getCachedParseDoc(pdfa_html, pdfa_docRef, html);
         p1 = parseHikerToJq(p1, false);
         String[] parses = p1.split(" ");
         Elements ret = new Elements();

@@ -58,6 +58,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.github.tvbox.osc.util.LOG;
+import com.github.tvbox.osc.subtitle.runtime.AppTaskExecutor;
 /**
  * @author pj567
  * @date :2020/12/18
@@ -164,13 +165,23 @@ public class ApiConfig {
         }
         File cache = new File(App.getInstance().getFilesDir().getAbsolutePath() + "/" + MD5.encode(apiUrl));
         if (useCache && cache.exists()) {
-            try {
-                parseJson(apiUrl, cache);
-                callback.success();
-                return;
-            } catch (Throwable th) {
-                th.printStackTrace();
-            }
+            // useCache 路径的磁盘读 + Hawk 落盘 + 全量 JSON 解析原本在主线程（大配置 ANR 风险），迁后台执行；
+            // callback.success() 内部经 mHandler 投递主线程，从后台线程调用安全
+            final String cacheApiUrl = apiUrl;
+            AppTaskExecutor.deskIO().execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        parseJson(cacheApiUrl, cache);
+                        callback.success();
+                    } catch (Throwable th) {
+                        LOG.e("ApiConfig parseCache " + cacheApiUrl, th);
+                        // 缓存解析失败走网络重新拉取
+                        loadConfig(false, callback, activity);
+                    }
+                }
+            });
+            return;
         }
         String TempKey = null, configUrl = "", pk = ";pk;";
         if (apiUrl.contains(pk)) {

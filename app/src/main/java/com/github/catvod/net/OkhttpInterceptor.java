@@ -37,7 +37,13 @@ public class OkhttpInterceptor implements Interceptor {
                 }
             }
         };
-        return response.newBuilder().headers(response.headers()).body(new ResponseBody() {
+        // 解压后内容已还原，必须移除 Content-Encoding/Content-Length 头：
+        // 保留会让下游按"仍是 deflate 压缩"处理导致乱码，且解压后长度与原 Content-Length 不符
+        return response.newBuilder()
+                .headers(response.headers())
+                .removeHeader(HttpHeaders.CONTENT_ENCODING)
+                .removeHeader(HttpHeaders.CONTENT_LENGTH)
+                .body(new ResponseBody() {
             @Nullable
             @Override
             public MediaType contentType() {
