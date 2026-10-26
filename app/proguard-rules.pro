@@ -194,8 +194,11 @@
 -keep class jcifs.** { *; }
 -dontwarn jcifs.**
 
-# 实体类
-#-keep class com.github.tvbox.osc.bean.** { *; }
+# 实体类：必须 keep。VodInfo/VodRecord 等经 Gson 序列化进数据库（历史记录 dataJson），
+# 混淆改名后旧数据与新版本字段错位，表现为历史节目名称变成数字
+-keep class com.github.tvbox.osc.bean.** { *; }
+# 缓存实体同样经 Gson/Serializable 落库
+-keep class com.github.tvbox.osc.cache.** { *; }
 -keep class com.github.tvbox.osc.ui.fragment.homes.**{*;}
 #CardView
 -keep class com.github.tvbox.osc.ui.tv.widget.card.**{*;}
