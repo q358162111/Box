@@ -755,7 +755,11 @@ public class DetailActivity extends BaseActivity {
                     }
                     mVideo = absXml.movie.videoList.get(0);
                     mVideo.id = vodId;
-                    if (TextUtils.isEmpty(mVideo.name)) mVideo.name = "片名";
+                    // 防御:部分源(JS 爬虫)详情返回的 vod_name 缺失或误填为影片 id,
+                    // 导致历史记录名称显示成数字;名称为空或等于 id 时回退占位名
+                    if (TextUtils.isEmpty(mVideo.name) || mVideo.name.equals(vodId)) {
+                        mVideo.name = "片名";
+                    }
                     vodInfo = new VodInfo();
                     vodInfo.setVideo(mVideo);
                     vodInfo.sourceKey = mVideo.sourceKey;
