@@ -407,6 +407,10 @@ public class ApiConfig {
         JsonArray sites = infoJson.has("video") ? infoJson.getAsJsonObject("video").getAsJsonArray("sites") : infoJson.get("sites").getAsJsonArray();
         // sites 字段缺失/为空时跳过解析，避免整个配置加载 NPE 失败
         if (sites == null) sites = new JsonArray();
+        // useCache 解析已后台化：在临时 Map 上构建完整站点列表后一次性原子发布，
+        // 避免解析线程写 sourceBeanList 与主线程 getSource()/getSourceList() 读并发修改
+        // 同一 LinkedHashMap（结构损坏 → 死循环/崩溃，表现为启动加载中后闪退）
+        LinkedHashMap<String, SourceBean> parsedSites = new LinkedHashMap<>();
         for (JsonElement opt : sites) {
             // 防御：element 不是 object 时跳过，避免 ClassCastException
             if (opt == null || !opt.isJsonObject()) continue;
@@ -436,9 +440,12 @@ public class ApiConfig {
             sb.setStyle(DefaultConfig.safeJsonString(obj, "style", ""));
             if (firstSite == null && sb.getHide() == 0)
                 firstSite = sb;
-            sourceBeanList.put(siteKey, sb);
+            parsedSites.put(siteKey, sb);
         }
-        if (sourceBeanList != null && sourceBeanList.size() > 0) {
+        // 原子发布：整体替换引用
+        sourceBeanList.clear();
+        sourceBeanList.putAll(parsedSites);
+        if (!parsedSites.isEmpty()) {
             String home = Hawk.get(HawkConfig.HOME_API, "");
             SourceBean sh = getSource(home);
             if (sh == null || sh.getHide() == 1)
