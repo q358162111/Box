@@ -68,6 +68,9 @@ import com.github.tvbox.osc.player.TrackInfo;
 import com.github.tvbox.osc.player.TrackInfoBean;
 import com.github.tvbox.osc.player.controller.VodController;
 import com.github.tvbox.osc.play.TrackSelector;
+import com.github.tvbox.osc.play.DanmuPresenter;
+import com.github.tvbox.osc.play.SniffEngine;
+import xyz.doikki.videoplayer.player.VideoView;
 import com.github.tvbox.osc.player.danmu.Parser;
 import com.github.tvbox.osc.player.thirdparty.Kodi;
 import com.github.tvbox.osc.player.thirdparty.MXPlayer;
@@ -169,6 +172,7 @@ public class PlayActivity extends BaseActivity {
     ExecutorService executorService;
     private DanmakuView mDanmuView;
     private DanmakuContext mDanmakuContext;
+    private DanmuPresenter danmuPresenter;
     private String danmuText;
 
     @Override
@@ -196,38 +200,27 @@ public class PlayActivity extends BaseActivity {
     }
     private void initDanmuView() {
         mDanmuView  = findViewById(R.id.danmaku);
-        mDanmakuContext = DanmakuContext.create();
-        mVideoView.setDanmuView(mDanmuView);
+        danmuPresenter = new DanmuPresenter(new DanmuPresenter.Host() {
+            @Override
+            public boolean isInPictureInPictureMode() {
+                return Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && PlayActivity.this.isInPictureInPictureMode();
+            }
+
+            @Override
+            public DanmakuView getDanmuView() {
+                return mDanmuView;
+            }
+
+            @Override
+            public MyVideoView getVideoView() {
+                return mVideoView;
+            }
+        });
+        danmuPresenter.initDanmuView(mDanmuView, mVideoView);
     }
 
     private void setDanmuViewSettings(boolean reload) {
-        float speed = HawkUtils.getDanmuSpeed();
-        float alpha = HawkUtils.getDanmuAlpha();
-        float sizeScale = HawkUtils.getDanmuSizeScale();
-        int maxLine = HawkUtils.getDanmuMaxLine();
-        HashMap<Integer, Integer> maxLines = new HashMap<>();
-        maxLines.put(BaseDanmaku.TYPE_FIX_TOP, maxLine);
-        maxLines.put(BaseDanmaku.TYPE_SCROLL_RL, maxLine);
-        maxLines.put(BaseDanmaku.TYPE_SCROLL_LR, maxLine);
-        maxLines.put(BaseDanmaku.TYPE_FIX_BOTTOM, maxLine);
-        mDanmakuContext.setMaximumLines(maxLines).setScrollSpeedFactor(speed).setDanmakuTransparency(alpha).setScaleTextSize(sizeScale);
-        mDanmakuContext.setDanmakuStyle(IDisplayer.DANMAKU_STYLE_STROKEN, 3).setDanmakuMargin(8);
-        if (reload){
-            if (executorService != null){
-                executorService.shutdownNow();
-                executorService = null;
-            }
-            executorService = Executors.newSingleThreadExecutor();
-            executorService.execute(() -> {
-                mDanmuView.release();
-                mDanmuView.prepare(new Parser(danmuText), mDanmakuContext);
-                App.post(()->{
-                    if(mVideoView!=null && mVideoView.isPlaying()){
-                        mDanmuView.seekTo(mVideoView.getCurrentPosition());
-                    }
-                });
-            });
-        }
+        danmuPresenter.setDanmuViewSettings(danmuText, reload);
     }
     private void initView() {
 
@@ -937,15 +930,9 @@ public class PlayActivity extends BaseActivity {
 
     private void checkDanmu(String danmu) {
         danmuText = danmu;
-        mDanmuView.release();
-        mDanmuView.setVisibility(TextUtils.isEmpty(danmuText) || !HawkUtils.getDanmuOpen() ? View.GONE : View.VISIBLE);
-        if (TextUtils.isEmpty(danmuText)
-                || !HawkUtils.getDanmuOpen()
-                || (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && isInPictureInPictureMode())) return;
-        if (!danmuText.isEmpty()) {
-            mController.setHasDanmu(true);
-            setDanmuViewSettings(true);
-        }
+        if (danmuPresenter != null) danmuPresenter.checkDanmu(danmu);
+        if (TextUtils.isEmpty(danmuText) || !HawkUtils.getDanmuOpen()) return;
+        mController.setHasDanmu(!TextUtils.isEmpty(danmuText));
     }
 
     private void initData() {
@@ -1882,19 +1869,8 @@ public class PlayActivity extends BaseActivity {
     }
 
     boolean checkVideoFormat(String url) {
-        if (url.contains("url=http") || url.contains(".html")) {
-            return false;
-        }
-        try {
-            if (sourceBean.getType() == 3) {
-                Spider sp = ApiConfig.get().getCSP(sourceBean);
-                if (sp != null && sp.manualVideoCheck())
-                    return sp.isVideoFormat(url);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return VideoParseRuler.checkIsVideoForParse(webUrl, url);
+        // 委托公共 SniffEngine（补齐 sourceBean 判空与异常兜底，与 Fragment 侧统一）
+        return SniffEngine.checkVideoFormat(sourceBean, webUrl, url);
     }
 
     class MyWebView extends WebView {

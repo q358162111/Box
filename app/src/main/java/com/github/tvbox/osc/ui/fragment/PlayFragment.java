@@ -61,6 +61,8 @@ import com.github.tvbox.osc.player.TrackInfo;
 import com.github.tvbox.osc.player.TrackInfoBean;
 import com.github.tvbox.osc.player.controller.VodController;
 import com.github.tvbox.osc.play.TrackSelector;
+import com.github.tvbox.osc.play.DanmuPresenter;
+import com.github.tvbox.osc.play.SniffEngine;
 import com.github.tvbox.osc.player.danmu.Parser;
 import com.github.tvbox.osc.player.thirdparty.Kodi;
 import com.github.tvbox.osc.player.thirdparty.MXPlayer;
@@ -136,6 +138,7 @@ import me.jessyan.autosize.AutoSize;
 import tv.danmaku.ijk.media.player.IMediaPlayer;
 import tv.danmaku.ijk.media.player.IjkTimedText;
 import xyz.doikki.videoplayer.player.AbstractPlayer;
+import xyz.doikki.videoplayer.player.VideoView;
 import xyz.doikki.videoplayer.player.ProgressManager;
 
 public class PlayFragment extends BaseLazyFragment {
@@ -151,6 +154,7 @@ public class PlayFragment extends BaseLazyFragment {
     ExecutorService executorService;
     private DanmakuView mDanmuView;
     private DanmakuContext mDanmakuContext;
+    private DanmuPresenter danmuPresenter;
     private String danmuText;
 
     private String videoURL;
@@ -181,42 +185,27 @@ public class PlayFragment extends BaseLazyFragment {
     }
     private void initDanmuView() {
         mDanmuView  = findViewById(R.id.danmaku);
-        mDanmakuContext = DanmakuContext.create();
-        mVideoView.setDanmuView(mDanmuView);
+        danmuPresenter = new DanmuPresenter(new DanmuPresenter.Host() {
+            @Override
+            public boolean isInPictureInPictureMode() {
+                return mActivity != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && mActivity.isInPictureInPictureMode();
+            }
+
+            @Override
+            public DanmakuView getDanmuView() {
+                return mDanmuView;
+            }
+
+            @Override
+            public MyVideoView getVideoView() {
+                return mVideoView;
+            }
+        });
+        danmuPresenter.initDanmuView(mDanmuView, mVideoView);
     }
 
     private void setDanmuViewSettings(boolean reload) {
-        float speed = HawkUtils.getDanmuSpeed();
-        float alpha = HawkUtils.getDanmuAlpha();
-        float sizeScale = HawkUtils.getDanmuSizeScale();
-        int maxLine = HawkUtils.getDanmuMaxLine();
-        HashMap<Integer, Integer> maxLines = new HashMap<>();
-        maxLines.put(BaseDanmaku.TYPE_FIX_TOP, maxLine);
-        maxLines.put(BaseDanmaku.TYPE_SCROLL_RL, maxLine);
-        maxLines.put(BaseDanmaku.TYPE_SCROLL_LR, maxLine);
-        maxLines.put(BaseDanmaku.TYPE_FIX_BOTTOM, maxLine);
-        mDanmakuContext.setMaximumLines(maxLines).setScrollSpeedFactor(speed).setDanmakuTransparency(alpha).setScaleTextSize(sizeScale);
-        mDanmakuContext.setDanmakuStyle(IDisplayer.DANMAKU_STYLE_STROKEN, 3).setDanmakuMargin(8);
-        if (reload){
-            if (executorService != null){
-                executorService.shutdownNow();
-                executorService = null;
-            }
-            executorService = Executors.newSingleThreadExecutor();
-            executorService.execute(() -> {
-                // onDestroyView 会 shutdownNow 并清视图,任务已开始时视图可能为 null,先判空
-                DanmakuView danmuView = mDanmuView;
-                if (danmuView == null) return;
-                danmuView.release();
-                danmuView.prepare(new Parser(danmuText), mDanmakuContext);
-                App.post(()->{
-                    DanmakuView view = mDanmuView;
-                    if(view!=null && mVideoView!=null && mVideoView.isPlaying()){
-                        view.seekTo(mVideoView.getCurrentPosition());
-                    }
-                });
-            });
-        }
+        danmuPresenter.setDanmuViewSettings(danmuText, reload);
     }
 
     public VodController getVodController() {
@@ -923,15 +912,9 @@ public class PlayFragment extends BaseLazyFragment {
 
     private void checkDanmu(String danmu) {
         danmuText = danmu;
-        mDanmuView.release();
-        mDanmuView.setVisibility(TextUtils.isEmpty(danmuText) || !HawkUtils.getDanmuOpen() ? View.GONE : View.VISIBLE);
-        if (TextUtils.isEmpty(danmuText)
-                || !HawkUtils.getDanmuOpen()
-                || (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && mActivity.isInPictureInPictureMode())) return;
-        if (!danmuText.isEmpty()) {
-            mController.setHasDanmu(true);
-            setDanmuViewSettings(true);
-        }
+        if (danmuPresenter != null) danmuPresenter.checkDanmu(danmu);
+        if (TextUtils.isEmpty(danmuText) || !HawkUtils.getDanmuOpen()) return;
+        mController.setHasDanmu(!TextUtils.isEmpty(danmuText));
     }
 
     public void setData(Bundle bundle) {
@@ -1773,20 +1756,8 @@ public class PlayFragment extends BaseLazyFragment {
     }
 
     boolean checkVideoFormat(String url) {
-        try {
-            if (url.contains("url=http") || url.contains(".html")) {
-                return false;
-            }
-            if (sourceBean != null && sourceBean.getType() == 3) {
-                Spider sp = ApiConfig.get().getCSP(sourceBean);
-                if (sp != null && sp.manualVideoCheck()) {
-                    return sp.isVideoFormat(url);
-                }
-            }
-            return VideoParseRuler.checkIsVideoForParse(webUrl, url);
-        } catch (Exception e) {
-            return false;
-        }
+        // 委托公共 SniffEngine（统一实现）
+        return SniffEngine.checkVideoFormat(sourceBean, webUrl, url);
     }
 
     class MyWebView extends WebView {
