@@ -2,6 +2,8 @@ package com.github.tvbox.osc.api;
 
 import static com.github.tvbox.osc.util.RegexUtils.getPattern;
 import android.app.Activity;
+import android.os.Handler;
+import android.os.Looper;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Base64;
@@ -538,7 +540,7 @@ public class ApiConfig {
                         putLiveHistory(extUrlFix);
                         // Overwrite with Live URL from Settings
                         if (StringUtils.isBlank(liveURL)) {
-                            Hawk.put(HawkConfig.LIVE_URL, extUrlFix);
+                            putHawkOnMainThread(HawkConfig.LIVE_URL, extUrlFix);
                         } else {
                             extUrlFix = liveURL;
                         }
@@ -558,9 +560,9 @@ public class ApiConfig {
                         putEPGHistory(epg);
                         // Overwrite with EPG URL from Settings
                         if (StringUtils.isBlank(epgURL)) {
-                            Hawk.put(HawkConfig.EPG_URL, epg);
+                            putHawkOnMainThread(HawkConfig.EPG_URL, epg);
                         } else {
-                            Hawk.put(HawkConfig.EPG_URL, epgURL);
+                            putHawkOnMainThread(HawkConfig.EPG_URL, epgURL);
                         }
                     }
 
@@ -576,7 +578,7 @@ public class ApiConfig {
                         loadLives(infoJson.get("lives").getAsJsonArray());
                     } else {
                         JsonObject fengMiLives = infoJson.get("lives").getAsJsonArray().get(0).getAsJsonObject();
-                        Hawk.put(HawkConfig.LIVE_PLAYER_TYPE, DefaultConfig.safeJsonInt(fengMiLives, "playerType", -1));
+                        putHawkOnMainThread(HawkConfig.LIVE_PLAYER_TYPE, DefaultConfig.safeJsonInt(fengMiLives, "playerType", -1));
                         String type = fengMiLives.get("type").getAsString();
                         if (type.equals("0")) {
                             String url = fengMiLives.get("url").getAsString();
@@ -588,9 +590,9 @@ public class ApiConfig {
                                 putEPGHistory(epg);
                                 // Overwrite with EPG URL from Settings
                                 if (StringUtils.isBlank(epgURL)) {
-                                    Hawk.put(HawkConfig.EPG_URL, epg);
+                                    putHawkOnMainThread(HawkConfig.EPG_URL, epg);
                                 } else {
-                                    Hawk.put(HawkConfig.EPG_URL, epgURL);
+                                    putHawkOnMainThread(HawkConfig.EPG_URL, epgURL);
                                 }
                             }
 
@@ -600,7 +602,7 @@ public class ApiConfig {
                                 putLiveHistory(url);
                                 // Overwrite with Live URL from Settings
                                 if (StringUtils.isBlank(liveURL)) {
-                                    Hawk.put(HawkConfig.LIVE_URL, url);
+                                    putHawkOnMainThread(HawkConfig.LIVE_URL, url);
                                 } else {
                                     url = liveURL;
                                 }
@@ -759,6 +761,22 @@ public class ApiConfig {
         }
     }
 
+    /**
+     * Hawk 写入统一收口到主线程:SharedPreferences.apply/commit 是全量写盘,
+     * useCache 解析后台化后,后台线程的 Hawk.put 与用户在主线程点确认时的
+     * Hawk.put(API_HISTORY 等)并发,后写盘的一方基于旧快照会覆盖掉先写的 key,
+     * 导致地址历史丢失。所有解析路径的 Hawk 写操作都必须回主线程。
+     */
+    private void putHawkOnMainThread(String key, Object value) {
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            Hawk.put(key, value);
+        } else {
+            final String k = key;
+            final Object v = value;
+            new Handler(Looper.getMainLooper()).post(() -> Hawk.put(k, v));
+        }
+    }
+
     private void putLiveHistory(String url) {
         if (!url.isEmpty()) {
             ArrayList<String> liveHistory = Hawk.get(HawkConfig.LIVE_HISTORY, new ArrayList<String>());
@@ -766,7 +784,7 @@ public class ApiConfig {
                 liveHistory.add(0, url);
             if (liveHistory.size() > 20)
                 liveHistory.remove(20);
-            Hawk.put(HawkConfig.LIVE_HISTORY, liveHistory);
+            putHawkOnMainThread(HawkConfig.LIVE_HISTORY, liveHistory);
         }
     }
 
@@ -777,7 +795,12 @@ public class ApiConfig {
                 epgHistory.add(0, url);
             if (epgHistory.size() > 20)
                 epgHistory.remove(20);
-            Hawk.put(HawkConfig.EPG_HISTORY, epgHistory);
+            // 静态方法无法走实例级 putHawkOnMainThread,就地按线程分派
+            if (Looper.myLooper() == Looper.getMainLooper()) {
+                Hawk.put(HawkConfig.EPG_HISTORY, epgHistory);
+            } else {
+                new Handler(Looper.getMainLooper()).post(() -> Hawk.put(HawkConfig.EPG_HISTORY, epgHistory));
+            }
         }
     }
 
