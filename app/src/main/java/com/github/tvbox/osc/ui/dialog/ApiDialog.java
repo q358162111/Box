@@ -92,43 +92,51 @@ public class ApiDialog extends BaseDialog {
                     newApi = newApi.replace("./", "clan://localhost/");
                 }
                 if (!newApi.isEmpty()) {
-                    ArrayList<String> history = Hawk.get(HawkConfig.API_HISTORY, new ArrayList<String>());
+                    ArrayList<String> history = HawkConfig.getHistory(HawkConfig.API_HISTORY);
                     if (!history.contains(newApi))
                         history.add(0, newApi);
                     if (history.size() > 20)
                         history.remove(20);
-                    Hawk.put(HawkConfig.API_HISTORY, history);
+                    HawkConfig.putHistory(HawkConfig.API_HISTORY, history);
                     listener.onchange(newApi);
                     dismiss();
                 }
                 // Capture Live input into Settings & Live History (max 20)
                 Hawk.put(HawkConfig.LIVE_URL, newLive);
                 if (!newLive.isEmpty()) {
-                    ArrayList<String> liveHistory = Hawk.get(HawkConfig.LIVE_HISTORY, new ArrayList<String>());
+                    ArrayList<String> liveHistory = HawkConfig.getHistory(HawkConfig.LIVE_HISTORY);
                     if (!liveHistory.contains(newLive))
                         liveHistory.add(0, newLive);
                     if (liveHistory.size() > 20)
                         liveHistory.remove(20);
-                    Hawk.put(HawkConfig.LIVE_HISTORY, liveHistory);
+                    HawkConfig.putHistory(HawkConfig.LIVE_HISTORY, liveHistory);
                 }
                 // Capture EPG input into Settings
                 Hawk.put(HawkConfig.EPG_URL, newEPG);
                 if (!newEPG.isEmpty()) {
-                    ArrayList<String> EPGHistory = Hawk.get(HawkConfig.EPG_HISTORY, new ArrayList<String>());
+                    ArrayList<String> EPGHistory = HawkConfig.getHistory(HawkConfig.EPG_HISTORY);
                     if (!EPGHistory.contains(newEPG))
                         EPGHistory.add(0, newEPG);
                     if (EPGHistory.size() > 20)
                         EPGHistory.remove(20);
-                    Hawk.put(HawkConfig.EPG_HISTORY, EPGHistory);
+                    HawkConfig.putHistory(HawkConfig.EPG_HISTORY, EPGHistory);
                 }
-                // Capture oroxy server input into Settings
+                // Capture proxy server input into Settings & Proxy History (max 20)
                 Hawk.put(HawkConfig.PROXY_SERVER, newProxyServer);
+                if (!newProxyServer.isEmpty()) {
+                    ArrayList<String> proxyHistory = HawkConfig.getHistory(HawkConfig.PROXY_HISTORY);
+                    if (!proxyHistory.contains(newProxyServer))
+                        proxyHistory.add(0, newProxyServer);
+                    if (proxyHistory.size() > 20)
+                        proxyHistory.remove(20);
+                    HawkConfig.putHistory(HawkConfig.PROXY_HISTORY, proxyHistory);
+                }
             }
         });
         findViewById(R.id.apiHistory).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ArrayList<String> history = Hawk.get(HawkConfig.API_HISTORY, new ArrayList<String>());
+                ArrayList<String> history = HawkConfig.getHistory(HawkConfig.API_HISTORY);
                 if (history.isEmpty())
                     return;
                 String current = Hawk.get(HawkConfig.API_URL, "");
@@ -142,12 +150,20 @@ public class ApiDialog extends BaseDialog {
                     public void click(String value) {
                         inputApi.setText(value);
                         listener.onchange(value);
+                        ArrayList<String> history = HawkConfig.getHistory(HawkConfig.API_HISTORY);
+                        if (history.contains(value)) {
+                            history.remove(value);
+                            history.add(0, value);
+                        } else {
+                            history.add(0, value);
+                        }
+                        HawkConfig.putHistory(HawkConfig.API_HISTORY, history);
                         dialog.dismiss();
                     }
 
                     @Override
                     public void del(String value, ArrayList<String> data) {
-                        Hawk.put(HawkConfig.API_HISTORY, data);
+                        HawkConfig.putHistory(HawkConfig.API_HISTORY, data);
                     }
                 }, history, idx);
                 dialog.show();
@@ -156,7 +172,7 @@ public class ApiDialog extends BaseDialog {
         findViewById(R.id.liveHistory).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ArrayList<String> liveHistory = Hawk.get(HawkConfig.LIVE_HISTORY, new ArrayList<String>());
+                ArrayList<String> liveHistory = HawkConfig.getHistory(HawkConfig.LIVE_HISTORY);
                 if (liveHistory.isEmpty())
                     return;
                 String current = Hawk.get(HawkConfig.LIVE_URL, "");
@@ -170,12 +186,18 @@ public class ApiDialog extends BaseDialog {
                     public void click(String liveURL) {
                         inputLive.setText(liveURL);
                         Hawk.put(HawkConfig.LIVE_URL, liveURL);
+                        ArrayList<String> liveHistory = HawkConfig.getHistory(HawkConfig.LIVE_HISTORY);
+                        if (liveHistory.contains(liveURL)) {
+                            liveHistory.remove(liveURL);
+                            liveHistory.add(0, liveURL);
+                            HawkConfig.putHistory(HawkConfig.LIVE_HISTORY, liveHistory);
+                        }
                         dialog.dismiss();
                     }
 
                     @Override
                     public void del(String value, ArrayList<String> data) {
-                        Hawk.put(HawkConfig.LIVE_HISTORY, data);
+                        HawkConfig.putHistory(HawkConfig.LIVE_HISTORY, data);
                     }
                 }, liveHistory, idx);
                 dialog.show();
@@ -184,7 +206,7 @@ public class ApiDialog extends BaseDialog {
         findViewById(R.id.EPGHistory).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ArrayList<String> EPGHistory = Hawk.get(HawkConfig.EPG_HISTORY, new ArrayList<String>());
+                ArrayList<String> EPGHistory = HawkConfig.getHistory(HawkConfig.EPG_HISTORY);
                 if (EPGHistory.isEmpty())
                     return;
                 String current = Hawk.get(HawkConfig.EPG_URL, "");
@@ -198,14 +220,54 @@ public class ApiDialog extends BaseDialog {
                     public void click(String epgURL) {
                         inputEPG.setText(epgURL);
                         Hawk.put(HawkConfig.EPG_URL, epgURL);
+                        ArrayList<String> EPGHistory = HawkConfig.getHistory(HawkConfig.EPG_HISTORY);
+                        if (EPGHistory.contains(epgURL)) {
+                            EPGHistory.remove(epgURL);
+                            EPGHistory.add(0, epgURL);
+                            HawkConfig.putHistory(HawkConfig.EPG_HISTORY, EPGHistory);
+                        }
                         dialog.dismiss();
                     }
 
                     @Override
                     public void del(String value, ArrayList<String> data) {
-                        Hawk.put(HawkConfig.EPG_HISTORY, data);
+                        HawkConfig.putHistory(HawkConfig.EPG_HISTORY, data);
                     }
                 }, EPGHistory, idx);
+                dialog.show();
+            }
+        });
+        findViewById(R.id.proxyHistory).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ArrayList<String> proxyHistory = HawkConfig.getHistory(HawkConfig.PROXY_HISTORY);
+                if (proxyHistory.isEmpty())
+                    return;
+                String current = Hawk.get(HawkConfig.PROXY_SERVER, "");
+                int idx = 0;
+                if (proxyHistory.contains(current))
+                    idx = proxyHistory.indexOf(current);
+                ApiHistoryDialog dialog = new ApiHistoryDialog(getContext());
+                dialog.setTip(HomeActivity.getRes().getString(R.string.dia_history_proxy));
+                dialog.setAdapter(new ApiHistoryDialogAdapter.SelectDialogInterface() {
+                    @Override
+                    public void click(String proxyURL) {
+                        inputProxy.setText(proxyURL);
+                        Hawk.put(HawkConfig.PROXY_SERVER, proxyURL);
+                        ArrayList<String> proxyHistory = HawkConfig.getHistory(HawkConfig.PROXY_HISTORY);
+                        if (proxyHistory.contains(proxyURL)) {
+                            proxyHistory.remove(proxyURL);
+                            proxyHistory.add(0, proxyURL);
+                            HawkConfig.putHistory(HawkConfig.PROXY_HISTORY, proxyHistory);
+                        }
+                        dialog.dismiss();
+                    }
+
+                    @Override
+                    public void del(String value, ArrayList<String> data) {
+                        HawkConfig.putHistory(HawkConfig.PROXY_HISTORY, data);
+                    }
+                }, proxyHistory, idx);
                 dialog.show();
             }
         });

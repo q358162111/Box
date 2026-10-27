@@ -4,6 +4,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 
 import com.github.tvbox.osc.event.RefreshEvent;
@@ -15,6 +17,7 @@ import com.orhanobut.hawk.Hawk;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 
@@ -80,22 +83,79 @@ public class ControlManager {
 
                 @Override
                 public void onApiReceived(String url) {
-                    EventBus.getDefault().post(new RefreshEvent(RefreshEvent.TYPE_API_URL_CHANGE, url));
+                    // Hawk 写盘收口到主线程:后台线程与主线程并发 put 会互相覆盖整份存储,导致地址历史丢失
+                    new Handler(Looper.getMainLooper()).post(() -> {
+                        Hawk.put(HawkConfig.API_URL, url);
+                        ArrayList<String> history = HawkConfig.getHistory(HawkConfig.API_HISTORY);
+                        if (!history.contains(url)) {
+                            history.add(0, url);
+                        } else {
+                            history.remove(url);
+                            history.add(0, url);
+                        }
+                        if (history.size() > 20) {
+                            history.remove(20);
+                        }
+                        HawkConfig.putHistory(HawkConfig.API_HISTORY, history);
+                        EventBus.getDefault().post(new RefreshEvent(RefreshEvent.TYPE_API_URL_CHANGE, url));
+                    });
                 }
 
                 @Override
                 public void onLiveReceived(String url) {
-                    EventBus.getDefault().post(new RefreshEvent(RefreshEvent.TYPE_LIVE_URL_CHANGE, url));
+                    new Handler(Looper.getMainLooper()).post(() -> {
+                        Hawk.put(HawkConfig.LIVE_URL, url);
+                        ArrayList<String> history = HawkConfig.getHistory(HawkConfig.LIVE_HISTORY);
+                        if (!history.contains(url)) {
+                            history.add(0, url);
+                        } else {
+                            history.remove(url);
+                            history.add(0, url);
+                        }
+                        if (history.size() > 20) {
+                            history.remove(20);
+                        }
+                        HawkConfig.putHistory(HawkConfig.LIVE_HISTORY, history);
+                        EventBus.getDefault().post(new RefreshEvent(RefreshEvent.TYPE_LIVE_URL_CHANGE, url));
+                    });
                 }
 
                 @Override
                 public void onEpgReceived(String url) {
-                    EventBus.getDefault().post(new RefreshEvent(RefreshEvent.TYPE_EPG_URL_CHANGE, url));
+                    new Handler(Looper.getMainLooper()).post(() -> {
+                        Hawk.put(HawkConfig.EPG_URL, url);
+                        ArrayList<String> history = HawkConfig.getHistory(HawkConfig.EPG_HISTORY);
+                        if (!history.contains(url)) {
+                            history.add(0, url);
+                        } else {
+                            history.remove(url);
+                            history.add(0, url);
+                        }
+                        if (history.size() > 20) {
+                            history.remove(20);
+                        }
+                        HawkConfig.putHistory(HawkConfig.EPG_HISTORY, history);
+                        EventBus.getDefault().post(new RefreshEvent(RefreshEvent.TYPE_EPG_URL_CHANGE, url));
+                    });
                 }
 
                 @Override
                 public void onProxysReceived(String url) {
-                    EventBus.getDefault().post(new RefreshEvent(RefreshEvent.TYPE_PROXYS_CHANGE, url));
+                    new Handler(Looper.getMainLooper()).post(() -> {
+                        Hawk.put(HawkConfig.PROXY_SERVER, url);
+                        ArrayList<String> history = HawkConfig.getHistory(HawkConfig.PROXY_HISTORY);
+                        if (!history.contains(url)) {
+                            history.add(0, url);
+                        } else {
+                            history.remove(url);
+                            history.add(0, url);
+                        }
+                        if (history.size() > 20) {
+                            history.remove(20);
+                        }
+                        HawkConfig.putHistory(HawkConfig.PROXY_HISTORY, history);
+                        EventBus.getDefault().post(new RefreshEvent(RefreshEvent.TYPE_PROXYS_CHANGE, url));
+                    });
                 }
 
                 @Override

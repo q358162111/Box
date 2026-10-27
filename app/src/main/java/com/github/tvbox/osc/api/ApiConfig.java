@@ -779,27 +779,28 @@ public class ApiConfig {
 
     private void putLiveHistory(String url) {
         if (!url.isEmpty()) {
-            ArrayList<String> liveHistory = Hawk.get(HawkConfig.LIVE_HISTORY, new ArrayList<String>());
+            ArrayList<String> liveHistory = HawkConfig.getHistory(HawkConfig.LIVE_HISTORY);
             if (!liveHistory.contains(url))
                 liveHistory.add(0, url);
             if (liveHistory.size() > 20)
                 liveHistory.remove(20);
-            putHawkOnMainThread(HawkConfig.LIVE_HISTORY, liveHistory);
+            putHawkOnMainThread(HawkConfig.LIVE_HISTORY, HawkConfig.joinHistory(liveHistory));
         }
     }
 
     public static void putEPGHistory(String url) {
         if (!url.isEmpty()) {
-            ArrayList<String> epgHistory = Hawk.get(HawkConfig.EPG_HISTORY, new ArrayList<String>());
+            ArrayList<String> epgHistory = HawkConfig.getHistory(HawkConfig.EPG_HISTORY);
             if (!epgHistory.contains(url))
                 epgHistory.add(0, url);
             if (epgHistory.size() > 20)
                 epgHistory.remove(20);
-            // 静态方法无法走实例级 putHawkOnMainThread,就地按线程分派
+            // 静态方法无法走实例级 putHawkOnMainThread,就地按线程分派(仍落 String 类型,避免 Hawk List 缺陷)
+            final String joined = HawkConfig.joinHistory(epgHistory);
             if (Looper.myLooper() == Looper.getMainLooper()) {
-                Hawk.put(HawkConfig.EPG_HISTORY, epgHistory);
+                Hawk.put(HawkConfig.EPG_HISTORY, joined);
             } else {
-                new Handler(Looper.getMainLooper()).post(() -> Hawk.put(HawkConfig.EPG_HISTORY, epgHistory));
+                new Handler(Looper.getMainLooper()).post(() -> Hawk.put(HawkConfig.EPG_HISTORY, joined));
             }
         }
     }
@@ -911,14 +912,15 @@ public class ApiConfig {
 
     public void setSourceBean(SourceBean sourceBean) {
         this.mHomeSource = sourceBean;
-        Hawk.put(HawkConfig.HOME_API, sourceBean.getKey());
+        // 收口主线程写盘，避免后台解析线程与主线程并发 Hawk.put 互相覆盖导致地址历史等丢失
+        putHawkOnMainThread(HawkConfig.HOME_API, sourceBean.getKey());
     }
 
     public void setDefaultParse(ParseBean parseBean) {
         if (this.mDefaultParse != null)
             this.mDefaultParse.setDefault(false);
         this.mDefaultParse = parseBean;
-        Hawk.put(HawkConfig.DEFAULT_PARSE, parseBean.getName());
+        putHawkOnMainThread(HawkConfig.DEFAULT_PARSE, parseBean.getName());
         parseBean.setDefault(true);
     }
 

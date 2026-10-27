@@ -2,12 +2,44 @@ package com.github.tvbox.osc.util;
 
 import com.orhanobut.hawk.Hawk;
 
+import java.util.ArrayList;
+
 /**
  * @author pj567
  * @date :2020/12/23
  * @description:
  */
 public class HawkConfig {
+    // 地址历史统一用 String 承载（以换行分隔）：本 fork 的 Hawk 会把 List 序列化落盘为
+    // String 类型标记，导致按 ArrayList 读取时类型不匹配、返回空历史，故此改为恒定 String 类型读写。
+    public static ArrayList<String> getHistory(String key) {
+        return splitHistory(Hawk.get(key, ""));
+    }
+
+    public static boolean putHistory(String key, ArrayList<String> list) {
+        return Hawk.put(key, joinHistory(list));
+    }
+
+    public static String joinHistory(ArrayList<String> list) {
+        StringBuilder sb = new StringBuilder();
+        for (String it : list) {
+            if (sb.length() > 0) sb.append('\n');
+            sb.append(it);
+        }
+        return sb.toString();
+    }
+
+    public static ArrayList<String> splitHistory(String s) {
+        if (s == null || s.isEmpty())
+            return new ArrayList<String>();
+        ArrayList<String> list = new ArrayList<String>();
+        for (String it : s.split("\n", -1)) {
+            if (!it.isEmpty())
+                list.add(it);
+        }
+        return list;
+    }
+
     public static final String PUSH_TO_ADDR = "push_to_addr"; // 推送到地址的IP
     public static final String PUSH_TO_PORT = "push_to_port"; // 推送到地址的端口
     // URL Configurations
@@ -18,6 +50,7 @@ public class HawkConfig {
     public static final String EPG_URL = "epg_url";
     public static final String EPG_HISTORY = "epg_history";
     public static final String PROXY_SERVER = "proxy_server";
+    public static final String PROXY_HISTORY = "proxy_history";
     // Settings
     public static final String DEBUG_OPEN = "debug_open";
     public static final String HOME_API = "home_api";

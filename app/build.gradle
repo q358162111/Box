@@ -37,17 +37,15 @@ android {
     }
 
     // 签名配置：keystore 与密码均不落库，从 gradle.properties / 环境变量 / -P 传入。
-    // 只有 test.keystore 存在且 KEYSTORE_PASS 可用时才启用签名，否则 release 构建为未签名 APK。
+    // 专用 release 签名:仓库根目录 test.keystore(key0),保证任何机器构建的 APK 签名一致,
+    // 可直接覆盖安装(此前用各机器自生成的 debug.keystore,跨机器构建签名不一致无法升级)
     def ksFile = rootProject.file("test.keystore")
-    def ksPass = (project.findProperty("KEYSTORE_PASS") ?: System.getenv("KEYSTORE_PASS")) ?: ""
     signingConfigs {
         release {
-            if (ksFile.exists() && !ksPass.isEmpty()) {
-                storeFile ksFile
-                storePassword ksPass
-                keyAlias (project.findProperty("KEYSTORE_ALIAS") ?: System.getenv("KEYSTORE_ALIAS")) ?: "key0"
-                keyPassword (project.findProperty("KEYSTORE_KEY_PASS") ?: System.getenv("KEYSTORE_KEY_PASS")) ?: ksPass
-            }
+            storeFile ksFile
+            storePassword "900825"
+            keyAlias "key0"
+            keyPassword "900825"
         }
     }
 
@@ -55,7 +53,7 @@ android {
         release {
             minifyEnabled true
             shrinkResources true
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
         }
     }
 

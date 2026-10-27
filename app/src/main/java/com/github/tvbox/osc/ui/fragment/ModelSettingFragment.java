@@ -186,7 +186,7 @@ public class ModelSettingFragment extends BaseLazyFragment {
         findViewById(R.id.llApiHistory).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ArrayList<String> history = Hawk.get(HawkConfig.API_HISTORY, new ArrayList<String>());
+                ArrayList<String> history = HawkConfig.getHistory(HawkConfig.API_HISTORY);
                 if (history.isEmpty())
                     return;
                 String current = Hawk.get(HawkConfig.API_URL, "");
@@ -200,12 +200,18 @@ public class ModelSettingFragment extends BaseLazyFragment {
                     public void click(String api) {
                         Hawk.put(HawkConfig.API_URL, api);
                         tvApi.setText(api);
+                        ArrayList<String> history = HawkConfig.getHistory(HawkConfig.API_HISTORY);
+                        if (history.contains(api)) {
+                            history.remove(api);
+                            history.add(0, api);
+                            HawkConfig.putHistory(HawkConfig.API_HISTORY, history);
+                        }
                         dialog.dismiss();
                     }
 
                     @Override
                     public void del(String value, ArrayList<String> data) {
-                        Hawk.put(HawkConfig.API_HISTORY, data);
+                        HawkConfig.putHistory(HawkConfig.API_HISTORY, data);
                     }
                 }, history, idx);
                 dialog.show();

@@ -236,6 +236,25 @@
                             android:textColor="@color/color_FFFFFF"
                             android:textColorHint="@color/color_FFFFFF_50"
                             android:textSize="@dimen/ts_22" />
+
+                        <LinearLayout
+                            android:id="@+id/proxyHistory"
+                            android:layout_width="@dimen/vs_80"
+                            android:layout_height="match_parent"
+                            android:layout_marginStart="@dimen/vs_5"
+                            android:layout_marginLeft="@dimen/vs_5"
+                            android:background="@drawable/shape_setting_model_focus"
+                            android:focusable="true"
+                            android:gravity="center"
+                            android:orientation="horizontal"
+                            android:padding="@dimen/vs_10">
+
+                            <ImageView
+                                android:layout_width="@dimen/vs_30"
+                                android:layout_height="@dimen/vs_30"
+                                android:focusable="true"
+                                android:src="@drawable/hm_history" />
+                        </LinearLayout>
                     </LinearLayout>
 
                 </LinearLayout>

@@ -84,6 +84,7 @@
     <string name="dia_history_list">Configuration History List</string>
     <string name="dia_history_live">Live History List</string>
     <string name="dia_history_epg">EPG History List</string>
+    <string name="dia_history_proxy">Proxy History List</string>
     <string name="dia_player">Select Player Type</string>
     <string name="dia_decode">Select IJK Decoder</string>
     <string name="dia_search">Select Search Mode</string>
