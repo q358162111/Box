@@ -14,6 +14,7 @@ import com.github.tvbox.osc.callback.EmptyCallback;
 import com.github.tvbox.osc.callback.LoadingCallback;
 import com.github.tvbox.osc.data.AppDataManager;
 import com.github.tvbox.osc.server.ControlManager;
+import com.github.tvbox.osc.util.AppExecutors;
 import com.github.tvbox.osc.util.EpgUtil;
 import com.github.tvbox.osc.util.FileUtils;
 import com.github.tvbox.osc.util.HawkConfig;
@@ -99,8 +100,14 @@ public class App extends android.app.Application {
         dir = getExternalCacheDir();
         FileUtils.recursiveDelete(dir);*/
 
-        // 后台线程清理播放缓存，避免大缓存目录拖慢冷启动
-        new Thread(FileUtils::cleanPlayerCache, "cleanPlayerCache").start();
+        // 后台线程清理播放缓存，避免大缓存目录拖慢冷启动(共享 daemon 池,带异常保护)
+        AppExecutors.execute(() -> {
+            try {
+                FileUtils.cleanPlayerCache();
+            } catch (Throwable th) {
+                th.printStackTrace();
+            }
+        });
 
         // Add JS support
         QuickJSLoader.init();

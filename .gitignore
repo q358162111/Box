@@ -1,5 +1,6 @@
-# windows thumbnail cache
+# Windows thumbnail cache
 Thumbs.db
+.DS_Store
 
 
 # Built application files
@@ -20,6 +21,14 @@ proguardMapping.txt
 bin/
 gen/
 out/
+
+# Native dynamic libs (dev-host artifacts, not runtime deps)
+*.dylib
+
+# Local signing secrets (never track)
+keystore.properties
+release.keystore
+test.keystore
 #  Uncomment the following line in case you need and you don't have the release build type files in your app
 # release/
 
@@ -89,8 +98,11 @@ vcs.xml
 # flavor APK output dirs (custom outputFileName places them at module root)
 /app/arm64Generic/
 /app/arm64GenericNormal/
+/app/arm64GenericPython/
 /app/arm64HisenseNormal/
 /app/armeabiGeneric/
+/app/armeabiGenericNormal/
+/app/armeabiGenericPython/
 /app/armeabiHisenseNormal/
 
 # lint
