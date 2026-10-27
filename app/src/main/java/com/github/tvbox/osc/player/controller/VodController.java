@@ -225,7 +225,7 @@ public class VodController extends BaseController {
                                 float speed = (float) mPlayerConfig.getDouble("sp");
                                 mControlWrapper.setSpeed(speed);
                             } catch (JSONException e) {
-                                e.printStackTrace();
+                                LOG.e(e);
                             }
                         } else if (mSpeedRetryCount++ < 50) // 非播放态最多重试 5 秒，避免错误态下无限占用主线程
                             mHandler.sendEmptyMessageDelayed(1004, 100);
@@ -580,7 +580,7 @@ public class VodController extends BaseController {
                     float speed = (float) mPlayerConfig.getDouble("sp");
                     increasePlaySpeed(speed);
                 } catch (JSONException e) {
-                    e.printStackTrace();
+                    LOG.e(e);
                 }
             }
         });
@@ -660,7 +660,7 @@ public class VodController extends BaseController {
                     mControlWrapper.setScreenScaleType(scaleType);
 //                    Toast.makeText(getContext(), PlayerHelper.getScaleName(mPlayerConfig.getInt("sc")), Toast.LENGTH_SHORT).show();
                 } catch (JSONException e) {
-                    e.printStackTrace();
+                    LOG.e(e);
                 }
             }
         });
@@ -705,7 +705,7 @@ public class VodController extends BaseController {
 //                    listener.replay(false);
 //                    // hideBottom();
 //                } catch (JSONException e) {
-//                    e.printStackTrace();
+//                    LOG.e(e);
 //                }
 //                mPlayerBtn.requestFocus();
 //            }
@@ -743,7 +743,7 @@ public class VodController extends BaseController {
                                 listener.updatePlayerCfg();
                                 listener.replay(false);
                             } catch (Exception e) {
-                                e.printStackTrace();
+                                LOG.e(e);
                             }
                         }
 
@@ -764,7 +764,7 @@ public class VodController extends BaseController {
                     }, players, defaultPos);
                     dialog.show();
                 } catch (JSONException e) {
-                    e.printStackTrace();
+                    LOG.e(e);
                 }
             }
         });
@@ -791,7 +791,7 @@ public class VodController extends BaseController {
                     listener.replay(false);
                     // hideBottom();
                 } catch (JSONException e) {
-                    e.printStackTrace();
+                    LOG.e(e);
                 }
                 mPlayerIJKBtn.requestFocus();
             }
@@ -843,7 +843,7 @@ public class VodController extends BaseController {
                     updatePlayerCfgView();
                     listener.updatePlayerCfg();
                 } catch (JSONException e) {
-                    e.printStackTrace();
+                    LOG.e(e);
                 }
             }
         });
@@ -856,7 +856,7 @@ public class VodController extends BaseController {
                     updatePlayerCfgView();
                     listener.updatePlayerCfg();
                 } catch (JSONException e) {
-                    e.printStackTrace();
+                    LOG.e(e);
                 }
                 Toast.makeText(getContext(), "已预设片头片尾", Toast.LENGTH_SHORT).show();
                 return true;
@@ -884,7 +884,7 @@ public class VodController extends BaseController {
                     updatePlayerCfgView();
                     listener.updatePlayerCfg();
                 } catch (JSONException e) {
-                    e.printStackTrace();
+                    LOG.e(e);
                 }
             }
         });
@@ -897,7 +897,7 @@ public class VodController extends BaseController {
                     updatePlayerCfgView();
                     listener.updatePlayerCfg();
                 } catch (JSONException e) {
-                    e.printStackTrace();
+                    LOG.e(e);
                 }
                 return true;
             }
@@ -924,7 +924,7 @@ public class VodController extends BaseController {
                     updatePlayerCfgView();
                     listener.updatePlayerCfg();
                 } catch (JSONException e) {
-                    e.printStackTrace();
+                    LOG.e(e);
                 }
             }
         });
@@ -937,7 +937,7 @@ public class VodController extends BaseController {
                     updatePlayerCfgView();
                     listener.updatePlayerCfg();
                 } catch (JSONException e) {
-                    e.printStackTrace();
+                    LOG.e(e);
                 }
                 return true;
             }
@@ -1083,7 +1083,7 @@ public class VodController extends BaseController {
 //            mSubtitleBtn.setVisibility(playerType == 1 ? VISIBLE : GONE);
 //            mAudioTrackBtn.setVisibility(playerType == 1 ? VISIBLE : GONE);
         } catch (JSONException e) {
-            e.printStackTrace();
+            LOG.e(e);
         }
     }
 
@@ -1142,7 +1142,7 @@ public class VodController extends BaseController {
             try {
                 et = mPlayerConfig.getInt("et");
             } catch (JSONException e) {
-                e.printStackTrace();
+                LOG.e(e);
             }
             if (et > 0 && position + (et * 1000) >= duration) {
                 skipEnd = false;
@@ -1355,7 +1355,7 @@ public class VodController extends BaseController {
             listener.updatePlayerCfg();
             mControlWrapper.setSpeed(value);
         } catch (JSONException err) {
-            err.printStackTrace();
+            LOG.e(err);
         }
     }
 
@@ -1377,7 +1377,7 @@ public class VodController extends BaseController {
             updatePlayerCfgView();
             listener.updatePlayerCfg();
         } catch (JSONException e) {
-            e.printStackTrace();
+            LOG.e(e);
         }
     }
 
@@ -1399,7 +1399,7 @@ public class VodController extends BaseController {
             updatePlayerCfgView();
             listener.updatePlayerCfg();
         } catch (JSONException e) {
-            e.printStackTrace();
+            LOG.e(e);
         }
     }
 
@@ -1469,14 +1469,14 @@ public class VodController extends BaseController {
                         float speed = (float) mPlayerConfig.getDouble("sp");
                         increasePlaySpeed(speed);
                     } catch (JSONException e) {
-                        e.printStackTrace();
+                        LOG.e(e);
                     }
                 } else if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
                     try {
                         float speed = (float) mPlayerConfig.getDouble("sp");
                         decreasePlaySpeed(speed);
                     } catch (JSONException e) {
-                        e.printStackTrace();
+                        LOG.e(e);
                     }
                 }
             }
@@ -1532,7 +1532,7 @@ public class VodController extends BaseController {
                 }
                 setPlaySpeed(mSpeed);
             } catch (JSONException f) {
-                f.printStackTrace();
+                LOG.e(f);
             }
         }
     }

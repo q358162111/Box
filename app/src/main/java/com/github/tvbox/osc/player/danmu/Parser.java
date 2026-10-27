@@ -7,6 +7,7 @@ import com.github.tvbox.osc.bean.Danmu;
 import com.github.tvbox.osc.util.ColorHelper;
 import com.github.tvbox.osc.util.FileUtils;
 import com.github.tvbox.osc.util.HawkUtils;
+import com.github.tvbox.osc.util.LOG;
 import com.lzy.okgo.OkGo;
 
 import org.json.JSONArray;
@@ -61,7 +62,7 @@ public class Parser extends BaseDanmakuParser {
                     }
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                LOG.e(e);
             }
         }
         return result;
@@ -106,7 +107,7 @@ public class Parser extends BaseDanmakuParser {
                 textArr[i] = jsonArray.getString(i);
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+            LOG.e(e);
         }
         if (textArr == null || textArr.length < 5 || TextUtils.isEmpty(textArr[4])) {
             // 返回失败标记，不再置空共享的 item 字段

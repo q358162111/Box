@@ -1,6 +1,7 @@
 package com.github.tvbox.osc.server
 
 import com.github.tvbox.osc.event.RefreshEvent
+import com.github.tvbox.osc.util.LOG
 import com.yanzhenjie.andserver.annotation.GetMapping
 import com.yanzhenjie.andserver.annotation.QueryParam
 import com.yanzhenjie.andserver.annotation.ResponseBody
@@ -23,8 +24,8 @@ class WebController {
             EventBus.getDefault().post(RefreshEvent(RefreshEvent.TYPE_PUSH_URL, url))
             "ok"
         } catch (e: Exception) {
-            e.printStackTrace()
-            "error:" + e.message
+            LOG.e(e)
+            "error:" + e.message.orEmpty()
         }
     }
 

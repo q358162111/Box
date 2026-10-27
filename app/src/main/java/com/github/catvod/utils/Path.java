@@ -5,6 +5,7 @@ import android.os.Environment;
 import android.util.Log;
 
 import com.github.catvod.Init;
+import com.github.tvbox.osc.util.LOG;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -163,7 +164,7 @@ public class Path {
             while ((n = input.read(buffer)) != -1) bos.write(buffer, 0, n);
             return bos.toString("UTF-8");
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.e(e);
             return "";
         }
     }
@@ -244,7 +245,7 @@ public class Path {
                 else copy(zip.getInputStream(entry), out);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.e(e);
         }
     }
 
@@ -256,7 +257,7 @@ public class Path {
             process.waitFor();
             return file;
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.e(e);
             return file;
         }
     }

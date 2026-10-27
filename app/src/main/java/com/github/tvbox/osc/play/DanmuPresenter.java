@@ -1,7 +1,6 @@
 package com.github.tvbox.osc.play;
 
 import android.os.Build;
-import android.os.Handler;
 
 import com.github.tvbox.osc.base.App;
 import com.github.tvbox.osc.player.danmu.Parser;
@@ -35,7 +34,6 @@ public class DanmuPresenter {
     }
 
     private final Host host;
-    private final Handler handler = new Handler();
     private DanmakuContext danmakuContext;
     private ExecutorService executorService;
 

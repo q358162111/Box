@@ -4,9 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * @author pj567
  * @date :2021/1/5
@@ -18,8 +15,6 @@ public class CustomWebReceiver extends BroadcastReceiver {
     public static String REFRESH_SOURCE = "source";
     public static String REFRESH_LIVE = "live";
     public static String REFRESH_PARSE = "parse";
-
-    public static List<Callback> callback = new ArrayList<>();
 
     public interface Callback {
         void onChange(String action, Object obj);

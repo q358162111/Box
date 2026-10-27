@@ -158,7 +158,8 @@ public class LivePlayActivity extends BaseActivity {
     private final Handler mHandler = new Handler();
     // 防御：改为实例字段（不再 static），避免多 Activity 实例间状态串台，且 GC 可正常释放
     private LiveChannelItem channel_Name = null;
-    // 防御：Hashtable 同步开销大且无限大小可能 OOM，改用 LinkedHashMap + 容量上限
+    // 防御：EPG 缓存做容量上限（超 200 项按插入顺序淘汰一半，见 L886），避免无限增长 OOM；
+    // 保留 synchronized Hashtable 以在多处访问处提供线程安全
     private static final Hashtable hsEpg = new Hashtable();
     private TextView tvTime;
     private TextView tvNetSpeed;
@@ -545,7 +546,7 @@ public class LivePlayActivity extends BaseActivity {
         super.onDestroy();
         // 修复：原代码未 unregister EventBus，导致 Activity 实例被 EventBus 引用泄漏
         if (EventBus.getDefault().isRegistered(this)) {
-            if (EventBus.getDefault().isRegistered(this)) EventBus.getDefault().unregister(this);
+            EventBus.getDefault().unregister(this);
         }
         // 修复：清理所有 mHandler 队列回调，防止 Activity 已销毁后回调触发 NPE 与泄漏
         if (mHandler != null) {
