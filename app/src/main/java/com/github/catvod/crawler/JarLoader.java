@@ -18,23 +18,61 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 import dalvik.system.DexClassLoader;
 import okhttp3.Response;
 
 public class JarLoader {
-    private final ConcurrentHashMap<String, DexClassLoader> classLoaders = new ConcurrentHashMap<>();
+    // 缓存上限：DexClassLoader 一旦加载就无法卸载，Spider 实例也常持有网络资源。
+    // 原本两个 Map 都是无上限的 ConcurrentHashMap，多 jar 源反复切换会持续泄漏 native 内存。
+    // 改为 accessOrder 的 LRU，超限时淘汰最久未使用的条目。
+    private static final int MAX_LOADED_JARS = 12;
+    private static final int MAX_SPIDERS = 64;
+
+    private final Map<String, DexClassLoader> classLoaders = Collections.synchronizedMap(
+            new LinkedHashMap<String, DexClassLoader>(16, 0.75f, true) {
+                @Override
+                protected boolean removeEldestEntry(Map.Entry<String, DexClassLoader> eldest) {
+                    return size() > MAX_LOADED_JARS;
+                }
+            });
     private final ConcurrentHashMap<String, Method> proxyMethods = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<String, Spider> spiders = new ConcurrentHashMap<>();
+    private final Map<String, Spider> spiders = Collections.synchronizedMap(
+            new LinkedHashMap<String, Spider>(16, 0.75f, true) {
+                @Override
+                protected boolean removeEldestEntry(Map.Entry<String, Spider> eldest) {
+                    if (size() <= MAX_SPIDERS) return false;
+                    // 淘汰前必须 destroy，否则 Spider 持有的连接/线程随引用一起泄漏
+                    try {
+                        eldest.getValue().cancelByTag();
+                        eldest.getValue().destroy();
+                    } catch (Throwable ignored) {
+                    }
+                    return true;
+                }
+            });
     // siteKey -> jarKey 映射，供 proxyInvoke 按 params 中的 siteKey 精确路由，避免多源并发时按「最后加载的源」串数据
     private final ConcurrentHashMap<String, String> siteJarKeys = new ConcurrentHashMap<>();
     // getSpider 的 check-then-act 竞态防护锁
     private final Object spiderLoadLock = new Object();
     private volatile String recentJarKey = "";
+    // 首页预热专用：原实现在 spiderLoadLock 内同步发起完整网络请求，多源并发加载时全部串行阻塞
+    private static final ExecutorService warmUpExecutor = Executors.newFixedThreadPool(2, new ThreadFactory() {
+        @Override
+        public Thread newThread(Runnable r) {
+            Thread t = new Thread(r, "spider-warmup");
+            t.setDaemon(true);
+            return t;
+        }
+    });
 
     /**
      * 不要在主线程调用我
@@ -48,16 +86,22 @@ public class JarLoader {
 
     public void clear() {
         // 切换配置是高频操作：只清 Map 会导致每个 jar 源泄漏，必须逐个 destroy
-        for (Spider spider : spiders.values()) {
-            try {
-                spider.cancelByTag();
-                spider.destroy();
-            } catch (Throwable ignored) {
+        // spiders 是 synchronizedMap，迭代期间必须持有其自身锁，否则并发 put 会触发 ConcurrentModificationException
+        synchronized (spiders) {
+            for (Spider spider : spiders.values()) {
+                try {
+                    spider.cancelByTag();
+                    spider.destroy();
+                } catch (Throwable ignored) {
+                }
             }
+            spiders.clear();
         }
-        spiders.clear();
         proxyMethods.clear();
-        classLoaders.clear();
+        synchronized (classLoaders) {
+            classLoaders.clear();
+        }
+        siteJarKeys.clear();
     }
 
     private boolean loadClassLoader(String jar, String key) {
@@ -201,10 +245,21 @@ public class JarLoader {
         if (classLoader == null) return new SpiderNull();
         try {
             Log.i("JarLoader", "echo-getSpider 加载spider: " + key);
-            Spider sp = (Spider) classLoader.loadClass("com.github.catvod.spider." + clsKey).newInstance();
+            final Spider sp = (Spider) classLoader.loadClass("com.github.catvod.spider." + clsKey).newInstance();
             sp.init(App.getInstance(), ext);
             if (!jar.isEmpty()) {
-                sp.homeContent(false); // 增加此行 应该可以解决部分写的有问题源的历史记录问题 但会增加这个源的首次加载时间 不需要可以已删掉
+                // 预热该源首页：可解决部分写的有问题源的历史记录问题（不需要可整块删掉）。
+                // 原实现直接在持有 spiderLoadLock 时同步发起一次完整网络请求，
+                // 多源并发加载时被串行阻塞，首次加载耗时成倍放大；改为后台异步预热。
+                warmUpExecutor.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            sp.homeContent(false);
+                        } catch (Throwable ignored) {
+                        }
+                    }
+                });
             }
             spiders.put(key, sp);
             return sp;

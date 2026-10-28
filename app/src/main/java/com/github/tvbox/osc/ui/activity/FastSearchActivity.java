@@ -173,7 +173,9 @@ public class FastSearchActivity extends BaseActivity {
             }
         });
 
-        // mGridView.setHasFixedSize(true);
+        // 聚合搜索结果 item 尺寸固定，恢复固定尺寸优化（原为注释掉的遗留代码）
+        mGridView.setHasFixedSize(true);
+        mGridView.setItemViewCacheSize(16);
         mGridView.setLayoutManager(new V7GridLayoutManager(this.mContext, isBaseOnWidth() ? 4 : 5));
 
         searchAdapter = new FastSearchAdapter();

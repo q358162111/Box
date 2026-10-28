@@ -2,6 +2,7 @@ package com.github.catvod.net;
 
 import android.net.Uri;
 
+import androidx.annotation.NonNull;
 import androidx.collection.ArrayMap;
 
 import com.github.tvbox.osc.bean.Doh;
@@ -10,13 +11,17 @@ import com.github.catvod.utils.Util;
 import com.github.tvbox.osc.util.OkGoHelper;
 import com.google.common.net.HttpHeaders;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Cache;
 import okhttp3.Call;
+import okhttp3.CacheControl;
+import okhttp3.ConnectionPool;
 import okhttp3.Dns;
+import okhttp3.Interceptor;
 import okhttp3.FormBody;
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
@@ -141,6 +146,38 @@ public class OkHttp {
     private static OkHttpClient.Builder getBuilder() {
         OkHttpClient.Builder builder = new OkHttpClient.Builder().addInterceptor(new OkhttpInterceptor()).connectTimeout(TIMEOUT, TimeUnit.MILLISECONDS).readTimeout(TIMEOUT, TimeUnit.MILLISECONDS).writeTimeout(TIMEOUT, TimeUnit.MILLISECONDS).dns(dns()).hostnameVerifier(SSLCompat.VERIFIER).sslSocketFactory(new SSLCompat(), SSLCompat.TM);
         builder.proxySelector(selector());
+        // 默认连接池仅 5 个空闲连接，多源并发搜索时连接被反复创建/回收；TV 端多源场景放大为 16
+        builder.connectionPool(new ConnectionPool(16, 5, TimeUnit.MINUTES));
+        try {
+            builder.cache(new Cache(Path.cache("okhttp"), CACHE));
+        } catch (Throwable e) {
+            // 缓存目录不可用时降级为无缓存，不影响正常请求
+            e.printStackTrace();
+        }
+        // 用 network interceptor 而非 application interceptor：它运行在 CacheInterceptor 之后，
+        // 改写响应头才能真正影响写入磁盘缓存的决策
+        builder.addNetworkInterceptor(new CachePolicyInterceptor());
         return builder;
+    }
+
+    /**
+     * 只对服务端明确声明可缓存的响应启用磁盘缓存。
+     * 爬虫接口多返回动态 JSON 且不带任何缓存头，若沿用 OkHttp 的默认启发式缓存，
+     * 会让列表/详情/搜索结果返回陈旧数据；因此未声明缓存策略的一律标记 no-store，行为与加缓存前一致。
+     */
+    public static class CachePolicyInterceptor implements Interceptor {
+        @NonNull
+        @Override
+        public Response intercept(@NonNull Chain chain) throws IOException {
+            Response response = chain.proceed(chain.request());
+            CacheControl control = response.cacheControl();
+            if (control.noStore() || control.maxAgeSeconds() > 0 || response.header("Expires") != null) {
+                return response;
+            }
+            return response.newBuilder()
+                    .removeHeader("Cache-Control")
+                    .header("Cache-Control", "no-store")
+                    .build();
+        }
     }
 }

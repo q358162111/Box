@@ -22,6 +22,9 @@ import java.util.Set;
  * @description:
  */
 public class VodInfo implements Serializable {
+    // clone() 走 Gson 序列化深拷贝，构造 Gson 的开销较大且是线程安全的，静态复用
+    private static final Gson CLONE_GSON = new Gson();
+
     public String last;//时间
     //内容id
     public String id;
@@ -181,9 +184,8 @@ public class VodInfo implements Serializable {
     @Override
     public Object clone() {
         try {
-            Gson gson = new Gson();
-            String json = gson.toJson(this);
-            return gson.fromJson(json, VodInfo.class);
+            String json = CLONE_GSON.toJson(this);
+            return CLONE_GSON.fromJson(json, VodInfo.class);
         } catch (Exception e) {
             // 反序列化失败时返回字段拷贝副本，绝不返回 this（否则调用方的修改会污染原件）
             VodInfo copy = new VodInfo();

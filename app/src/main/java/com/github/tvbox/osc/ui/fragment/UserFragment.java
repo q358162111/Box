@@ -151,6 +151,7 @@ public class UserFragment extends BaseLazyFragment implements View.OnClickListen
         tvHotListForLine = findViewById(R.id.tvHotListForLine);
         tvHotListForGrid = findViewById(R.id.tvHotListForGrid);
         tvHotListForGrid.setHasFixedSize(true);
+        tvHotListForGrid.setItemViewCacheSize(16);
         int spanCount = 5;
         if (Hawk.get(HawkConfig.HOME_REC, 0) == 1 && homeSourceRec!=null) {
             style=ImgUtil.initStyle();
@@ -222,7 +223,7 @@ public class UserFragment extends BaseLazyFragment implements View.OnClickListen
                 // Additional Check if : Home Rec 0=豆瓣, 1=推荐, 2=历史
                 if ((vod.id != null && !vod.id.isEmpty()) && (Hawk.get(HawkConfig.HOME_REC, 0) == 2)) {
                     HawkConfig.hotVodDelete = !HawkConfig.hotVodDelete;
-                    homeHotVodAdapter.notifyDataSetChanged();
+                    refreshDeleteMode();
                 } else {
                     Intent newIntent = new Intent(mContext, FastSearchActivity.class);
                     newIntent.putExtra("title", vod.name);
@@ -397,6 +398,28 @@ public class UserFragment extends BaseLazyFragment implements View.OnClickListen
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void server(ServerEvent event) {
         if (event.type == ServerEvent.SERVER_CONNECTION) {
+        }
+    }
+
+    /**
+     * 切换删除模式时只更新屏幕上可见 item 的删除按钮，不触发任何 rebind。
+     * 背景：BRVAH 2.9.49 的 BaseQuickAdapter 没有 convert(helper, item, payloads) 重载，
+     * 不支持 payload 局部刷新，notifyDataSetChanged() 会把可见项整项重绑——
+     * 其中最贵的 ImgUtil.load 会被全部重放一遍。
+     * 直接改可见 View 即可，滚动后新绑定的 item 会在 convert() 里读到新的 hotVodDelete 值。
+     */
+    public static void refreshDeleteMode() {
+        if (homeHotVodAdapter == null) return;
+        int visibility = HawkConfig.hotVodDelete ? android.view.View.VISIBLE : android.view.View.GONE;
+        applyDeleteModeToList(tvHotListForGrid, visibility);
+        applyDeleteModeToList(tvHotListForLine, visibility);
+    }
+
+    private static void applyDeleteModeToList(TvRecyclerView list, int visibility) {
+        if (list == null) return;
+        for (int i = 0; i < list.getChildCount(); i++) {
+            android.view.View del = list.getChildAt(i).findViewById(R.id.delFrameLayout);
+            if (del != null) del.setVisibility(visibility);
         }
     }
 

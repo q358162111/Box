@@ -65,6 +65,9 @@ public class SearchAdapter extends BaseQuickAdapter<Movie.Video, BaseViewHolder>
 
     private void setItemWidth(FrameLayout view) {
         GridLayoutManager.LayoutParams layoutParams = (GridLayoutManager.LayoutParams) view.getLayoutParams();
+        // 宽度对所有 item 相同；每次 bind 都 setLayoutParams 会触发 requestLayout，
+        // 快速滚动时产生大量无谓的重新测量与布局，仅在宽度真正变化时才设置
+        if (layoutParams.width == searchWidth) return;
         layoutParams.width = searchWidth;
         view.setLayoutParams(layoutParams);
     }

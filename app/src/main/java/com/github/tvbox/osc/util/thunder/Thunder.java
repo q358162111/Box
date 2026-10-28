@@ -83,15 +83,21 @@ public class Thunder {
                 FileUtils.recursiveDelete(cache);
                 if (!cache.exists())
                     cache.mkdirs();
-                if (threadPool != null) {
-                    try {
-                        threadPool.shutdownNow();
-                        threadPool = null;
-                    } catch (Throwable th) {
-
-                    }
-                }
             }
+            // 无论是否清缓存都要关池：原先 stop(false) 分支直接跳过 shutdown，
+            // 单线程池与其线程会一直常驻到进程结束（PlayActivity 走的就是 stop(false)）。
+            // 任务本身已由 parseGeneration 判定失效，shutdownNow 不会误伤新一轮解析。
+            shutdownPool();
+        }
+    }
+
+    private static void shutdownPool() {
+        if (threadPool != null) {
+            try {
+                threadPool.shutdownNow();
+            } catch (Throwable ignored) {
+            }
+            threadPool = null;
         }
     }
 

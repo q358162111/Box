@@ -4,6 +4,7 @@ import static com.bumptech.glide.load.resource.bitmap.VideoDecoder.FRAME_OPTION;
 import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
 import android.text.TextUtils;
+import android.view.View;
 import android.widget.ImageView;
 import androidx.annotation.Nullable;
 
@@ -18,6 +19,7 @@ import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.ImageViewTarget;
 import com.bumptech.glide.request.target.Target;
 import com.github.tvbox.osc.R;
 import com.github.tvbox.osc.api.ApiConfig;
@@ -140,27 +142,43 @@ public class ImgUtil {
         load(url, view, roundingRadius,0,0);
     }
 
+    // RequestOptions 按「圆角+尺寸」缓存复用：列表快速滚动时每个 item 都会调用 load()，
+    // 原实现每次 bind 都重建 RequestOptions + CenterCrop + RoundedCorners + 匿名 listener。
+    private static final java.util.concurrent.ConcurrentHashMap<String, RequestOptions> OPTIONS_CACHE =
+            new java.util.concurrent.ConcurrentHashMap<>();
+
+    private static RequestOptions obtainOptions(int roundingRadius, int width, int height) {
+        String key = roundingRadius + "_" + width + "_" + height;
+        RequestOptions cached = OPTIONS_CACHE.get(key);
+        if (cached != null) return cached;
+        RequestOptions created = new RequestOptions()
+            .format(DecodeFormat.PREFER_RGB_565)
+            .diskCacheStrategy(getDiskCacheStrategy(4))
+            .dontAnimate()
+            .transform(new CenterCrop(), new RoundedCorners(roundingRadius));
+        if (width > 0 && height > 0) {
+            created = created.override(width, height);
+        }
+        // 上限保护：圆角/尺寸组合理论上无界，避免缓存无限增长
+        if (OPTIONS_CACHE.size() < 64) {
+            OPTIONS_CACHE.putIfAbsent(key, created);
+        }
+        return created;
+    }
+
     public static void load(String url, ImageView view, int roundingRadius, int newWidth, int newHeight) {
         view.setScaleType(ImageView.ScaleType.CENTER);
         if (TextUtils.isEmpty(url)) {
             view.setImageResource(R.drawable.img_loading_placeholder);
         } else {
             if (roundingRadius == 0) roundingRadius = 1;
-            RequestOptions requestOptions = new RequestOptions()
-                .format(DecodeFormat.PREFER_RGB_565)
-                .diskCacheStrategy(getDiskCacheStrategy(4))
-                .dontAnimate()
-                .transform(new CenterCrop(), new RoundedCorners(roundingRadius));
-            if (newWidth > 0 && newHeight > 0) {
-                requestOptions = requestOptions.override(newWidth, newHeight);
-            }
             Glide.with(App.getInstance())
                 .asBitmap()
                 .load(getUrl(url))
                 .error(R.drawable.img_loading_placeholder)
                 .placeholder(R.drawable.img_loading_placeholder)
-                .listener(getListener(view, ImageView.ScaleType.FIT_XY))
-                .apply(requestOptions)
+                .listener(FIT_XY_LISTENER)
+                .apply(obtainOptions(roundingRadius, newWidth, newHeight))
                 .into(view);
         }
     }
@@ -276,19 +294,35 @@ public class ImgUtil {
         return new GlideUrl(url, builder.build());
     }
 
-    private static RequestListener < Bitmap > getListener(ImageView view, ImageView.ScaleType scaleType) {
-        return new RequestListener < Bitmap > () {@Override
-            public boolean onLoadFailed(@Nullable GlideException e, Object model, Target < Bitmap > target, boolean isFirstResource) {
-                view.setScaleType(scaleType);
+    /**
+     * 静态复用的 listener：原实现每次 load 都 new 一个匿名对象并捕获 view。
+     * 改为从 target 反查 ImageView（asBitmap().into(ImageView) 必然生成 ImageViewTarget）。
+     */
+    private static final RequestListener<Bitmap> FIT_XY_LISTENER = new RequestListener<Bitmap>() {
+        @Override
+        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
+            ImageView view = viewFrom(target);
+            if (view != null) {
+                view.setScaleType(ImageView.ScaleType.FIT_XY);
                 view.setImageResource(R.drawable.img_loading_placeholder);
-                return true;
             }
+            return true;
+        }
 
-            @Override
-            public boolean onResourceReady(Bitmap resource, Object model, Target < Bitmap > target, DataSource dataSource, boolean isFirstResource) {
-                view.setScaleType(scaleType);
-                return false;
-            }
-        };
+        @Override
+        public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
+            ImageView view = viewFrom(target);
+            if (view != null) view.setScaleType(ImageView.ScaleType.FIT_XY);
+            return false;
+        }
+    };
+
+    @Nullable
+    private static ImageView viewFrom(Target<Bitmap> target) {
+        if (target instanceof ImageViewTarget) {
+            View v = ((ImageViewTarget<?>) target).getView();
+            return v instanceof ImageView ? (ImageView) v : null;
+        }
+        return null;
     }
 }

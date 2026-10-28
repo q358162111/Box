@@ -28,6 +28,7 @@ import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
 import okhttp3.Cache;
+import okhttp3.ConnectionPool;
 import okhttp3.ConnectionSpec;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
@@ -231,6 +232,16 @@ public class OkGoHelper {
                 .readTimeout(DEFAULT_MILLISECONDS, TimeUnit.MILLISECONDS)
                 .writeTimeout(DEFAULT_MILLISECONDS, TimeUnit.MILLISECONDS)
                 .connectTimeout(DEFAULT_MILLISECONDS, TimeUnit.MILLISECONDS);
+        // 默认连接池仅 5 个空闲连接，多源并发时连接被反复创建/回收
+        builder.connectionPool(new ConnectionPool(16, 5, TimeUnit.MINUTES));
+        try {
+            builder.cache(new Cache(new File(App.getInstance().getCacheDir(), "okgocache"), 50 * 1024 * 1024));
+        } catch (Throwable e) {
+            // 缓存目录不可用时降级为无缓存，不影响正常请求
+            e.printStackTrace();
+        }
+        // 仅缓存服务端明确声明可缓存的响应，避免动态爬虫数据被 OkHttp 启发式缓存成陈旧内容（策略同 OkHttp）
+        builder.addNetworkInterceptor(new com.github.catvod.net.OkHttp.CachePolicyInterceptor());
         if (dnsOverHttps != null) builder.dns(dnsOverHttps);
         try {
             setOkHttpSsl(builder);

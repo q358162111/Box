@@ -250,6 +250,7 @@ public class SearchActivity extends BaseActivity {
             }
         });
         mGridView.setHasFixedSize(true);
+        mGridView.setItemViewCacheSize(16);
         // lite
         if (Hawk.get(HawkConfig.SEARCH_VIEW, 0) == 0)
             mGridView.setLayoutManager(new V7LinearLayoutManager(this.mContext, 1, false));

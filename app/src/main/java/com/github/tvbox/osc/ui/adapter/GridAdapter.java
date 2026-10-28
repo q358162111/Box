@@ -112,8 +112,13 @@ public class GridAdapter extends BaseQuickAdapter<Movie.Video, BaseViewHolder> {
             int width = defaultWidth;
             int height = (int) (width / style.ratio);
             ViewGroup.LayoutParams containerParams = container.getLayoutParams();
-            containerParams.height = AutoSizeUtils.mm2px(mContext, height); // 高度
-            containerParams.width = AutoSizeUtils.mm2px(mContext, width); // 宽度
+            int targetWidth = AutoSizeUtils.mm2px(mContext, width);
+            int targetHeight = AutoSizeUtils.mm2px(mContext, height);
+            // 尺寸由 style 决定、对所有 item 相同；每次 bind 都 setLayoutParams 会触发 requestLayout，
+            // 快速滚动时产生大量无谓的重新测量与布局。仅在尺寸真正变化时才设置。
+            if (containerParams.width == targetWidth && containerParams.height == targetHeight) return;
+            containerParams.height = targetHeight;
+            containerParams.width = targetWidth;
             container.setLayoutParams(containerParams);
         }
     }    

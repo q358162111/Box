@@ -193,6 +193,9 @@ public class GridFragment extends BaseLazyFragment {
             mGridView.setVisibility(View.VISIBLE);
         }
         mGridView.setHasFixedSize(true);
+        // 默认只缓存 2 个已创建的 ViewHolder，网格页一屏可达十余个 item，
+        // 滚动时会反复 create/bind；放大缓存池可显著减少滚动卡顿
+        mGridView.setItemViewCacheSize(16);
         style=ImgUtil.initStyle();
         gridAdapter = new GridAdapter(isFolederMode(), style);
         this.page = 1;

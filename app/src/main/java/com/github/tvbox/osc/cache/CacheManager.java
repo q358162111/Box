@@ -73,8 +73,17 @@ public class CacheManager {
 
     // 内存镜像：key -> 反序列化后的对象。allowMainThreadQueries 移除后，
     // 同步读路径（播放进度起播判断等）从镜像取值；DB 只在后台线程读写
-    private static final java.util.concurrent.ConcurrentHashMap<String, Object> memoryMirror =
-            new java.util.concurrent.ConcurrentHashMap<>();
+    // 上限：播放进度/字幕路径随观看量单调增长，原实现只 put 不淘汰，
+    // 长期使用的进程内会无限膨胀直至 OOM。改为 accessOrder 的 LRU，超限时淘汰最久未读的条目。
+    // 注意：淘汰只影响内存镜像，DB 中的数据不受影响，冷启动会重新预热。
+    private static final int MAX_MIRROR_ENTRIES = 2000;
+    private static final java.util.Map<String, Object> memoryMirror = java.util.Collections.synchronizedMap(
+            new java.util.LinkedHashMap<String, Object>(256, 0.75f, true) {
+                @Override
+                protected boolean removeEldestEntry(java.util.Map.Entry<String, Object> eldest) {
+                    return size() > MAX_MIRROR_ENTRIES;
+                }
+            });
     // 镜像是否已完成初始全量加载（懒加载，首次 getCache 时在后台预热）
     private static volatile boolean mirrorLoaded = false;
 

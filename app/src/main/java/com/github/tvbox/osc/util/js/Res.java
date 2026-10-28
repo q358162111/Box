@@ -15,6 +15,9 @@ import java.util.Objects;
 
 public class Res {
 
+    // 同 Req：复用 Gson，避免每次请求重建 TypeAdapter 缓存
+    private static final Gson GSON = new Gson();
+
     @SerializedName("code")
     private Integer code;
     @SerializedName("buffer")
@@ -25,7 +28,7 @@ public class Res {
     private JsonElement headers;
 
     public static Res objectFrom(String json) {
-        return new Gson().fromJson(json, Res.class);
+        return GSON.fromJson(json, Res.class);
     }
 
     public int getCode() {

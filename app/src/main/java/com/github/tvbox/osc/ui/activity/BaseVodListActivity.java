@@ -67,6 +67,7 @@ public abstract class BaseVodListActivity<T> extends BaseActivity {
         tvClear = findViewById(R.id.tvClear);
         mGridView = findViewById(R.id.mGridView);
         mGridView.setHasFixedSize(true);
+        mGridView.setItemViewCacheSize(16);
         mGridView.setLayoutManager(new V7GridLayoutManager(this.mContext, isBaseOnWidth() ? 5 : 6));
         listAdapter = createAdapter();
         mGridView.setAdapter(listAdapter);

@@ -190,8 +190,9 @@ public final class ExoMediaSourceHelper {
     @SuppressLint("UnsafeOptInUsageError")
     private DataSource.Factory getHttpDataSourceFactory() {
         if (mHttpDataSourceFactory == null) {
-            // mOkClient 可能尚未通过 setOkClient 设置，为 null 时会导致后续请求 NPE
-            OkHttpClient client = mOkClient != null ? mOkClient : new OkHttpClient();
+            // mOkClient 可能尚未通过 setOkClient 设置，为 null 时会导致后续请求 NPE。
+            // 回退到全局单例而非 new OkHttpClient()：后者每次起播都会新建连接池与 dispatcher 线程池。
+            OkHttpClient client = mOkClient != null ? mOkClient : com.github.catvod.net.OkHttp.client();
             mHttpDataSourceFactory = new OkHttpDataSource.Factory(client)
                     .setUserAgent(mUserAgent)/*
                     .setAllowCrossProtocolRedirects(true)*/;
@@ -236,7 +237,7 @@ public final class ExoMediaSourceHelper {
         Proxy proxy = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(server, port));
         // 确保 client 已就绪
         getHttpDataSourceFactory();
-        mHttpDataSourceFactory = new OkHttpDataSource.Factory((mOkClient != null ? mOkClient : new OkHttpClient()).newBuilder().proxy(proxy).build())
+        mHttpDataSourceFactory = new OkHttpDataSource.Factory((mOkClient != null ? mOkClient : com.github.catvod.net.OkHttp.client()).newBuilder().proxy(proxy).build())
                 .setUserAgent(mUserAgent);
     }
     public void clearSocksProxy() {

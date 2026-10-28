@@ -13,6 +13,10 @@ import java.util.Objects;
 
 public class Req {
 
+    // Gson 实例是线程安全且构造昂贵的（内部会建大量 TypeAdapter 缓存），
+    // 每次 JS fetch 都 new 一个会白白丢弃这些缓存
+    private static final Gson GSON = new Gson();
+
     @SerializedName("buffer")
     private Integer buffer;
     @SerializedName("redirect")
@@ -31,7 +35,7 @@ public class Req {
     private JsonElement headers;
 
     public static Req objectFrom(String json) {
-        return new Gson().fromJson(json, Req.class);
+        return GSON.fromJson(json, Req.class);
     }
 
     public int getBuffer() {

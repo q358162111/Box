@@ -27,6 +27,8 @@ import tv.danmaku.ijk.media.player.IjkMediaPlayer;
  * @description:
  */
 public class ControlManager {
+    // 复用主线程 Handler：原实现在每次推送回调里都 new 一个，属于无谓的重复分配
+    private static final Handler MAIN_HANDLER = new Handler(Looper.getMainLooper());
     private static ControlManager instance;
     private RemoteServer mServer = null;
     public static Context mContext;
@@ -84,7 +86,7 @@ public class ControlManager {
                 @Override
                 public void onApiReceived(String url) {
                     // Hawk 写盘收口到主线程:后台线程与主线程并发 put 会互相覆盖整份存储,导致地址历史丢失
-                    new Handler(Looper.getMainLooper()).post(() -> {
+                    MAIN_HANDLER.post(() -> {
                         Hawk.put(HawkConfig.API_URL, url);
                         ArrayList<String> history = HawkConfig.getHistory(HawkConfig.API_HISTORY);
                         if (!history.contains(url)) {
@@ -103,7 +105,7 @@ public class ControlManager {
 
                 @Override
                 public void onLiveReceived(String url) {
-                    new Handler(Looper.getMainLooper()).post(() -> {
+                    MAIN_HANDLER.post(() -> {
                         Hawk.put(HawkConfig.LIVE_URL, url);
                         ArrayList<String> history = HawkConfig.getHistory(HawkConfig.LIVE_HISTORY);
                         if (!history.contains(url)) {
@@ -122,7 +124,7 @@ public class ControlManager {
 
                 @Override
                 public void onEpgReceived(String url) {
-                    new Handler(Looper.getMainLooper()).post(() -> {
+                    MAIN_HANDLER.post(() -> {
                         Hawk.put(HawkConfig.EPG_URL, url);
                         ArrayList<String> history = HawkConfig.getHistory(HawkConfig.EPG_HISTORY);
                         if (!history.contains(url)) {
@@ -141,7 +143,7 @@ public class ControlManager {
 
                 @Override
                 public void onProxysReceived(String url) {
-                    new Handler(Looper.getMainLooper()).post(() -> {
+                    MAIN_HANDLER.post(() -> {
                         Hawk.put(HawkConfig.PROXY_SERVER, url);
                         ArrayList<String> history = HawkConfig.getHistory(HawkConfig.PROXY_HISTORY);
                         if (!history.contains(url)) {

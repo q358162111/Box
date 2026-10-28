@@ -261,7 +261,10 @@ public class DetailActivity extends BaseActivity {
         tvPlayUrl = findViewById(R.id.tvPlayUrl);
         mEmptyPlayList = findViewById(R.id.mEmptyPlaylist);
         mGridView = findViewById(R.id.mGridView);
-        mGridView.setHasFixedSize(false);
+        // 选集列表 item 尺寸固定，可按固定尺寸优化；原 false 会让每次数据变化都走一遍全量测量。
+        // 注意 setHasFixedSize 约束的是「RecyclerView 自身尺寸」是否随内容变化，与 item 数量无关。
+        mGridView.setHasFixedSize(true);
+        mGridView.setItemViewCacheSize(16);
         mGridViewLayoutMgr = new V7GridLayoutManager(this.mContext, 6);
         mGridView.setLayoutManager(mGridViewLayoutMgr);
 //        mGridView.setLayoutManager(new V7GridLayoutManager(this.mContext, isBaseOnWidth() ? 6 : 7));

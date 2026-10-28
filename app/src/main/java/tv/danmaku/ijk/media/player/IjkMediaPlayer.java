@@ -61,6 +61,8 @@ import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -417,72 +419,101 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
      * current working directory), and that the pathname should
      * reference a world-readable file.
      */
-    private boolean over = false;
+    // xml 分片清单的下载超时；latch 额外留 2s 余量，保证任何情况下都不会无限阻塞调用线程
+    private static final int XML_FETCH_TIMEOUT_MS = 10000;
+    // 上一次生成的 ffconcat 临时文件：每次播放都会新建一个，需在下次生成前删掉旧的
+    private static volatile String lastFfconcatPath = null;
 
     @Override
     public void setDataSource(String path)
             throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
         if (path.contains(".xml")) {
-            this.over = false;
+            final CountDownLatch done = new CountDownLatch(1);
             new Thread() {
                 public void run() {
+                    HttpURLConnection conn = null;
                     try {
-                        HttpURLConnection httpURLConnection = (HttpURLConnection) new URL(path).openConnection();
-                        httpURLConnection.setRequestMethod("GET");
-                        httpURLConnection.setDoInput(true);
-                        httpURLConnection.setUseCaches(false);
-                        httpURLConnection.setConnectTimeout(10000);
-                        httpURLConnection.setReadTimeout(10000);
-                        httpURLConnection.connect();
-                        if (httpURLConnection.getResponseCode() == 200) {
-                            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
-                            String str = "";
-                            while (true) {
-                                String readLine = bufferedReader.readLine();
-                                if (readLine == null) {
-                                    break;
+                        conn = (HttpURLConnection) new URL(path).openConnection();
+                        conn.setRequestMethod("GET");
+                        conn.setDoInput(true);
+                        conn.setUseCaches(false);
+                        conn.setConnectTimeout(XML_FETCH_TIMEOUT_MS);
+                        conn.setReadTimeout(XML_FETCH_TIMEOUT_MS);
+                        conn.connect();
+                        if (conn.getResponseCode() == 200) {
+                            StringBuilder sb = new StringBuilder();
+                            try (BufferedReader reader = new BufferedReader(
+                                    new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
+                                String readLine;
+                                while ((readLine = reader.readLine()) != null) {
+                                    sb.append(readLine).append('\n');
                                 }
-                                str = str + readLine + "\n";
                             }
+                            String str = sb.toString();
                             if (str.length() >= 20) {
                                 mDataSource = xml2ffconcat(str);
                             }
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
+                    } finally {
+                        if (conn != null) conn.disconnect();
+                        // 必须放在 finally：原实现把 over=true 放在 try 外且只捕获 IOException，
+                        // 抛出非 IO 异常时标志位永不置位，调用线程会永远自旋
+                        done.countDown();
                     }
-                    over = true;
                 }
             }.start();
 
-            while (!this.over) {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                }
+            // 用带超时的 latch 替代原来的 100ms 忙等自旋，并避免非 volatile 标志位的可见性问题
+            try {
+                done.await(XML_FETCH_TIMEOUT_MS + 2000L, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
         }
         mDataSource = path;
         _setDataSource(path, null, null);
     }
 
+    private static void deleteLastFfconcat() {
+        String last = lastFfconcatPath;
+        if (last == null) return;
+        try {
+            File f = new File(last);
+            if (f.exists()) f.delete();
+        } catch (Throwable ignored) {
+        }
+    }
+
     public static String xml2ffconcat(String str) {
         String str2 = FileUtils.getExternalCachePath() + "/" + System.currentTimeMillis() + ".ffconcat";
+        FileOutputStream fileOutputStream = null;
         try {
+            // 每次播放都会新建带时间戳的文件且从不删除，长期使用会堆积；生成前先清掉上一次的
+            deleteLastFfconcat();
             File file = new File(str2);
             if (!file.exists()) {
                 file.createNewFile();
             }
-            FileOutputStream fileOutputStream = new FileOutputStream(file);
+            fileOutputStream = new FileOutputStream(file);
             Matcher matcher = Pattern.compile("<file><!\\[CDATA\\[(.*?)]]></file><seconds>(.*?)</seconds>").matcher(str);
-            String str3 = "ffconcat version 1.0\n";
             fileOutputStream.write("ffconcat version 1.0\n".getBytes());
             while (matcher.find()) {
-                str3 = str3 + "file '" + matcher.group(1) + "'\nduration " + matcher.group(2) + "\n";
-                fileOutputStream.write(("file '" + matcher.group(1) + "'\nduration " + matcher.group(2) + "\n").getBytes());
+                String line = "file '" + matcher.group(1) + "'\nduration " + matcher.group(2) + "\n";
+                fileOutputStream.write(line.getBytes());
             }
+            fileOutputStream.flush();
+            lastFfconcatPath = str2;
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            if (fileOutputStream != null) {
+                try {
+                    fileOutputStream.close();
+                } catch (IOException ignored) {
+                }
+            }
         }
         return str2;
     }

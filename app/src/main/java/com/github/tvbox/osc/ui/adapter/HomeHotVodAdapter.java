@@ -28,6 +28,11 @@ public class HomeHotVodAdapter extends BaseQuickAdapter<Movie.Video, BaseViewHol
     /**
      * style 数据结构：ratio 指定宽高比（宽 / 高），type 表示风格（例如 rect、list）
      */
+    // 缓存「首页是否为观看历史」：原实现在每个 item 的 convert() 里都调 Hawk.get，
+    // 而 Hawk.get 每次都要解密并反序列化，列表滚动时等于每帧重复几十次同样的读。
+    // 该值只在设置里变更，变更后会重建首页数据，缓存到实例字段即可。
+    private final boolean showSourceName;
+
     public HomeHotVodAdapter(ImgUtil.Style style,String tvYear) {
         super(R.layout.item_user_hot_vod, new ArrayList<>());
         if(style!=null){
@@ -35,6 +40,7 @@ public class HomeHotVodAdapter extends BaseQuickAdapter<Movie.Video, BaseViewHol
         }
         this.style=style;
         this.tvYearValue=tvYear;
+        this.showSourceName = Hawk.get(HawkConfig.HOME_REC, 0) == 2;
     }
 
     @Override
@@ -50,7 +56,7 @@ public class HomeHotVodAdapter extends BaseQuickAdapter<Movie.Video, BaseViewHol
 
         // check if set as last watched
         TextView tvYear = helper.getView(R.id.tvYear);
-        if (Hawk.get(HawkConfig.HOME_REC, 0) == 2) {
+        if (showSourceName) {
             tvYear.setVisibility(View.VISIBLE);
             SourceBean source = ApiConfig.get().getSource(item.sourceKey);
             if(source!=null){
@@ -97,8 +103,13 @@ public class HomeHotVodAdapter extends BaseQuickAdapter<Movie.Video, BaseViewHol
             int width = defaultWidth;
             int height = (int) (width / style.ratio);
             ViewGroup.LayoutParams containerParams = container.getLayoutParams();
-            containerParams.height = AutoSizeUtils.mm2px(mContext, height); // 高度
-            containerParams.width = AutoSizeUtils.mm2px(mContext, width); // 宽度
+            int targetWidth = AutoSizeUtils.mm2px(mContext, width);
+            int targetHeight = AutoSizeUtils.mm2px(mContext, height);
+            // 尺寸由 style 决定、对所有 item 相同；每次 bind 都 setLayoutParams 会触发 requestLayout，
+            // 快速滚动时产生大量无谓的重新测量与布局。仅在尺寸真正变化时才设置。
+            if (containerParams.width == targetWidth && containerParams.height == targetHeight) return;
+            containerParams.height = targetHeight;
+            containerParams.width = targetWidth;
             container.setLayoutParams(containerParams);
         }
     }

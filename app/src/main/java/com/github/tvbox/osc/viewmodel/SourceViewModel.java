@@ -58,6 +58,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -144,12 +147,23 @@ public class SourceViewModel extends ViewModel {
         return t;
     });
 
-    // 共享的 Spider 调用线程池:避免每次请求都创建/销毁一次性单线程池
-    private static final ExecutorService spiderCallExecutor = Executors.newCachedThreadPool(r -> {
-        Thread t = new Thread(r, "spider-call");
-        t.setDaemon(true);
-        return t;
-    });
+    // 共享的 Spider 调用线程池:避免每次请求都创建/销毁一次性单线程池。
+    // 必须有界：原 newCachedThreadPool 线程数无上限，而 DetailActivity/FastSearch/SourceViewModel
+    // 各自再开 5 线程池并发多源并二次提交到此池，超时任务因 cancel(true) 无法中断阻塞 IO 会继续占位，
+    // TV 设备上（每线程约 1MB 栈）连续聚合搜索会线程爆炸直至 OOM。
+    // 队列满时回退 CallerRunsPolicy：任务在调用线程直接执行，既不丢任务也不再新增线程。
+    private static final ExecutorService spiderCallExecutor = new ThreadPoolExecutor(
+            8, 8, 60L, TimeUnit.SECONDS,
+            new LinkedBlockingQueue<Runnable>(256),
+            new ThreadFactory() {
+                @Override
+                public Thread newThread(Runnable r) {
+                    Thread t = new Thread(r, "spider-call");
+                    t.setDaemon(true);
+                    return t;
+                }
+            },
+            new ThreadPoolExecutor.CallerRunsPolicy());
 
     /**
      * 在共享线程池中执行 Spider 调用并限时等待,超时或异常返回 null(超时会取消任务)。

@@ -111,11 +111,20 @@ public class LiveEpgAdapter extends BaseQuickAdapter<Epginfo, BaseViewHolder> {
     }
 
     public void setShiyiSelection(int i, boolean t, String currentEpgDate) {
+        int previous = this.selectedEpgIndex;
+        boolean wasShiyi = ShiyiSelection;
         this.selectedEpgIndex = i;
         this.shiyiDate = t ? currentEpgDate : null;
         ShiyiSelection = t;
-        notifyItemChanged(this.selectedEpgIndex);
-
+        // 原实现无条件 notifyItemChanged(i)：i 为 -1（取消时移）时会用无效下标刷新，属隐患。
+        // 时移态之间的切换只影响「旧选中项 + 新选中项」，可以只局部刷新两项；
+        // 进出时移态还会改变「正在播」那一项的波形与文案，其位置不固定，只能全量刷新。
+        if (wasShiyi && t) {
+            if (previous >= 0 && previous != i) notifyItemChanged(previous);
+            if (i >= 0) notifyItemChanged(i);
+        } else {
+            notifyDataSetChanged();
+        }
     }
 
     public int getSelectedIndex() {

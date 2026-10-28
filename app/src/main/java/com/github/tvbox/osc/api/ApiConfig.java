@@ -67,6 +67,8 @@ import com.github.tvbox.osc.subtitle.runtime.AppTaskExecutor;
  * @description:
  */
 public class ApiConfig {
+    // 复用主线程 Handler：原实现在每条 Hawk 写入路径上 new 一个，属于无谓的重复分配
+    private static final android.os.Handler MAIN_HANDLER = new android.os.Handler(Looper.getMainLooper());
     // DCL 双检锁必须 volatile，否则指令重排可能让其他线程读到未完全构造的实例
     private static volatile ApiConfig instance;
     private final LinkedHashMap<String, SourceBean> sourceBeanList;
@@ -773,7 +775,7 @@ public class ApiConfig {
         } else {
             final String k = key;
             final Object v = value;
-            new Handler(Looper.getMainLooper()).post(() -> Hawk.put(k, v));
+            MAIN_HANDLER.post(() -> Hawk.put(k, v));
         }
     }
 
@@ -800,7 +802,7 @@ public class ApiConfig {
             if (Looper.myLooper() == Looper.getMainLooper()) {
                 Hawk.put(HawkConfig.EPG_HISTORY, joined);
             } else {
-                new Handler(Looper.getMainLooper()).post(() -> Hawk.put(HawkConfig.EPG_HISTORY, joined));
+                MAIN_HANDLER.post(() -> Hawk.put(HawkConfig.EPG_HISTORY, joined));
             }
         }
     }

@@ -637,9 +637,8 @@ public class HomeActivity extends BaseActivity {
         // 如果处于 VOD 删除模式，则退出该模式并刷新界面
         if (HawkConfig.hotVodDelete) {
             HawkConfig.hotVodDelete = false;
-            if (UserFragment.homeHotVodAdapter != null) {
-                UserFragment.homeHotVodAdapter.notifyDataSetChanged();
-            }
+            // 只更新可见 item 的删除按钮显隐，不重放图片加载（BRVAH 2.9 无 payload 支持）
+            UserFragment.refreshDeleteMode();
             return;
         }
 
