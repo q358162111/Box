@@ -9,6 +9,10 @@ Thumbs.db
 *.ap_
 *.aab
 
+# local-maven 是项目内置的离线仓库（预置 JitPack 不稳定构件），其 aar 必须入库，
+# 否则任何人 clone 后都会因缺件在依赖解析阶段构建失败。上面 *.aar 的例外。
+!local-maven/**/*.aar
+
 proguardMapping.txt
 
 # Files for the ART/Dalvik VM
