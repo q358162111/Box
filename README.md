@@ -197,7 +197,7 @@ Box/
 - **播放**：Media3 (ExoPlayer) 1.8.0、IJKPlayer、DKPlayer 3.3.7、阿里云播放器 5.5.2.0、P2P 加速
 - **脚本引擎**：QuickJS（JS）、Chaquo Python（Py）
 - **存储**：Room 2.6.1（数据库）、Hawk（键值存储）
-- **服务**：AndServer 2.1.12（内置 Web/遥测）、NanoHttpd 2.3.1（WebSocket）
+- **服务**：AndServer 2.1.12（内置 Web/遥测）、NanoHttpd 2.3.1（本地 HTTP 服务）
 - **其他**：EventBus、Glide 4.16.0、XXPermissions、ZXing（二维码）、DanmakuFlameMaster（弹幕）、Sardine（WebDAV）
 
 ## 常见问题

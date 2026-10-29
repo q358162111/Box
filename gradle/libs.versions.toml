@@ -26,8 +26,7 @@ loadsir = "1.3.8"
 baseRecyclerView = "2.9.49-androidx"
 flowLayout = "v1.5"
 sardine = "0.8"
-nanohttpd = "nanohttpd-project-2.3.1"
-nanohttpd-ws = "nanohttpd-websocket-2.3.1"
+nanohttpd = "2.3.1"
 tvRecyclerView = "3.0.0"
 utilcodex = "1.31.0"
 xxPermissions = "18.5"
@@ -80,8 +79,7 @@ loadsir = { module = "com.kingja.loadsir:loadsir", version.ref = "loadsir" }
 baseRecyclerViewAdapterHelper = { module = "com.github.CymChad:BaseRecyclerViewAdapterHelper", version.ref = "baseRecyclerView" }
 flowLayout = { module = "com.github.alidili:FlowLayout", version.ref = "flowLayout" }
 sardine-android = { module = "com.github.thegrizzlylabs:sardine-android", version.ref = "sardine" }
-nanohttpd = { module = "com.github.NanoHttpd.nanohttpd:nanohttpd", version.ref = "nanohttpd" }
-nanohttpd-websocket = { module = "com.github.NanoHttpd.nanohttpd:nanohttpd", version.ref = "nanohttpd-ws" }
+nanohttpd = { module = "org.nanohttpd:nanohttpd", version.ref = "nanohttpd" }
 tv-recyclerview = { module = "com.owen:tv-recyclerview", version.ref = "tvRecyclerView" }
 utilcodex = { module = "com.blankj:utilcodex", version.ref = "utilcodex" }
 xxpermissions = { module = "com.github.getActivity:XXPermissions", version.ref = "xxPermissions" }

@@ -148,7 +148,6 @@ dependencies {
         exclude group: 'com.squareup.okhttp3'
     }
     implementation libs.nanohttpd
-    implementation libs.nanohttpd.websocket
     implementation libs.zxing
     implementation libs.androidx.appcompat
     implementation libs.androidx.constraintlayout
