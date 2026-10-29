@@ -3,6 +3,7 @@ package com.github.tvbox.osc.server;
 import static com.github.tvbox.osc.util.RegexUtils.getPattern;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Environment;
 import android.util.Base64;
@@ -112,6 +113,39 @@ public class RemoteServer extends NanoHTTPD {
         } catch (IOException e) {
             return false;
         }
+    }
+
+    /**
+     * 相对目录路径校验：允许中间层级（"Movies/Sub"），但禁止空值、绝对路径、
+     * 上级目录跳转、反斜杠与 NUL，防止拼出 "null" 垃圾目录或逃逸出 root。
+     */
+    private static boolean isSafeRelativePath(String name) {
+        if (!isSafePathComponent(name)) return false;
+        String n = name.trim();
+        // 允许 / 作为层级分隔，但不得出现连续或尾部的 /
+        if (n.contains("//") || n.endsWith("/")) return false;
+        for (String seg : n.split("/", -1)) {
+            if (!isSafeFileName(seg)) return false;
+        }
+        return true;
+    }
+
+    /**
+     * 单个文件名校验：禁止空值、绝对路径、盘符、上级目录跳转与路径分隔符。
+     */
+    private static boolean isSafeFileName(String name) {
+        if (!isSafePathComponent(name)) return false;
+        String n = name.trim();
+        return !n.contains("/") && !n.contains("\\");
+    }
+
+    private static boolean isSafePathComponent(String name) {
+        if (name == null) return false;
+        String n = name.trim();
+        if (n.isEmpty() || n.length() > 255) return false;
+        if (n.startsWith("/") || n.startsWith("\\")) return false;
+        if (n.contains("..") || n.contains("\0")) return false;
+        return true;
     }
 
     private Response forbidden() {
@@ -313,8 +347,9 @@ public class RemoteServer extends NanoHTTPD {
                     }
                     return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, NanoHTTPD.MIME_PLAINTEXT, value == null ? "" : value);
                 } else if (fileName.startsWith("/dash/")) {
-                    String dashData = App.getInstance().getDashData();
                     try {
+                        // 取 dashData 必须在 try 内：getter 抛异常时会逃出 serve() 中断整个请求处理
+                        String dashData = App.getInstance().getDashData();
                         String data = new String(Base64.decode(dashData, Base64.DEFAULT | Base64.NO_WRAP), "UTF-8");
                         return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/dash+xml", data);
                     } catch (Throwable th) {
@@ -357,6 +392,11 @@ public class RemoteServer extends NanoHTTPD {
                     Map < String, String > params = session.getParms();
                     if (fileName.equals("/upload")) {
                         String path = params.get("path");
+                        // 参数未校验时：path 为 null 会把文件写进 "null" 目录，tmpFile 为 null 会让
+                        // new File(null) 直接 NPE（该分支不在外层 try 内，会中断整个请求处理）
+                        if (!isSafeRelativePath(path)) {
+                            return forbidden();
+                        }
                         String root = Environment.getExternalStorageDirectory().getAbsolutePath();
                         File targetDir = new File(root + "/" + path);
                         if (!isPathSafe(targetDir)) {
@@ -366,6 +406,9 @@ public class RemoteServer extends NanoHTTPD {
                             if (k.startsWith("files-")) {
                                 String fn = params.get(k);
                                 String tmpFile = files.get(k);
+                                if (fn == null || fn.trim().isEmpty() || tmpFile == null || !isSafeFileName(fn)) {
+                                    return forbidden();
+                                }
                                 File tmp = new File(tmpFile);
                                 File file = new File(root + "/" + path + "/" + fn);
                                 if (!isPathSafe(file)) {
@@ -386,6 +429,10 @@ public class RemoteServer extends NanoHTTPD {
                     } else if (fileName.equals("/newFolder")) {
                         String path = params.get("path");
                         String name = params.get("name");
+                        // 同 /upload：null 参数会拼出 "null" 目录并写入垃圾文件
+                        if (!isSafeRelativePath(path) || !isSafeFileName(name)) {
+                            return forbidden();
+                        }
                         String root = Environment.getExternalStorageDirectory().getAbsolutePath();
                         File file = new File(root + "/" + path + "/" + name);
                         if (!isPathSafe(file)) {
@@ -488,8 +535,14 @@ public class RemoteServer extends NanoHTTPD {
 
     @SuppressLint("DefaultLocale")
     public static String getLocalIPAddress(Context context) {
+        // getSystemService 在无 WiFi 模块的以太网盒子上返回 null，getConnectionInfo() 在服务未就绪时也返回 null；
+        // 原实现直接解引用会 NPE，并打断 fileList() 所在的整条请求处理
         WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-        int ipAddress = wifiManager.getConnectionInfo().getIpAddress();
+        int ipAddress = 0;
+        if (wifiManager != null) {
+            WifiInfo info = wifiManager.getConnectionInfo();
+            if (info != null) ipAddress = info.getIpAddress();
+        }
         if (ipAddress == 0) {
             try {
                 Enumeration < NetworkInterface > enumerationNi = NetworkInterface.getNetworkInterfaces();
@@ -532,7 +585,8 @@ public class RemoteServer extends NanoHTTPD {
         if (path.isEmpty()) {
             info.addProperty("parent", ".");
         } else {
-            info.addProperty("parent", file.getParentFile().getAbsolutePath().replace(root + "/", "").replace(root, ""));
+            File parent = file == null ? null : file.getParentFile();
+            info.addProperty("parent", parent == null ? "" : parent.getAbsolutePath().replace(root + "/", "").replace(root, ""));
         }
         if (list == null || list.length == 0) {
             info.add("files", new JsonArray());

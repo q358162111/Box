@@ -68,14 +68,18 @@ public class DanmuPresenter {
             executorService = Executors.newSingleThreadExecutor();
             executorService.execute(() -> {
                 // 视图可能在任务排队期间被宿主销毁/置空，先判空
-                DanmakuView view = host.getDanmuView();
-                if (view == null) return;
-                view.release();
-                view.prepare(new Parser(danmuText), danmakuContext);
+                if (host.getDanmuView() == null) return;
+                // Parser 构造内部会同步发起弹幕文件下载，留在子线程；
+                // DanmakuView 的 release()/prepare() 会同步操作 DrawTask/DrawHandler，
+                // 必须在主线程调用，否则与渲染线程并发导致渲染竞态/崩溃
+                final Parser parser = new Parser(danmuText);
                 App.post(() -> {
                     DanmakuView v = host.getDanmuView();
+                    if (v == null) return;
+                    v.release();
+                    v.prepare(parser, danmakuContext);
                     MyVideoView videoView = host.getVideoView();
-                    if (v != null && videoView != null && videoView.isPlaying()) {
+                    if (videoView != null && videoView.isPlaying()) {
                         v.seekTo(videoView.getCurrentPosition());
                     }
                 });

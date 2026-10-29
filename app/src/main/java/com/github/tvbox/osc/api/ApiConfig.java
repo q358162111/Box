@@ -190,6 +190,11 @@ public class ApiConfig {
         String TempKey = null, configUrl = "", pk = ";pk;";
         if (apiUrl.contains(pk)) {
             String[] a = apiUrl.split(pk);
+            // split 会丢弃尾部空串：填入 "xxx;pk;" 时长度为 1，直接取 a[1] 会越界崩溃
+            if (a.length < 2 || a[0].isEmpty()) {
+                callback.error("地址格式错误");
+                return;
+            }
             TempKey = a[1];
             if (apiUrl.startsWith("clan")) {
                 configUrl = clanToAddress(a[0]);
@@ -408,7 +413,13 @@ public class ApiConfig {
         sourceBeanList.clear();
         // 配置变更后同步清空首页缓存，否则同 key 旧缓存会让新配置首页返回过期数据
         SourceViewModel.clearSortCache();
-        JsonArray sites = infoJson.has("video") ? infoJson.getAsJsonObject("video").getAsJsonArray("sites") : infoJson.get("sites").getAsJsonArray();
+        // 防御：video/sites 缺失或类型异常时 get() 返回 null，再 getAsJsonArray() 会直接 NPE，
+        // 导致 parseParses/parseLives/parseRules/parseAdsAndIjk 全部被跳过（整份配置只剩站点）
+        JsonArray sites = null;
+        JsonElement sitesEle = infoJson.has("video") && infoJson.get("video").isJsonObject()
+                ? infoJson.getAsJsonObject("video").get("sites")
+                : infoJson.get("sites");
+        if (sitesEle != null && sitesEle.isJsonArray()) sites = sitesEle.getAsJsonArray();
         // sites 字段缺失/为空时跳过解析，避免整个配置加载 NPE 失败
         if (sites == null) sites = new JsonArray();
         // useCache 解析已后台化：在临时 Map 上构建完整站点列表后一次性原子发布，
@@ -452,10 +463,12 @@ public class ApiConfig {
         if (!parsedSites.isEmpty()) {
             String home = Hawk.get(HawkConfig.HOME_API, "");
             SourceBean sh = getSource(home);
-            if (sh == null || sh.getHide() == 1)
-                setSourceBean(firstSite);
-            else
+            if (sh == null || sh.getHide() == 1) {
+                // 所有站点都 hide=1 时 firstSite 为 null，退回首个站点，避免首页源为 null
+                setSourceBean(firstSite != null ? firstSite : parsedSites.values().iterator().next());
+            } else {
                 setSourceBean(sh);
+            }
         }
     }
 
@@ -638,32 +651,36 @@ public class ApiConfig {
 
     private void parseRules(JsonObject infoJson) {
         // Video parse rule for host
-        if (infoJson.has("rules")) {
+        // rules 非数组时 getAsJsonArray() 会抛 IllegalStateException 并击穿整份配置加载；
+        // 内部各子字段同理，统一走安全读取，单条规则畸形只跳过该条
+        JsonArray rules = DefaultConfig.safeJsonArray(infoJson, "rules");
+        if (rules != null) {
             VideoParseRuler.clearRule();
-            for(JsonElement oneHostRule : infoJson.getAsJsonArray("rules")) {
+            for (JsonElement oneHostRule : rules) {
                 // 畸形元素（非对象）跳过，避免 ClassCastException 击穿整个配置加载
                 if (oneHostRule == null || !oneHostRule.isJsonObject()) continue;
                 JsonObject obj = oneHostRule.getAsJsonObject();
                 //嗅探过滤规则
                 if (obj.has("host")) {
-                    String host = obj.get("host").getAsString();
-                    if (obj.has("rule")) {
-                        JsonArray ruleJsonArr = obj.getAsJsonArray("rule");
+                    String host = DefaultConfig.safeJsonString(obj, "host", "");
+                    if (host.isEmpty()) continue;
+                    JsonArray ruleJsonArr = DefaultConfig.safeJsonArray(obj, "rule");
+                    if (ruleJsonArr != null) {
                         ArrayList<String> rule = new ArrayList<>();
                         for (JsonElement one : ruleJsonArr) {
-                            String oneRule = one.getAsString();
-                            rule.add(oneRule);
+                            if (one == null || !one.isJsonPrimitive()) continue;
+                            rule.add(one.getAsString());
                         }
                         if (rule.size() > 0) {
                             VideoParseRuler.addHostRule(host, rule);
                         }
                     }
-                    if (obj.has("filter")) {
-                        JsonArray filterJsonArr = obj.getAsJsonArray("filter");
+                    JsonArray filterJsonArr = DefaultConfig.safeJsonArray(obj, "filter");
+                    if (filterJsonArr != null) {
                         ArrayList<String> filter = new ArrayList<>();
                         for (JsonElement one : filterJsonArr) {
-                            String oneFilter = one.getAsString();
-                            filter.add(oneFilter);
+                            if (one == null || !one.isJsonPrimitive()) continue;
+                            filter.add(one.getAsString());
                         }
                         if (filter.size() > 0) {
                             VideoParseRuler.addHostFilter(host, filter);
@@ -671,35 +688,35 @@ public class ApiConfig {
                     }
                 }
                 //广告过滤规则
-                if (obj.has("hosts") && obj.has("regex")) {
+                JsonArray regexArray = DefaultConfig.safeJsonArray(obj, "regex");
+                JsonArray hostsArray = DefaultConfig.safeJsonArray(obj, "hosts");
+                if (regexArray != null && hostsArray != null) {
                     ArrayList<String> rule = new ArrayList<>();
                     ArrayList<String> ads = new ArrayList<>();
-                    JsonArray regexArray = obj.getAsJsonArray("regex");
                     for (JsonElement one : regexArray) {
+                        if (one == null || !one.isJsonPrimitive()) continue;
                         String regex = one.getAsString();
                         if (M3U8.isAd(regex)) ads.add(regex);
                         else rule.add(regex);
                     }
-
-                    JsonArray array = obj.getAsJsonArray("hosts");
-                    for (JsonElement one : array) {
+                    for (JsonElement one : hostsArray) {
+                        if (one == null || !one.isJsonPrimitive()) continue;
                         String host = one.getAsString();
                         VideoParseRuler.addHostRule(host, rule);
                         VideoParseRuler.addHostRegex(host, ads);
                     }
                 }
                 //嗅探脚本规则 如 click
-                if (obj.has("hosts") && obj.has("script")) {
+                JsonArray scriptArray = DefaultConfig.safeJsonArray(obj, "script");
+                if (scriptArray != null && hostsArray != null) {
                     ArrayList<String> scripts = new ArrayList<>();
-                    JsonArray scriptArray = obj.getAsJsonArray("script");
                     for (JsonElement one : scriptArray) {
-                        String script = one.getAsString();
-                        scripts.add(script);
+                        if (one == null || !one.isJsonPrimitive()) continue;
+                        scripts.add(one.getAsString());
                     }
-                    JsonArray array = obj.getAsJsonArray("hosts");
-                    for (JsonElement one : array) {
-                        String host = one.getAsString();
-                        VideoParseRuler.addHostScript(host, scripts);
+                    for (JsonElement one : hostsArray) {
+                        if (one == null || !one.isJsonPrimitive()) continue;
+                        VideoParseRuler.addHostScript(one.getAsString(), scripts);
                     }
                 }
             }
@@ -715,10 +732,12 @@ public class ApiConfig {
             for (JsonElement host : defaultJson.getAsJsonArray("ads")) {
                 AdBlocker.addAdHost(host.getAsString());
             }
-            //追加的广告拦截
-            if(infoJson.has("ads")){
-                for (JsonElement host : infoJson.getAsJsonArray("ads")) {
-                    if(!AdBlocker.hasHost(host.getAsString())){
+            //追加的广告拦截：ads 为字符串/对象而非数组时 getAsJsonArray() 会抛异常，走安全读取
+            JsonArray adsArray = DefaultConfig.safeJsonArray(infoJson, "ads");
+            if (adsArray != null) {
+                for (JsonElement host : adsArray) {
+                    if (host == null || !host.isJsonPrimitive()) continue;
+                    if (!AdBlocker.hasHost(host.getAsString())) {
                         AdBlocker.addAdHost(host.getAsString());
                     }
                 }
@@ -729,7 +748,9 @@ public class ApiConfig {
             ijkCodes = new ArrayList<>();
             boolean foundOldSelect = false;
             String ijkCodec = Hawk.get(HawkConfig.IJK_CODEC, "");
-            JsonArray ijkJsonArray = infoJson.has("ijk") ? infoJson.getAsJsonArray("ijk") : defaultJson.getAsJsonArray("ijk");
+            // 站点配置的 ijk 字段类型异常时回退内置默认配置，而不是击穿整个配置加载
+            JsonArray ijkJsonArray = DefaultConfig.safeJsonArray(infoJson, "ijk");
+            if (ijkJsonArray == null) ijkJsonArray = defaultJson.getAsJsonArray("ijk");
             for (JsonElement opt : ijkJsonArray) {
                 // 单个畸形元素跳过而不是击穿整个配置加载
                 if (opt == null || !opt.isJsonObject()) continue;
@@ -915,7 +936,8 @@ public class ApiConfig {
     public void setSourceBean(SourceBean sourceBean) {
         this.mHomeSource = sourceBean;
         // 收口主线程写盘，避免后台解析线程与主线程并发 Hawk.put 互相覆盖导致地址历史等丢失
-        putHawkOnMainThread(HawkConfig.HOME_API, sourceBean.getKey());
+        // 防御：全部站点 hide=1 时传入 null，此处 NPE 会让整个配置解析中断
+        putHawkOnMainThread(HawkConfig.HOME_API, sourceBean == null ? "" : sourceBean.getKey());
     }
 
     public void setDefaultParse(ParseBean parseBean) {

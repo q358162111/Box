@@ -163,7 +163,8 @@ public class JsLoader {
 
     private Spider createSpider(String key, String api, String ext, String jar) {
         Class<?> classLoader = null;
-        if (!jar.isEmpty()) {
+        // jar 为 null（站点未配置 jar 字段）时原实现直接 NPE
+        if (jar != null && !jar.isEmpty()) {
             String[] urls = jar.split(";md5;");
             String jarUrl = urls[0];
             String jarKey = MD5.string2MD5(jarUrl);

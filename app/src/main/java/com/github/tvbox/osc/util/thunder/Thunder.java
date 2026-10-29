@@ -9,6 +9,7 @@ import com.github.tvbox.osc.R;
 import com.github.tvbox.osc.base.App;
 import com.github.tvbox.osc.bean.Movie;
 import com.github.tvbox.osc.util.FileUtils;
+import com.github.tvbox.osc.util.LOG;
 import com.xunlei.downloadlib.XLDownloadManager;
 import com.xunlei.downloadlib.XLTaskHelper;
 import com.xunlei.downloadlib.android.XLUtil;
@@ -129,7 +130,14 @@ public class Thunder {
         threadPool.execute(new Runnable() {
             @Override
             public void run() {
+                // 整体兜底：此前 run() 内无任何异常保护，任何 NPE 都会让线程静默死亡，
+                // callback.list()/status() 永不触发，UI 永久停在"解析中"
+                try {
                 if (gen != parseGeneration) return;
+                if (urlBean == null || urlBean.infoList == null) {
+                    callback.status(-1, "解析异常");
+                    return;
+                }
                 for (int idx=0;idx<urlBean.infoList.size();idx++) {
                     if (gen != parseGeneration) return;
                     Movie.Video.UrlBean.UrlInfo urlInfo = urlBean.infoList.get(idx);
@@ -238,6 +246,10 @@ public class Thunder {
                     callback.list(urlMap);
                 } else {
                     callback.status(-1, "解析异常");
+                }
+                } catch (Throwable t) {
+                    LOG.e("Thunder parse", t);
+                    if (gen == parseGeneration) callback.status(-1, "解析异常");
                 }
             }});
     }

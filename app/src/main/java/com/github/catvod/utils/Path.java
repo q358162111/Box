@@ -170,16 +170,15 @@ public class Path {
     }
 
     public static File write(File file, byte[] data) {
-        try {
-            FileOutputStream fos = new FileOutputStream(file);
+        // 原实现在 fos.write() 抛异常时不会执行 close()，造成 fd 泄漏；改 try-with-resources
+        try (FileOutputStream fos = new FileOutputStream(file)) {
             fos.write(data);
             fos.flush();
-            fos.close();
-            chmod(file);
-            return file;
         } catch (Exception ignored) {
             return file;
         }
+        chmod(file);
+        return file;
     }
 
     public static void move(File in, File out) {
@@ -188,15 +187,17 @@ public class Path {
     }
 
     public static void copy(File in, File out) {
-        try {
-            copy(new FileInputStream(in), new FileOutputStream(out));
+        // 原实现两个流都没有关闭，异常路径必然 fd 泄漏；改 try-with-resources
+        try (FileInputStream fis = new FileInputStream(in);
+             FileOutputStream fos = new FileOutputStream(out)) {
+            copy(fis, fos);
         } catch (Exception ignored) {
         }
     }
 
     public static void copy(InputStream in, File out) {
-        try {
-            copy(in, new FileOutputStream(out));
+        try (FileOutputStream fos = new FileOutputStream(out)) {
+            copy(in, fos);
         } catch (Exception ignored) {
         }
     }

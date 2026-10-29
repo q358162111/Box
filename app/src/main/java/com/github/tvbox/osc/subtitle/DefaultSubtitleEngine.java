@@ -49,6 +49,8 @@ public class DefaultSubtitleEngine implements SubtitleEngine {
     private AbstractPlayer mMediaPlayer;
     private OnSubtitlePreparedListener mOnSubtitlePreparedListener;
     private OnSubtitleChangeListener mOnSubtitleChangeListener;
+    // 引擎销毁标记：destroy() 后主线程 Runnable 与工作线程消息都据此停止自递归
+    private volatile boolean mDestroyed = false;
 
     public DefaultSubtitleEngine() {
 
@@ -236,13 +238,25 @@ public class DefaultSubtitleEngine implements SubtitleEngine {
     @Override
     public void destroy() {
         Log.d(TAG, "destroy: ");
+        mDestroyed = true;
         stopWorkThread();
         reset();
+        // 解除播放器强引用：否则播放器 release 后引擎仍持有最后一次的实例（含 native 句柄）
+        mMediaPlayer = null;
+    }
 
+    /**
+     * 播放器释放前解除绑定，避免引擎继续持有已释放的播放器实例。
+     */
+    public void unbindMediaPlayer() {
+        mMediaPlayer = null;
     }
 
     private void initWorkThread() {
         stopWorkThread();
+        // 引擎可复用：视图重新 attach 后会再次走到这里，必须清掉 destroy() 置的销毁标记，
+        // 否则 detach 一次之后字幕将永久不再刷新
+        mDestroyed = false;
         mHandlerThread = new HandlerThread("SubtitleFindThread");
         mHandlerThread.start();
         mWorkHandler = new Handler(mHandlerThread.getLooper(), new Handler.Callback() {
@@ -253,20 +267,28 @@ public class DefaultSubtitleEngine implements SubtitleEngine {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                long delay = REFRESH_INTERVAL;
-                                long position = mMediaPlayer.getCurrentPosition();
-                                Subtitle subtitle = SubtitleFinder.find(position, mSubtitles);
-                                notifyRefreshUI(subtitle);
-                                if (subtitle != null) {
-                                    delay = subtitle.end.mseconds - position;
-                                }
+                                // 该 Runnable 在主线程执行，外层 try/catch 覆盖不到；
+                                // Media3 ExoPlayer release 后 getCurrentPosition() 会抛 IllegalStateException 直接崩主线程
+                                try {
+                                    if (mDestroyed || mMediaPlayer == null) return;
+                                    long delay = REFRESH_INTERVAL;
+                                    long position = mMediaPlayer.getCurrentPosition();
+                                    Subtitle subtitle = SubtitleFinder.find(position, mSubtitles);
+                                    notifyRefreshUI(subtitle);
+                                    if (subtitle != null) {
+                                        delay = subtitle.end.mseconds - position;
+                                    }
 
-                                // 防御：负 delay 会让 sendEmptyMessageDelayed 立即触发下一轮，
-                                // 导致 Handler 自递归空转、消息队列膨胀直至 ANR
-                                if (delay <= 0) delay = REFRESH_INTERVAL;
+                                    // 防御：负 delay 会让 sendEmptyMessageDelayed 立即触发下一轮，
+                                    // 导致 Handler 自递归空转、消息队列膨胀直至 ANR
+                                    if (delay <= 0) delay = REFRESH_INTERVAL;
 
-                                if (mWorkHandler != null) {
-                                    mWorkHandler.sendEmptyMessageDelayed(MSG_REFRESH, delay);
+                                    if (mWorkHandler != null && !mDestroyed) {
+                                        mWorkHandler.sendEmptyMessageDelayed(MSG_REFRESH, delay);
+                                    }
+                                } catch (Throwable t) {
+                                    // 播放器已释放/状态异常：停止自递归，避免主线程持续抛异常
+                                    if (mWorkHandler != null) mWorkHandler.removeMessages(MSG_REFRESH);
                                 }
                             }
                         });

@@ -155,7 +155,7 @@ public class PythonSpider extends Spider {
             Log.w("PyLoader", "echo-proxyLocal: app/pySpider 未初始化");
             return new Object[]{0, "", new ByteArrayInputStream(new byte[0]), null};
         }
-        Log.i("PyLoader","echo-proxyLocal:param"+params.toString());
+        Log.i("PyLoader","echo-proxyLocal:param"+params);
         List<PyObject> list;
         try {
             list = app.callAttr("localProxy", pySpider, map2json(params).toString()).asList();
@@ -171,8 +171,15 @@ public class PythonSpider extends Spider {
         Object[] result = new Object[4];
         result[0] = list.size() > 0 && list.get(0) != null ? list.get(0).toInt() : 0;
         result[1] = list.size() > 1 && list.get(1) != null ? list.get(1).toString() : "";
-        result[2] = getStream(list.size() > 2 ? list.get(2) : null, base64);
-        result[3] = headerAvailable ? getHeader(list.get(3)) : null;
+        try {
+            result[2] = getStream(list.size() > 2 ? list.get(2) : null, base64);
+            // getHeader/getStream 可能抛异常（Python 侧返回 None 或类型不符），
+            // 必须纳入保护，否则异常会穿透到 ApiConfig.proxyLocal → RemoteServer /proxy?do=
+            result[3] = headerAvailable ? getHeader(list.get(3)) : null;
+        } catch (Throwable t) {
+            Log.e("PyLoader", "echo-proxyLocal 结果解析失败", t);
+            return new Object[]{0, "", new ByteArrayInputStream(new byte[0]), null};
+        }
         return result;
     }
 
@@ -185,7 +192,11 @@ public class PythonSpider extends Spider {
         Map<String, String> headerMap = new HashMap<>();
         Map<PyObject, PyObject> pyMap = headerObj.asMap();
         for (Map.Entry<PyObject, PyObject> entry : pyMap.entrySet()) {
-            headerMap.put(entry.getKey().toString(), Objects.requireNonNull(entry.getValue()).toString());
+            // Python dict 允许值为 None，requireNonNull 会直接抛 NPE；
+            // 且该方法在 proxyLocal 的 try 块之外调用，异常会穿透到 ApiConfig/RemoteServer
+            PyObject key = entry.getKey();
+            PyObject value = entry.getValue();
+            headerMap.put(key == null ? "" : key.toString(), value == null ? "" : value.toString());
         }
         return headerMap;
     }

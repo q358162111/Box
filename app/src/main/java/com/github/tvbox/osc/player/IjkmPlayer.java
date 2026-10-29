@@ -31,6 +31,7 @@ import xyz.doikki.videoplayer.ijk.RawDataSourceProvider;
 public class IjkmPlayer extends IjkPlayer {
 
     private IJKCode codec = null;
+    private IMediaPlayer.OnTimedTextListener timedTextListener = null;
 
     public IjkmPlayer(Context context, IJKCode codec) {
         super(context);
@@ -189,7 +190,23 @@ public class IjkmPlayer extends IjkPlayer {
     }
 
     public void setOnTimedTextListener(IMediaPlayer.OnTimedTextListener listener) {
+        // 先移除旧监听，防止播放器实例复用时监听器叠加导致重复回调与泄漏
+        if (timedTextListener != null) {
+            mMediaPlayer.setOnTimedTextListener(null);
+        }
+        timedTextListener = listener;
         mMediaPlayer.setOnTimedTextListener(listener);
+    }
+
+    @Override
+    public void release() {
+        // release 时反注册字幕监听器：该匿名 Listener 强引用 Controller/Activity，
+        // 不移除会让整个播放页无法回收，且 native 层 release 后仍可能投递 timed text
+        if (timedTextListener != null && mMediaPlayer != null) {
+            mMediaPlayer.setOnTimedTextListener(null);
+        }
+        timedTextListener = null;
+        super.release();
     }
 
 }

@@ -1,5 +1,6 @@
 package com.github.tvbox.osc.util.urlhttp;
 
+import android.net.Uri;
 import android.text.TextUtils;
 
 import java.io.IOException;
@@ -85,13 +86,20 @@ class OKRequest {
     }
 
     private void setGetParams() {
-        if (mParamsMap != null) {
-            mUrl = mUrl + "?";
-            for (String key : mParamsMap.keySet()) {
-                mUrl = mUrl + key + "=" + mParamsMap.get(key) + "&";
-            }
-            mUrl = mUrl.substring(0, mUrl.length() - 1);
+        if (mParamsMap == null || mParamsMap.isEmpty()) return;
+        // 原实现用 + 循环拼接（每次新建 String）且未做 URL 编码：
+        // 参数含 &、空格、中文时会破坏 URL 或直接请求失败
+        StringBuilder sb = new StringBuilder(mUrl).append('?');
+        boolean first = true;
+        for (Map.Entry<String, String> entry : mParamsMap.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+            if (key == null) continue;
+            if (!first) sb.append('&');
+            first = false;
+            sb.append(Uri.encode(key)).append('=').append(Uri.encode(value == null ? "" : value));
         }
+        mUrl = sb.toString();
     }
 
     private void setHeader() {

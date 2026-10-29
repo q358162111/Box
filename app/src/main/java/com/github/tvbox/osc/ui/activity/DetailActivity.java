@@ -1312,7 +1312,11 @@ public class DetailActivity extends BaseActivity {
             }
         } else if (showPreview && playFragment != null) {
             playFragment.setPlayTitle(false);
-            playFragment.mVideoView.release();
+            // fragment 视图销毁后 mVideoView 已置 null（见 PlayFragment.onDestroyView），
+            // 而 fragment 实例仍被 Activity 持有，此处直接解引用会 NPE
+            if (playFragment.getPlayer() != null) {
+                playFragment.getPlayer().release();
+            }
         }
         super.onBackPressed();
     }

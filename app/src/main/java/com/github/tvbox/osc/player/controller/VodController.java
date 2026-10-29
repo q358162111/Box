@@ -801,6 +801,8 @@ public class VodController extends BaseController {
             @Override
             public void onClick(View view) {
                 FastClickCheckUtil.check(view);
+                // 与同类回调保持一致：listener 尚未设置或已置空时直接返回，避免 NPE
+                if (listener == null) return;
                 listener.selectSubtitle();
             }
         });
@@ -828,6 +830,7 @@ public class VodController extends BaseController {
             @Override
             public void onClick(View view) {
                 FastClickCheckUtil.check(view);
+                if (listener == null) return;
                 listener.selectAudioTrack();
             }
         });
@@ -1013,6 +1016,8 @@ public class VodController extends BaseController {
         });
 
         mDanmuSetting.setOnClickListener(view -> {
+            FastClickCheckUtil.check(view);
+            if (listener == null) return;
             listener.showDanmuSetting();
         });
 

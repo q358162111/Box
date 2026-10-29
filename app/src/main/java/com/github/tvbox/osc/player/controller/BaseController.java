@@ -147,6 +147,18 @@ public abstract class BaseController extends BaseVideoController implements Gest
         mHandler.removeCallbacks(mRunnable);
     }
 
+    /**
+     * 统一清理控制器所有延时/循环任务。
+     * onDetachedFromWindow() 并不总会触发（Activity 直接 finish、Fragment 实例被保留时），
+     * 残留的每秒自递归任务会持续持有 controller → mActivity，造成 Activity 泄漏与无效 UI 写入。
+     * 宿主应在 onDestroy/onDestroyView 中显式调用。
+     */
+    public void destroy() {
+        if (mHandler != null) {
+            mHandler.removeCallbacksAndMessages(null);
+        }
+    }
+
     @Override
     protected void initView() {
         super.initView();
@@ -176,7 +188,13 @@ public abstract class BaseController extends BaseVideoController implements Gest
         super.setProgress(duration, position);
         mPauseTime.setText(PlayerUtils.stringForTime(position) + " / " + PlayerUtils.stringForTime(duration));
         // takagen99 : Update mini bar (via touch)
-        int percent = (int) (((double) position / (double) duration) * 100);
+        // duration 为 0 时除法得 Infinity/NaN，强转 int 后是 Integer.MAX_VALUE，进度条会瞬间拉满
+        int percent = 0;
+        if (duration > 0) {
+            percent = (int) (((double) position / (double) duration) * 100);
+            if (percent < 0) percent = 0;
+            else if (percent > 100) percent = 100;
+        }
         mDialogVideoProgressBar.setProgress(percent);
         mDialogVideoPauseBar.setProgress(percent);
     }

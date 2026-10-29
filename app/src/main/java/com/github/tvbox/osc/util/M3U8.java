@@ -59,6 +59,8 @@ public class M3U8 {
             }
             totalTimes += entry.getValue();
         }
+        // totalTimes 为 0（无有效 ts 行）时返回 Infinity/NaN，会使调用方 "< 0.8" 判断失真
+        if (totalTimes <= 0) return 0.0;
         return  maxTimes*1.0 / (totalTimes*1.0);
     }
     /**

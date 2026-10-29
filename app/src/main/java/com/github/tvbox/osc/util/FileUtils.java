@@ -116,17 +116,37 @@ public class FileUtils {
             .getAbsolutePath();
     }
     public static void recursiveDelete(File file) {
+        // 该函数可被局域网 /delFolder 端点调用（外部可控输入）：
+        // 1) listFiles() 在权限不足或非目录竞态时返回 null，增强 for 会直接 NPE
+        // 2) 符号链接环会递归到 StackOverflowError，而它是 Error 不是 Exception，catch (Exception) 捕不到
         try {
-            if (!file.exists())
+            if (file == null || !file.exists())
                 return;
             if (file.isDirectory()) {
-                for (File f : file.listFiles()) {
+                File[] children = file.listFiles();
+                if (children == null) return;
+                for (File f : children) {
+                    if (f == null) continue;
+                    // 不跟随符号链接，避免目录环导致无限递归
+                    if (isSymlink(f)) {
+                        f.delete();
+                        continue;
+                    }
                     recursiveDelete(f);
                 }
             }
             file.delete();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
+    }
+
+    private static boolean isSymlink(File file) {
+        try {
+            java.nio.file.Path p = java.nio.file.Paths.get(file.getAbsolutePath());
+            return java.nio.file.Files.isSymbolicLink(p);
+        } catch (Throwable t) {
+            return false;
         }
     }
     //JS  工具方法

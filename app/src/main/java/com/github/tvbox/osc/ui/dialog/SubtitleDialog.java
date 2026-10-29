@@ -105,7 +105,12 @@ public class SubtitleDialog extends BaseDialog {
             @Override
             public void onClick(View view) {
                 String sizeStr = subtitleSizeText.getText().toString();
-                int curSize = Integer.parseInt(sizeStr);
+                // 历史脏值/空串会抛 NumberFormatException，onClick 内无捕获即崩溃，回退默认字号
+                int curSize = SubtitleHelper.getTextSize(getOwnerActivity());
+                try {
+                    curSize = Integer.parseInt(sizeStr);
+                } catch (NumberFormatException ignored) {
+                }
                 curSize -= 2;
                 if (curSize <= 10) {
                     curSize = 10;
@@ -119,7 +124,11 @@ public class SubtitleDialog extends BaseDialog {
             @Override
             public void onClick(View view) {
                 String sizeStr = subtitleSizeText.getText().toString();
-                int curSize = Integer.parseInt(sizeStr);
+                int curSize = SubtitleHelper.getTextSize(getOwnerActivity());
+                try {
+                    curSize = Integer.parseInt(sizeStr);
+                } catch (NumberFormatException ignored) {
+                }
                 curSize += 2;
                 if (curSize >= 60) {
                     curSize = 60;
@@ -143,7 +152,7 @@ public class SubtitleDialog extends BaseDialog {
             public void onClick(View view) {
                 FastClickCheckUtil.check(view);
                 String timeStr = subtitleTimeText.getText().toString();
-                double time = Float.parseFloat(timeStr);
+                double time = parseFloatSafe(timeStr, 0.0);
                 double oneceDelay = -0.5;
                 time += oneceDelay;
                 if (time == 0.0) {
@@ -162,7 +171,7 @@ public class SubtitleDialog extends BaseDialog {
             public void onClick(View view) {
                 FastClickCheckUtil.check(view);
                 String timeStr = subtitleTimeText.getText().toString();
-                double time = Float.parseFloat(timeStr);
+                double time = parseFloatSafe(timeStr, 0.0);
                 double oneceDelay = 0.5;
                 time += oneceDelay;
                 if (time == 0.0) {
@@ -203,6 +212,19 @@ public class SubtitleDialog extends BaseDialog {
                 SubtitleHelper.upTextStyle(subtitleStyleText, textStyle);
             }
         });
+    }
+
+    /**
+     * 字幕时间偏移输入框的历史值可能是空串或科学计数法脏值，
+     * 直接 Float.parseFloat 会抛 NumberFormatException，onClick 内无捕获即崩溃。
+     */
+    private static double parseFloatSafe(String value, double defaultVal) {
+        if (value == null) return defaultVal;
+        try {
+            return Float.parseFloat(value.trim());
+        } catch (NumberFormatException ignored) {
+            return defaultVal;
+        }
     }
 
     public void setLocalFileChooserListener(LocalFileChooserListener localFileChooserListener) {

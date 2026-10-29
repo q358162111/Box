@@ -39,8 +39,10 @@ public abstract class AbstractDriveViewModel extends ViewModel {
     public abstract String loadData(LoadDataCallback callback);
 
     protected void sortData(List<DriveFolderFile> data) {
+        // 网盘请求失败时 data 为 null，原实现直接 size() 会 NPE
+        if (data == null) return;
         DriveFolderFile backItem = null;
-        if (data.size() > 0 && data.get(0).name == null)
+        if (data.size() > 0 && data.get(0) != null && data.get(0).name == null)
             backItem = data.remove(0);
         Collections.sort(data, sortComparator);
         if (backItem != null)

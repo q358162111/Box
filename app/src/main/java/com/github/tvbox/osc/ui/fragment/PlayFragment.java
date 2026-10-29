@@ -731,6 +731,12 @@ public class PlayFragment extends BaseLazyFragment {
 
     private void initSubtitleView() {
     	AbstractPlayer mediaPlayer = mVideoView.getMediaPlayer();
+        // 同 PlayActivity：prepared 与 release 竞态时 getMediaPlayer() 会返回 null，
+        // 绑定 null 会让字幕引擎 start() 直接 return，本集外挂字幕静默失效
+        if (mediaPlayer == null) {
+            LOG.e("initSubtitleView: mediaPlayer 为空，跳过字幕初始化");
+            return;
+        }
         TrackInfo trackInfo = null;
         if (mVideoView.getMediaPlayer() instanceof IjkmPlayer) {
             trackInfo = ((IjkmPlayer) (mVideoView.getMediaPlayer())).getTrackInfo();
@@ -1019,6 +1025,11 @@ public class PlayFragment extends BaseLazyFragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        // 弹幕线程池此前从未销毁：每进一次播放页泄漏一个永不回收的单线程 ExecutorService
+        if (danmuPresenter != null) {
+            danmuPresenter.destroy();
+            danmuPresenter = null;
+        }
         if(executorService!=null){
             executorService.shutdownNow();
             executorService = null;
@@ -1027,7 +1038,12 @@ public class PlayFragment extends BaseLazyFragment {
             mHandler.removeCallbacksAndMessages(null);
         }
         // playResult 订阅已绑定 viewLifecycleOwner，随视图销毁自动退订，无需手动 remove
-        EventBus.getDefault().unregister(this);
+        // 未注册时 unregister 会抛异常（如视图创建失败），先判空
+        if (EventBus.getDefault().isRegistered(this)) EventBus.getDefault().unregister(this);
+        // 同 PlayActivity：显式清理控制器内每秒自递归任务，避免持有 Fragment/Activity
+        if (mController != null) {
+            mController.destroy();
+        }
         if (mVideoView != null) {
             mVideoView.release();
             mVideoView = null;
@@ -1056,7 +1072,7 @@ public class PlayFragment extends BaseLazyFragment {
             hasNext = mVodInfo.getplayIndex() + 1 < mVodInfo.seriesMap.get(mVodInfo.playFlag).size();
         }
         if (!hasNext) {
-            if(mVodInfo.reverseSort){
+            if(mVodInfo != null && mVodInfo.reverseSort){
                 Toast.makeText(requireContext(), getString(R.string.first_episode), Toast.LENGTH_SHORT).show();
             }else {
                 Toast.makeText(requireContext(), getString(R.string.last_episode), Toast.LENGTH_SHORT).show();
@@ -1085,7 +1101,7 @@ public class PlayFragment extends BaseLazyFragment {
             hasPre = mVodInfo.getplayIndex() - 1 >= 0;
         }
         if (!hasPre) {
-            if(mVodInfo.reverseSort){
+            if(mVodInfo != null && mVodInfo.reverseSort){
                 Toast.makeText(requireContext(), getString(R.string.last_episode), Toast.LENGTH_SHORT).show();
             }else {
                 Toast.makeText(requireContext(), getString(R.string.first_episode), Toast.LENGTH_SHORT).show();

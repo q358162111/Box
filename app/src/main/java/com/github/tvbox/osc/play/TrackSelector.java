@@ -46,6 +46,28 @@ public class TrackSelector {
         this.controller = controller;
     }
 
+    /**
+     * 切轨后用延迟任务恢复播放进度。
+     * 800ms 窗口内可能发生切集、退出播放页或画中画关闭，播放器已被 release：
+     * 此时 seekTo/start 在 Exo 上抛 IllegalStateException、在 IJK 上可能直接在 native 层崩溃，
+     * 因此统一包 try/catch 兜底，避免一次切轨把整个播放页带崩。
+     */
+    private Runnable delayedResume(final AbstractPlayer mediaPlayer, final long progress,
+                                  final boolean startProgress) {
+        return new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mediaPlayer.seekTo(progress);
+                    mediaPlayer.start();
+                    if (startProgress) controller.startProgress();
+                } catch (Throwable t) {
+                    LOG.e("TrackSelector delayedResume", t);
+                }
+            }
+        };
+    }
+
     private TrackInfo getTrackInfo(AbstractPlayer mediaPlayer) {
         if (mediaPlayer instanceof EXOmPlayer) {
             return ((EXOmPlayer) mediaPlayer).getTrackInfo();
@@ -86,27 +108,14 @@ public class TrackSelector {
                         controller.mSubtitleView.clearSubtitleCache();
                         controller.mSubtitleView.isInternal = true;
                         ((IjkmPlayer) mediaPlayer).setTrack(value.trackId);
-                        host.handler().postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                mediaPlayer.seekTo(progress);
-                                mediaPlayer.start();
-                            }
-                        }, 800);
+                        host.handler().postDelayed(delayedResume(mediaPlayer, progress, false), 800);
                     }
                     if (mediaPlayer instanceof EXOmPlayer) {
                         controller.mSubtitleView.destroy();
                         controller.mSubtitleView.clearSubtitleCache();
                         controller.mSubtitleView.isInternal = true;
                         ((EXOmPlayer) mediaPlayer).selectExoTrack(value);
-                        host.handler().postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                mediaPlayer.seekTo(progress);
-                                mediaPlayer.start();
-                                controller.startProgress();
-                            }
-                        }, 800);
+                        host.handler().postDelayed(delayedResume(mediaPlayer, progress, true), 800);
                     }
                     dialog.dismiss();
                 } catch (Exception e) {
@@ -148,14 +157,7 @@ public class TrackSelector {
                     if (mediaPlayer instanceof EXOmPlayer) {
                         ((EXOmPlayer) mediaPlayer).selectExoTrack(value);
                     }
-                    host.handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            mediaPlayer.seekTo(progress);
-                            mediaPlayer.start();
-                            controller.startProgress();
-                        }
-                    }, 800);
+                    host.handler().postDelayed(delayedResume(mediaPlayer, progress, true), 800);
                     dialog.dismiss();
                 } catch (Exception e) {
                     LOG.e("切换音轨出错");

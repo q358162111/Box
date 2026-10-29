@@ -587,6 +587,9 @@ public class JsSpider extends Spider {
     }*/
 
     private ByteArrayInputStream getStream(Object o) {
+        // JS 侧返回的 content 可能为 null（proxy 未返回内容），原实现直接 o.toString() 会 NPE，
+        // 该异常被外层 callWithTimeout 转成 ExecutionException 静默吞掉
+        if (o == null) return new ByteArrayInputStream(new byte[0]);
         if (o instanceof JSONArray) {
             JSONArray a = (JSONArray) o;
             byte[] bytes = new byte[a.length()];

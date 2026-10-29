@@ -234,13 +234,13 @@ public class JarLoader {
             jarMd5 = urls.length > 1 ? urls[1].trim() : "";
         }
         recentJarKey = jarKey;
-        // 记录 siteKey -> jarKey 路由，proxyInvoke 用它精确定位该源的 proxy 方法
-        siteJarKeys.put(key, jarKey);
-        // release 构建中 assert 会被禁用，使用显式校验
+        // 判空必须早于 put：ConcurrentHashMap 不允许 null 值，否则这里先抛 NPE 使下方防守成为死代码
         if (jarKey == null) {
             Log.w("JarLoader", "echo-getSpider jarKey 为空，返回 SpiderNull");
             return new SpiderNull();
         }
+        // 记录 siteKey -> jarKey 路由，proxyInvoke 用它精确定位该源的 proxy 方法
+        siteJarKeys.put(key, jarKey);
         DexClassLoader classLoader = jarKey.equals("main")? classLoaders.get("main"):loadJarInternal(jarUrl, jarMd5, jarKey);
         if (classLoader == null) return new SpiderNull();
         try {

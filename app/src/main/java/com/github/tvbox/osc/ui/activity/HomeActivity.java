@@ -279,14 +279,18 @@ public class HomeActivity extends BaseActivity {
                         reloadHome();
                         return;
                     }
+                    // 文件删除留在子线程，但 reloadHome() 会 startActivity，
+                    // 必须从主线程调用；同时避免异步任务长期隐式持有 Activity
                     new Thread(() -> {
                         try {
                             FileUtils.deleteFile(cspCacheDir);
                             ApiConfig.get().clearJarLoader();
-                            reloadHome();
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
+                        App.post(() -> {
+                            if (!isFinishing() && !isDestroyed()) reloadHome();
+                        });
                     }).start();
                 }
             }

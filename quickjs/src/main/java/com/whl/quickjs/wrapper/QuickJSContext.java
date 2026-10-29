@@ -247,6 +247,10 @@ public class QuickJSContext {
         checkDestroyed();
 
         JSCallFunction callFunction = callFunctionMap.get(callFunctionId);
+        // 该 id 可能已被 removeCallFunction 移除（JS 侧函数先于回调被释放），原实现直接 call() 会 NPE
+        if (callFunction == null) {
+            return null;
+        }
         Object ret = callFunction.call(args);
         if (ret instanceof JSCallFunction) {
             putCallFunction((JSCallFunction) ret);

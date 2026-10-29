@@ -753,6 +753,12 @@ public class PlayActivity extends BaseActivity {
 
     private void initSubtitleView() {
         AbstractPlayer mediaPlayer = mVideoView.getMediaPlayer();
+        // prepared 回调与 release 竞态（切集瞬间）时这里会是 null；
+        // 继续绑定 null 会让字幕引擎 start() 直接 return，本集外挂字幕完全不显示且无任何提示
+        if (mediaPlayer == null) {
+            LOG.e("initSubtitleView: mediaPlayer 为空，跳过字幕初始化");
+            return;
+        }
         TrackInfo trackInfo = null;
         if (mVideoView.getMediaPlayer() instanceof IjkmPlayer) {
             trackInfo = ((IjkmPlayer) (mVideoView.getMediaPlayer())).getTrackInfo();
@@ -935,7 +941,14 @@ public class PlayActivity extends BaseActivity {
         Intent intent = getIntent();
         if (intent != null && intent.getExtras() != null) {
             Bundle bundle = intent.getExtras();
-            mVodInfo = (VodInfo) bundle.getSerializable("VodInfo");
+            // 防御：进程重建/extra 缺失/类型不符时这里会拿到 null，
+            // 继续往下走会在 initPlayerCfg() 与 play() 连续 NPE
+            Object extra = bundle.get("VodInfo");
+            if (!(extra instanceof VodInfo)) {
+                errorWithRetry(getString(R.string.playlist_empty), true);
+                return;
+            }
+            mVodInfo = (VodInfo) extra;
             sourceKey = bundle.getString("sourceKey");
             sourceBean = ApiConfig.get().getSource(sourceKey);
             initPlayerCfg();
@@ -953,7 +966,9 @@ public class PlayActivity extends BaseActivity {
             if (!mVodPlayerCfg.has("pl")) {
                 int playType = Hawk.get(HawkConfig.PLAY_TYPE, 1);
                 boolean configurationFile = HawkUtils.getVodPlayerPreferredConfigurationFile();
-                int playerType = sourceBean.getPlayerType();
+                // sourceBean 在配置被清空/站点 key 不存在时为 null，原实现会 NPE 并被下方空 catch 吞掉，
+                // 导致 pl/sc/sp/st/et 全部缺失（播放参数静默失效）
+                int playerType = sourceBean == null ? -1 : sourceBean.getPlayerType();
                 if (configurationFile && playerType != -1) {
                     playType = playerType;
                 }
@@ -1053,7 +1068,11 @@ public class PlayActivity extends BaseActivity {
             mController.hideBottom();
             mVideoView.postDelayed(() -> {
                 // 400ms 窗口内 activity 可能已销毁，mVideoView 置空后 NPE
-                if (mVideoView != null && !mVideoView.isPlaying()) {
+                if (mVideoView == null || isFinishing() || isDestroyed()) return;
+                // 仅画中画真正成功后才恢复播放：PiP 失败（部分 ROM 会抛异常）时
+                // Activity 已进入后台，这里恢复会造成后台偷跑耗电
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && !isInPictureInPictureMode()) return;
+                if (!mVideoView.isPlaying()) {
                     mController.togglePlay();
                 }
             }, 400);
@@ -1081,13 +1100,17 @@ public class PlayActivity extends BaseActivity {
 
     // takagen99 : Use onStopCalled to track close activity
     private boolean onStopCalled;
+    // 记录进入后台前的播放态：用户手动暂停后短暂切后台再回来，不应被强行恢复播放
+    private boolean wasPlayingBeforePause;
+    // 播放器已释放：避免 PiP 关闭/销毁后 onResume 再对已 release 的实例 resume
+    private boolean playerReleased;
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (mVideoView != null) {
+        if (mVideoView != null && !playerReleased) {
             onStopCalled = false;
-            mVideoView.resume();
+            if (wasPlayingBeforePause) mVideoView.resume();
         }
     }
 
@@ -1102,6 +1125,7 @@ public class PlayActivity extends BaseActivity {
     protected void onPause() {
         super.onPause();
         if (mVideoView != null) {
+            wasPlayingBeforePause = mVideoView.isPlaying();
             mVideoView.pause();
         }
     }
@@ -1146,8 +1170,10 @@ public class PlayActivity extends BaseActivity {
             // Closed playback
             // mVideoView 在 fragment 视图销毁后可能为 null；
             // pipActionReceiver 从未注册时 unregisterReceiver 会抛 IllegalArgumentException
-            if (onStopCalled && mVideoView != null) {
+            if (onStopCalled && mVideoView != null && !playerReleased) {
                 mVideoView.release();
+                // 标记已释放：否则回到前台 onResume 会对已 release 的实例 resume
+                playerReleased = true;
             }
             if (pipActionReceiver != null) {
                 try {
@@ -1162,6 +1188,11 @@ public class PlayActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        // 弹幕线程池此前从未销毁：每进一次播放页泄漏一个永不回收的单线程 ExecutorService
+        if (danmuPresenter != null) {
+            danmuPresenter.destroy();
+            danmuPresenter = null;
+        }
         if (EventBus.getDefault().isRegistered(this)) EventBus.getDefault().unregister(this);
         if(executorService!=null){
             executorService.shutdownNow();
@@ -1180,6 +1211,11 @@ public class PlayActivity extends BaseActivity {
         }
         //手动注销
         sourceViewModel.playResult.removeObserver(mObserverPlayResult);
+        // 控制器内每秒自递归任务（网速/时间/隐藏底栏等）仅靠 onDetachedFromWindow 清理并不可靠，
+        // Activity 直接 finish 时该回调可能不触发，残留任务会持有 controller → Activity
+        if (mController != null) {
+            mController.destroy();
+        }
         if (mVideoView != null) {
             mVideoView.release();
             mVideoView = null;
@@ -1292,7 +1328,16 @@ public class PlayActivity extends BaseActivity {
     }
 
     public void play(boolean reset) {
-        VodInfo.VodSeries vs = mVodInfo.seriesMap.get(mVodInfo.playFlag).get(mVodInfo.getplayIndex());
+        // 防御：playFlag 与 seriesMap 不匹配、或 playIndex 越界时直接崩溃；
+        // 且 autoRetry() 会自动再次调用 play()，会形成崩溃循环
+        List<VodInfo.VodSeries> seriesList = mVodInfo == null || mVodInfo.seriesMap == null
+                ? null : mVodInfo.seriesMap.get(mVodInfo.playFlag);
+        if (seriesList == null || seriesList.isEmpty()
+                || mVodInfo.getplayIndex() < 0 || mVodInfo.getplayIndex() >= seriesList.size()) {
+            errorWithRetry(getString(R.string.playlist_empty), true);
+            return;
+        }
+        VodInfo.VodSeries vs = seriesList.get(mVodInfo.getplayIndex());
         EventBus.getDefault().post(new RefreshEvent(RefreshEvent.TYPE_REFRESH, mVodInfo.getplayIndex()));
         EventBus.getDefault().post(new RefreshEvent(RefreshEvent.TYPE_REFRESH_NOTIFY, mVodInfo.name + "&&" + vs.name));
         String playTitleInfo = mVodInfo.name + " : " + vs.name;

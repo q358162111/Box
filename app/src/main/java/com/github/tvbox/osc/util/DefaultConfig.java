@@ -15,6 +15,7 @@ import com.github.tvbox.osc.bean.MovieSort;
 import com.github.tvbox.osc.bean.SourceBean;
 import com.github.tvbox.osc.server.ControlManager;
 import com.github.tvbox.osc.ui.activity.HomeActivity;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.hjq.permissions.Permission;
@@ -253,6 +254,22 @@ public class DefaultConfig {
         } catch (Throwable th) {
         }
         return defaultVal;
+    }
+
+    /**
+     * 安全取 JsonArray：字段缺失、为 null 或类型不是数组时返回 null（调用方自行决定跳过还是用空数组）。
+     * 直接 getAsJsonArray() 在非数组字段上会抛 IllegalStateException，
+     * 在 ApiConfig 中会击穿整份配置解析（后续 parses/lives/rules/ads 全部被跳过）。
+     */
+    public static JsonArray safeJsonArray(JsonObject obj, String key) {
+        try {
+            if (obj != null && obj.has(key)) {
+                JsonElement ele = obj.get(key);
+                if (ele != null && ele.isJsonArray()) return ele.getAsJsonArray();
+            }
+        } catch (Throwable th) {
+        }
+        return null;
     }
 
     public static ArrayList<String> safeJsonStringList(JsonObject obj, String key) {

@@ -33,30 +33,34 @@ public class EpgUtil {
             return;
 
         //credit by 龍
-        try {
-            AssetManager assetManager = App.getInstance().getAssets(); //获得assets资源管理器（assets中的文件无法直接访问，可以使用AssetManager访问）
-            InputStreamReader inputStreamReader = new InputStreamReader(assetManager.open("epg_data.json"),"UTF-8"); //使用IO流读取json文件内容
-            BufferedReader br = new BufferedReader(inputStreamReader);//使用字符高效流
+        // 原实现只 catch IOException：epg_data.json 缺 epgs 字段 / 元素非 object / name 缺失
+        // 会抛 NPE/IllegalStateException 直接逃逸；且读取异常时两个流都不关闭。
+        // 这里改 try-with-resources + catch Throwable + 逐字段 opt 防御
+        try (InputStreamReader inputStreamReader = new InputStreamReader(
+                     App.getInstance().getAssets().open("epg_data.json"), "UTF-8");
+             BufferedReader br = new BufferedReader(inputStreamReader)) {
             String line;
             StringBuilder builder = new StringBuilder();
             while ((line = br.readLine()) != null) {
                 builder.append(line);
             }
-            br.close();
-            inputStreamReader.close();
-            if (!builder.toString().isEmpty()) {
+            if (builder.length() > 0) {
                 epgDoc = new Gson().fromJson(builder.toString(), (Type) JsonObject.class);// 从builder中读取了json中的数据。
-                for (JsonElement opt : epgDoc.get("epgs").getAsJsonArray()) {
-                    JsonObject obj = (JsonObject) opt;
-                    String name = obj.get("name").getAsString().trim();
-                    String[] names = name.split(",");
-                    for (String string : names) {
-                        epgHashMap.put(string, obj);
+                if (epgDoc != null && epgDoc.has("epgs") && epgDoc.get("epgs").isJsonArray()) {
+                    for (JsonElement opt : epgDoc.getAsJsonArray("epgs")) {
+                        if (opt == null || !opt.isJsonObject()) continue;
+                        JsonObject obj = opt.getAsJsonObject();
+                        if (!obj.has("name") || obj.get("name").isJsonNull()) continue;
+                        String name = obj.get("name").getAsString().trim();
+                        if (name.isEmpty()) continue;
+                        String[] names = name.split(",");
+                        for (String string : names) {
+                            epgHashMap.put(string, obj);
+                        }
                     }
                 }
             }
-
-        } catch (IOException e) {
+        } catch (Throwable e) {
             e.printStackTrace();
         }
     }

@@ -182,11 +182,18 @@ public class LivePlayActivity extends BaseActivity {
         HashMap<String, String> header = new HashMap();
         try {
             boolean matchTo = false;
-            JSONArray livePlayHeaders = new JSONArray(ApiConfig.get().getLivePlayHeaders().toString());
+            // getLivePlayHeaders() 在配置尚未解析时为 null，原实现直接 toString() 会 NPE，
+            // 被下方 catch 吞掉后所有用户配置的直播请求头静默失效
+            JsonArray configuredHeaders = ApiConfig.get().getLivePlayHeaders();
+            JSONArray livePlayHeaders = configuredHeaders == null
+                    ? new JSONArray() : new JSONArray(configuredHeaders.toString());
             for (int i = 0; i < livePlayHeaders.length(); i++) {
-                JSONObject headerObj = livePlayHeaders.getJSONObject(i);
-                JSONArray flags = headerObj.getJSONArray("flag");
-                JSONObject headerData = headerObj.getJSONObject("header");
+                JSONObject headerObj = livePlayHeaders.optJSONObject(i);
+                if (headerObj == null) continue;
+                // 缺 flag/header 字段时不要整段抛异常导致后续规则全部失效
+                JSONArray flags = headerObj.optJSONArray("flag");
+                JSONObject headerData = headerObj.optJSONObject("header");
+                if (flags == null || headerData == null) continue;
                 for (int j = 0; j < flags.length(); j++) {
                     String flag = flags.getString(j);
                     if (url.contains(flag)) {
@@ -494,12 +501,17 @@ public class LivePlayActivity extends BaseActivity {
 
     // takagen99 : Use onStopCalled to track close activity
     private boolean onStopCalled;
+    // 记录进入后台前的播放态：用户手动暂停后短暂切后台再回来，不应被强行恢复播放
+    private boolean wasPlayingBeforePause;
+    // 播放器已释放：避免画中画关闭后 onResume 再对已 release 的实例 resume
+    private boolean playerReleased;
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (mVideoView != null) {
-            mVideoView.resume();
+        if (mVideoView != null && !playerReleased) {
+            onStopCalled = false;
+            if (wasPlayingBeforePause) mVideoView.resume();
         }
     }
 
@@ -513,6 +525,7 @@ public class LivePlayActivity extends BaseActivity {
     protected void onPause() {
         super.onPause();
         if (mVideoView != null) {
+            wasPlayingBeforePause = mVideoView.isPlaying();
             if (supportsPiPMode()) {
                 if (isInPictureInPictureMode()) {
                     // Continue playback
@@ -534,8 +547,10 @@ public class LivePlayActivity extends BaseActivity {
         if (supportsPiPMode()) {
             if (!isInPictureInPictureMode()) {
                 // Closed playback
-                if (onStopCalled) {
+                // 原实现既无判空也无已释放标记：Activity 回到前台时 onResume 会对已 release 的实例 resume
+                if (onStopCalled && mVideoView != null && !playerReleased) {
                     mVideoView.release();
+                    playerReleased = true;
                 }
             }
         }
@@ -1227,12 +1242,15 @@ public class LivePlayActivity extends BaseActivity {
 
             @Override
             public void onItemClick(TvRecyclerView parent, View itemView, int position) {
+                // Activity 销毁后（onDestroy 已把 mVideoView 置 null）异步点击回调仍可能到达
+                if (mVideoView == null || playerReleased) return;
 
                 Date date = epgDateAdapter.getSelectedIndex() < 0 ? new Date() :
                         epgDateAdapter.getData().get(epgDateAdapter.getSelectedIndex()).getDateParamVal();
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
                 dateFormat.setTimeZone(TimeZone.getTimeZone("GMT+8:00"));
                 Epginfo selectedData = epgListAdapter.getItem(position);
+                if (selectedData == null) return;
                 String targetDate = dateFormat.format(date);
                 String shiyiStartdate = targetDate + selectedData.originStart.replace(":", "") + "30";
                 String shiyiEnddate = targetDate + selectedData.originEnd.replace(":", "") + "30";
@@ -1266,11 +1284,15 @@ public class LivePlayActivity extends BaseActivity {
         epgListAdapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
+                // 同上：销毁后回调仍到达时 mVideoView 已为 null
+                if (mVideoView == null || playerReleased) return;
+
                 Date date = epgDateAdapter.getSelectedIndex() < 0 ? new Date() :
                         epgDateAdapter.getData().get(epgDateAdapter.getSelectedIndex()).getDateParamVal();
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
                 dateFormat.setTimeZone(TimeZone.getTimeZone("GMT+8:00"));
                 Epginfo selectedData = epgListAdapter.getItem(position);
+                if (selectedData == null) return;
                 String targetDate = dateFormat.format(date);
                 String shiyiStartdate = targetDate + selectedData.originStart.replace(":", "") + "30";
                 String shiyiEnddate = targetDate + selectedData.originEnd.replace(":", "") + "30";
@@ -1636,6 +1658,7 @@ public class LivePlayActivity extends BaseActivity {
                 livePlayerManager.changeLivePlayerScale(mVideoView, position, currentLiveChannelItem.getChannelName());
                 break;
             case 2://播放解码
+                if (mVideoView == null || playerReleased) break;
                 mVideoView.release();
                 livePlayerManager.changeLivePlayerType(mVideoView, position, currentLiveChannelItem.getChannelName());
                 mVideoView.setUrl(currentLiveChannelItem.getUrl(), setPlayHeaders(currentLiveChannelItem.getUrl()));
