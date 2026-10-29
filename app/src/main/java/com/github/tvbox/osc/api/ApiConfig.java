@@ -71,7 +71,10 @@ public class ApiConfig {
     private static final android.os.Handler MAIN_HANDLER = new android.os.Handler(Looper.getMainLooper());
     // DCL 双检锁必须 volatile，否则指令重排可能让其他线程读到未完全构造的实例
     private static volatile ApiConfig instance;
-    private final LinkedHashMap<String, SourceBean> sourceBeanList;
+    // volatile + 整体替换引用发布：解析线程构建好新 Map 后一次性换引用，读方拿到的永远是
+    // 一个结构完整的快照。绝不可在此引用上做 clear()/putAll() —— 那会与主线程、
+    // 搜索/爬虫线程池的并发读构成结构性破坏（CME、HashMap 扩容成环死循环）。
+    private volatile LinkedHashMap<String, SourceBean> sourceBeanList;
     private SourceBean mHomeSource;
     private ParseBean mDefaultParse;
     private final List<LiveChannelGroup> liveChannelGroupList;
@@ -409,8 +412,8 @@ public class ApiConfig {
     private void parseSites(JsonObject infoJson) {
         // 远端站点源
         SourceBean firstSite = null;
-        // 重新解析配置时清空旧源，避免新旧配置站点混杂
-        sourceBeanList.clear();
+        // 注意：这里不能再 sourceBeanList.clear()。旧源靠下面的整体替换引用一次性淘汰，
+        // 且解析中途抛异常时保留上一次可用配置，优于清空导致全站失效。
         // 配置变更后同步清空首页缓存，否则同 key 旧缓存会让新配置首页返回过期数据
         SourceViewModel.clearSortCache();
         // 防御：video/sites 缺失或类型异常时 get() 返回 null，再 getAsJsonArray() 会直接 NPE，
@@ -457,9 +460,8 @@ public class ApiConfig {
                 firstSite = sb;
             parsedSites.put(siteKey, sb);
         }
-        // 原子发布：整体替换引用
-        sourceBeanList.clear();
-        sourceBeanList.putAll(parsedSites);
+        // 原子发布：整体替换引用（volatile 写），读方无需加锁即可看到完整快照
+        sourceBeanList = parsedSites;
         if (!parsedSites.isEmpty()) {
             String home = Hawk.get(HawkConfig.HOME_API, "");
             SourceBean sh = getSource(home);
@@ -928,9 +930,10 @@ public class ApiConfig {
     }
 
     public SourceBean getSource(String key) {
-        if (!sourceBeanList.containsKey(key))
-            return null;
-        return sourceBeanList.get(key);
+        if (key == null) return null;
+        // 取一次 volatile 快照再单次 get：避免 containsKey+get 两次查找之间引用被替换
+        LinkedHashMap<String, SourceBean> snapshot = sourceBeanList;
+        return snapshot == null ? null : snapshot.get(key);
     }
 
     public void setSourceBean(SourceBean sourceBean) {
@@ -953,7 +956,10 @@ public class ApiConfig {
     }
 
     public List<SourceBean> getSourceBeanList() {
-        return new ArrayList<>(sourceBeanList.values());
+        LinkedHashMap<String, SourceBean> snapshot = sourceBeanList;
+        if (snapshot == null || snapshot.isEmpty()) return new ArrayList<>();
+        // 基于快照拷贝，遍历期间即使解析线程替换了引用也不会 CME
+        return new ArrayList<>(snapshot.values());
     }
 
     public List<ParseBean> getParseBeanList() {

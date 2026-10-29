@@ -23,9 +23,12 @@ public class SelectDialogAdapter<T> extends ListAdapter<T, SelectDialogAdapter.S
     private boolean muteCheck = false;
 
     static class SelectViewHolder extends RecyclerView.ViewHolder {
+        // 修复：原 ViewHolder 不缓存子 view，每次 bind 都要 findViewById 遍历整棵 item 子树
+        final TextView tvName;
 
-        public SelectViewHolder(@NonNull @NotNull View itemView) {
+        SelectViewHolder(@NonNull @NotNull View itemView) {
             super(itemView);
+            tvName = itemView.findViewById(R.id.tvName);
         }
     }
 
@@ -68,7 +71,7 @@ public class SelectDialogAdapter<T> extends ListAdapter<T, SelectDialogAdapter.S
 
     public void setData(List<T> newData, int defaultSelect) {
         data.clear();
-        data.addAll(newData);
+        if (newData != null) data.addAll(newData);
         select = defaultSelect;
         notifyDataSetChanged();
     }
@@ -85,21 +88,27 @@ public class SelectDialogAdapter<T> extends ListAdapter<T, SelectDialogAdapter.S
     }
 
     @Override
-    public void onBindViewHolder(@NonNull @NotNull SelectDialogAdapter.SelectViewHolder holder, @SuppressLint("RecyclerView") int position) {    
+    public void onBindViewHolder(@NonNull @NotNull SelectDialogAdapter.SelectViewHolder holder, int position) {
         T value = data.get(position);
         String name = dialogInterface.getDisplay(value);
         if (!muteCheck && position == select)
             name = "√ " + name;
-        ((TextView) holder.itemView.findViewById(R.id.tvName)).setText(name);
+        holder.tvName.setText(name);
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!muteCheck && position == select)
+                // 修复：原实现用 @SuppressLint("RecyclerView") 压制警告、直接捕获绑定时的
+                // position 与 value。数据变化或 item 被移除后该下标失效，会把选中态刷到
+                // 错误的行并回传错误的 value。改为点击时实时查询当前绑定位置。
+                int pos = holder.getBindingAdapterPosition();
+                if (pos == RecyclerView.NO_POSITION || pos < 0 || pos >= data.size()) return;
+                T cur = data.get(pos);
+                if (!muteCheck && pos == select)
                     return;
+                if (select >= 0 && select < data.size()) notifyItemChanged(select);
+                select = pos;
                 notifyItemChanged(select);
-                select = position;
-                notifyItemChanged(select);
-                dialogInterface.click(value, position);
+                dialogInterface.click(cur, pos);
             }
         });
     }

@@ -33,8 +33,10 @@ public class Thunder {
     private static String name = "";
     private static String task_url = "";
     private static long currentTask = 0L;
-    private static ArrayList<TorrentFileInfo> torrentFileInfoArrayList = null;
-    private static ExecutorService threadPool = null;
+    // volatile：这三个列表在 parse() 的池线程里重建、在播放/回调线程里读取，
+    // 无可见性保证时会读到上一轮已作废的列表（索引越界 / 播错文件）
+    private static volatile ArrayList<TorrentFileInfo> torrentFileInfoArrayList = null;
+    private static volatile ExecutorService threadPool = null;
 
 
     private static void init(Context context) {
@@ -111,8 +113,9 @@ public class Thunder {
         void play(String url);
     }
 
-    private static ArrayList<String> playList = null;
-    private static ArrayList<String> ed2kList = null;
+    // 同 torrentFileInfoArrayList：跨线程读写，必须 volatile 保证可见性
+    private static volatile ArrayList<String> playList = null;
+    private static volatile ArrayList<String> ed2kList = null;
     // 解析代际：每次 parse/stop 自增。shutdownNow 不等待旧任务结束，
     // 旧任务凭代际判断自己是否已过期，过期则立即退出，
     // 避免其继续写共享的 currentTask/playList/torrentFileInfoArrayList 污染新一轮解析
@@ -122,12 +125,21 @@ public class Thunder {
         init(context);
         stop(true);
         final int gen = parseGeneration;
-        threadPool = Executors.newSingleThreadExecutor();
-        torrentFileInfoArrayList=new ArrayList<>();
-        playList=new ArrayList<>();
-        ed2kList=new ArrayList<>();
+        // 修复：原实现在 stateLock 之外给 threadPool / 三个列表赋值。
+        // stop()（主线程）在锁内 shutdownNow + 置 null，与此处交错时：
+        //   1) parse 赋新池 → stop 关掉并置 null → 下面的 threadPool.execute() 直接 NPE；
+        //   2) stop 置 null → parse 赋新池 → 旧池引用丢失，线程常驻泄漏。
+        // 改为在锁内赋值，并用局部引用 pool 提交任务（stop 后也不影响本次提交）。
+        final ExecutorService pool;
+        synchronized (stateLock) {
+            pool = Executors.newSingleThreadExecutor();
+            threadPool = pool;
+            torrentFileInfoArrayList=new ArrayList<>();
+            playList=new ArrayList<>();
+            ed2kList=new ArrayList<>();
+        }
         Map<Integer, String> urlMap = new HashMap<>();
-        threadPool.execute(new Runnable() {
+        pool.execute(new Runnable() {
             @Override
             public void run() {
                 // 整体兜底：此前 run() 内无任何异常保护，任何 NPE 都会让线程静默死亡，
@@ -368,9 +380,13 @@ public class Thunder {
             return true;
         }
         if (isEd2k(url) || isFtp(url)) {
-            if(threadPool==null){
-                init(App.getInstance());
-                threadPool = Executors.newSingleThreadExecutor();
+            // 同 parse()：池的创建/赋值必须纳入 stateLock，否则与 stop() 的
+            // shutdownNow + 置 null 交错会产生 NPE 或线程泄漏
+            synchronized (stateLock) {
+                if (threadPool == null || threadPool.isShutdown()) {
+                    init(App.getInstance());
+                    threadPool = Executors.newSingleThreadExecutor();
+                }
             }
             synchronized (stateLock) {
                 if (currentTask > 0) {

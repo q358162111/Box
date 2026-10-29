@@ -187,16 +187,8 @@ public class FastSearchActivity extends BaseActivity {
                 FastClickCheckUtil.check(view);
                 Movie.Video video = searchAdapter.getData().get(position);
                 if (video != null) {
-                    try {
-                        if (searchExecutorService != null) {
-                            // 暂停搜索的关停逻辑收敛到 SourceViewModel.pauseAll
-                            pauseRunnable = sourceViewModel.pauseAll();
-                            searchExecutorService = null;
-                            JsLoader.stopAll();
-                        }
-                    } catch (Throwable th) {
-                        th.printStackTrace();
-                    }
+                    // 暂停搜索的关停逻辑收敛到 SourceViewModel.pauseAll
+                    pauseSearch();
                     Bundle bundle = new Bundle();
                     bundle.putString("id", video.id);
                     bundle.putString("sourceKey", video.sourceKey);
@@ -214,16 +206,8 @@ public class FastSearchActivity extends BaseActivity {
                 FastClickCheckUtil.check(view);
                 Movie.Video video = searchAdapterFilter.getData().get(position);
                 if (video != null) {
-                    try {
-                        if (searchExecutorService != null) {
-                            // 暂停搜索的关停逻辑收敛到 SourceViewModel.pauseAll
-                            pauseRunnable = sourceViewModel.pauseAll();
-                            searchExecutorService = null;
-                            JsLoader.stopAll();
-                        }
-                    } catch (Throwable th) {
-                        th.printStackTrace();
-                    }
+                    // 暂停搜索的关停逻辑收敛到 SourceViewModel.pauseAll
+                    pauseSearch();
                     Bundle bundle = new Bundle();
                     bundle.putString("id", video.id);
                     bundle.putString("sourceKey", video.sourceKey);
@@ -386,6 +370,32 @@ public class FastSearchActivity extends BaseActivity {
     private ExecutorService searchExecutorService = null;
     private final AtomicInteger allRunCount = new AtomicInteger(0);
 
+    /**
+     * 暂停搜索：先记录未完成的待跑任务（回到本页时 resumeSearch 续跑），再真正关停线程池。
+     * 修复：此前只把 searchExecutorService 置 null 却不 shutdownNow —— 该池是本 Activity 自建的
+     * 5 线程 non-daemon 池，置 null 后 onDestroy 也拿不到引用，每点一次搜索结果就泄漏 5 个线程，
+     * 且队列里剩余任务会继续跑完并 post EventBus 到已跳转走的页面。
+     */
+    private void pauseSearch() {
+        try {
+            // 1) ViewModel 侧挂起任务
+            List<Runnable> paused = new ArrayList<>();
+            List<Runnable> vmPaused = sourceViewModel.pauseAll();
+            if (vmPaused != null) paused.addAll(vmPaused);
+            // 2) 本 Activity 自建池的挂起任务：shutdownNow() 会返回尚未开始执行的任务，
+            //    收集起来供 onResume 重放，避免跳转详情页后剩余源永远搜不出结果。
+            if (searchExecutorService != null) {
+                List<Runnable> pending = searchExecutorService.shutdownNow();
+                if (pending != null) paused.addAll(pending);
+                searchExecutorService = null;
+            }
+            pauseRunnable = paused;
+            JsLoader.stopAll();
+        } catch (Throwable th) {
+            th.printStackTrace();
+        }
+    }
+
     private void searchResult() {
         try {
             if (searchExecutorService != null) {
@@ -506,13 +516,20 @@ public class FastSearchActivity extends BaseActivity {
     protected void onDestroy() {
         super.onDestroy();
         cancel();
+        // 丢弃待重放任务，避免 onResume 在销毁后仍重放
+        if (pauseRunnable != null) pauseRunnable.clear();
         try {
             if (searchExecutorService != null) {
                 searchExecutorService.shutdownNow();
                 searchExecutorService = null;
-                //sLoader.load();
-                JsLoader.stopAll();
             }
+            // resumeAll 可能在 ViewModel 侧也建了池（重放暂停任务），此处一并关停
+            if (sourceViewModel != null) {
+                sourceViewModel.shutdownNow();
+                sourceViewModel.destroyExecutor();
+            }
+            //sLoader.load();
+            JsLoader.stopAll();
         } catch (Throwable th) {
             th.printStackTrace();
         }

@@ -46,8 +46,12 @@ public class GridAdapter extends BaseQuickAdapter<Movie.Video, BaseViewHolder> {
             ImageView ivThumb = helper.getView(R.id.ivThumb);
             //由于部分电视机使用glide报错
             if (!TextUtils.isEmpty(item.pic)) {
-            	item.pic=item.pic.trim();
-                ImgUtil.load(item.pic, ivThumb,  (int) App.getInstance().getResources().getDimension(R.dimen.vs_5));
+                item.pic=item.pic.trim();
+                // 修复：原调用未传目标尺寸，Glide 不做下采样，海报原图按原始分辨率解码进内存。
+                // list 模式是小图，浪费尤其明显。补上 override 与其它列表 adapter 保持一致。
+                ImgUtil.load(item.pic, ivThumb, (int) App.getInstance().getResources().getDimension(R.dimen.vs_5),
+                        AutoSizeUtils.mm2px(mContext, ImgUtil.defaultWidth),
+                        AutoSizeUtils.mm2px(mContext, ImgUtil.defaultHeight));
             } else {
                 ivThumb.setImageResource(R.drawable.img_loading_placeholder);
             }

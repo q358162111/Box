@@ -59,14 +59,16 @@ public class HomeHotVodAdapter extends BaseQuickAdapter<Movie.Video, BaseViewHol
         if (showSourceName) {
             tvYear.setVisibility(View.VISIBLE);
             SourceBean source = ApiConfig.get().getSource(item.sourceKey);
-            if(source!=null){
-                tvYearValue=source.getName();
-            }else {
-                tvYearValue="搜";
-
-            }
+            // 修复：原实现把源名写回实例字段 tvYearValue（构造函数传入的是年份值），
+            // 导致该字段被永久污染 —— 某个 item 查不到源时字段变成"搜"，后续 item 的
+            // 显示内容取决于 bind 顺序，RecyclerView 复用下表现为"年份/源名随机错乱"。
+            // 改为局部变量，tvYearValue 保持为构造时传入的年份值。
+            tvYear.setText(source != null ? source.getName() : "搜");
+        } else {
+            // 显式设置可见性：复用 ViewHolder 时避免残留上一个 item 的状态
+            tvYear.setVisibility(View.VISIBLE);
+            tvYear.setText(tvYearValue);
         }
-        tvYear.setText(tvYearValue);
         TextView tvRate = helper.getView(R.id.tvNote);
         if (item.note == null || item.note.isEmpty()) {
             tvRate.setVisibility(View.GONE);

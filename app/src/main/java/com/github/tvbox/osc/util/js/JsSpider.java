@@ -52,9 +52,23 @@ public class JsSpider extends Spider {
     private final String api;
     private boolean cat;
 
+    // 每个 JS 源独占一个单线程 Executor。修复：原用默认线程工厂创建 non-daemon 线程，
+    // 而 JsLoader.clear() 只在切配置时清理，几十上百个 JS 源会累积常驻线程
+    // （TV 设备上每线程约 1MB 栈）并阻止进程干净退出。改为具名 daemon 线程。
+    private static final java.util.concurrent.ThreadFactory JS_THREAD_FACTORY = new java.util.concurrent.ThreadFactory() {
+        private final java.util.concurrent.atomic.AtomicInteger seq = new java.util.concurrent.atomic.AtomicInteger(1);
+
+        @Override
+        public Thread newThread(Runnable r) {
+            Thread t = new Thread(r, "js-spider-" + seq.getAndIncrement());
+            t.setDaemon(true);
+            return t;
+        }
+    };
+
     public JsSpider(String key, String api, Class<?> cls) throws Exception {
         this.key = "J" + MD5.encode(key);
-        this.executor = Executors.newSingleThreadExecutor();
+        this.executor = Executors.newSingleThreadExecutor(JS_THREAD_FACTORY);
         this.api = api;
         this.dex = cls;
         initializeJS();

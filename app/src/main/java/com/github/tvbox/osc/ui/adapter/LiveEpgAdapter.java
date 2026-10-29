@@ -24,8 +24,51 @@ public class LiveEpgAdapter extends BaseQuickAdapter<Epginfo, BaseViewHolder> {
     private String shiyiDate = null;
     private SimpleDateFormat timeFormat = new SimpleDateFormat("yyyy-MM-dd");
 
+    // ---- 绑定路径缓存：以下值都是「列表级常量」，原实现在每个 item 每次 bind 都重新取一遍 ----
+    // Resources.getColor() 已废弃且内部走 AssetManager 加锁，getString() 走 AssetManager，
+    // 主题色是 Activity 级常量；EPG 列表上百条时焦点移动会反复触发重绑，缓存后全部降为字段读。
+    private boolean resourcesResolved = false;
+    private int colorWhite;
+    private int color32364E;
+    private int color32364E_40;
+    private int color3D3D3D;
+    private int themeColor;
+    private String strLive;
+    private String strPlayback;
+    private String strBooking;
+    private String strLiveNow;
+    private String strPlaybackNow;
+
+    // "yyyy-MM-dd" 粒度到天，30s 刷新一次足够；避免每个 item 每次 bind 都做一次
+    // SimpleDateFormat.format（内部要初始化 Calendar、查时区表）
+    private String todayStr;
+    private long todayStrUpdatedAt = 0L;
+
     public LiveEpgAdapter() {
         super(R.layout.item_epglist, new ArrayList<>());
+    }
+
+    private void ensureResources() {
+        if (resourcesResolved) return;
+        resourcesResolved = true;
+        colorWhite = mContext.getResources().getColor(R.color.color_FFFFFF);
+        color32364E = mContext.getResources().getColor(R.color.color_32364E);
+        color32364E_40 = mContext.getResources().getColor(R.color.color_32364E_40);
+        color3D3D3D = mContext.getResources().getColor(R.color.color_3D3D3D);
+        themeColor = (mContext instanceof BaseActivity ? ((BaseActivity) mContext).getThemeColor() : 0);
+        strLive = mContext.getString(R.string.epg_live);
+        strPlayback = mContext.getString(R.string.epg_playback);
+        strBooking = mContext.getString(R.string.epg_booking);
+        strLiveNow = mContext.getString(R.string.epg_live_now);
+        strPlaybackNow = mContext.getString(R.string.epg_playback_now);
+    }
+
+    private String getTodayStr(long nowMs) {
+        if (todayStr == null || nowMs - todayStrUpdatedAt > 30_000L) {
+            todayStr = timeFormat.format(new Date(nowMs));
+            todayStrUpdatedAt = nowMs;
+        }
+        return todayStr;
     }
 
     public void CanBack(Boolean source_include_back) {
@@ -34,58 +77,63 @@ public class LiveEpgAdapter extends BaseQuickAdapter<Epginfo, BaseViewHolder> {
 
     @Override
     protected void convert(BaseViewHolder holder, Epginfo value) {
-        Date now = new Date();
+        ensureResources();
+        long nowMs = System.currentTimeMillis();
+        // 用 long 比较代替新建 Date 再做 compareTo：省掉每个 item 一次对象分配
+        long startMs = value.startdateTime != null ? value.startdateTime.getTime() : 0L;
+        long endMs = value.enddateTime != null ? value.enddateTime.getTime() : 0L;
+        boolean isLive = nowMs >= startMs && nowMs <= endMs;
+        boolean isPast = nowMs > endMs;
+        boolean isFuture = nowMs < startMs;
+
+        String today = getTodayStr(nowMs);
         TextView textview = holder.getView(R.id.tv_epg_name);
         TextView timeview = holder.getView(R.id.tv_epg_time);
         TextView shiyi = holder.getView(R.id.shiyi);
         AudioWaveView wqddg_AudioWaveView = holder.getView(R.id.wqddg_AudioWaveView);
         wqddg_AudioWaveView.setVisibility(View.GONE);
 
-        if (value.index == selectedEpgIndex && value.index != focusedEpgIndex && (value.currentEpgDate.equals(shiyiDate) || value.currentEpgDate.equals(timeFormat.format(now)))) {
+        if (value.index == selectedEpgIndex && value.index != focusedEpgIndex && (value.currentEpgDate.equals(shiyiDate) || value.currentEpgDate.equals(today))) {
             // takagen99: Added Theme Color
-//            textview.setTextColor(mContext.getResources().getColor(R.color.color_theme));
-//            timeview.setTextColor(mContext.getResources().getColor(R.color.color_theme));
-            textview.setTextColor((mContext instanceof BaseActivity ? ((BaseActivity) mContext).getThemeColor() : 0));
-            timeview.setTextColor((mContext instanceof BaseActivity ? ((BaseActivity) mContext).getThemeColor() : 0));
+            textview.setTextColor(themeColor);
+            timeview.setTextColor(themeColor);
         } else {
-            textview.setTextColor(mContext.getResources().getColor(R.color.color_FFFFFF));
-            timeview.setTextColor(mContext.getResources().getColor(R.color.color_FFFFFF));
+            textview.setTextColor(colorWhite);
+            timeview.setTextColor(colorWhite);
         }
 
-        if (now.compareTo(value.startdateTime) >= 0 && now.compareTo(value.enddateTime) <= 0) {
+        if (isLive) {
             shiyi.setVisibility(View.VISIBLE);
-            shiyi.setBackgroundColor(mContext.getResources().getColor(R.color.color_32364E));
-            shiyi.setTextColor(mContext.getResources().getColor(R.color.color_FFFFFF));
-            shiyi.setText(mContext.getString(R.string.epg_live));
-        } else if (now.compareTo(value.enddateTime) > 0 && source_include_back) {
+            shiyi.setBackgroundColor(color32364E);
+            shiyi.setTextColor(colorWhite);
+            shiyi.setText(strLive);
+        } else if (isPast && source_include_back) {
             shiyi.setVisibility(View.VISIBLE);
-            shiyi.setBackgroundColor(mContext.getResources().getColor(R.color.color_32364E_40));
-            shiyi.setTextColor(mContext.getResources().getColor(R.color.color_FFFFFF));
-            shiyi.setText(mContext.getString(R.string.epg_playback));
-        } else if (now.compareTo(value.startdateTime) < 0 && source_include_back) {
+            shiyi.setBackgroundColor(color32364E_40);
+            shiyi.setTextColor(colorWhite);
+            shiyi.setText(strPlayback);
+        } else if (isFuture && source_include_back) {
             shiyi.setVisibility(View.VISIBLE);
-            shiyi.setBackgroundColor(mContext.getResources().getColor(R.color.color_3D3D3D));
-            shiyi.setTextColor(mContext.getResources().getColor(R.color.color_FFFFFF));
-            shiyi.setText(mContext.getString(R.string.epg_booking));
+            shiyi.setBackgroundColor(color3D3D3D);
+            shiyi.setTextColor(colorWhite);
+            shiyi.setText(strBooking);
         } else {
             shiyi.setVisibility(View.GONE);
         }
 
         textview.setText(value.title);
         timeview.setText(value.start + " - " + value.end);
-        textview.setTextColor(mContext.getResources().getColor(R.color.color_FFFFFF));
-        timeview.setTextColor(mContext.getResources().getColor(R.color.color_FFFFFF));
+        textview.setTextColor(colorWhite);
+        timeview.setTextColor(colorWhite);
         if (ShiyiSelection == false) {
-            if (now.compareTo(value.startdateTime) >= 0 && now.compareTo(value.enddateTime) <= 0) {
+            if (isLive) {
                 wqddg_AudioWaveView.setVisibility(View.VISIBLE);
                 // takagen99: Added Theme Color
-//                textview.setTextColor(mContext.getResources().getColor(R.color.color_theme));
-//                timeview.setTextColor(mContext.getResources().getColor(R.color.color_theme));
-                textview.setTextColor((mContext instanceof BaseActivity ? ((BaseActivity) mContext).getThemeColor() : 0));
-                timeview.setTextColor((mContext instanceof BaseActivity ? ((BaseActivity) mContext).getThemeColor() : 0));
+                textview.setTextColor(themeColor);
+                timeview.setTextColor(themeColor);
                 textview.setFreezesText(true);
                 timeview.setFreezesText(true);
-                shiyi.setText(mContext.getString(R.string.epg_live_now));
+                shiyi.setText(strLiveNow);
             } else {
                 wqddg_AudioWaveView.setVisibility(View.GONE);
             }
@@ -93,15 +141,13 @@ public class LiveEpgAdapter extends BaseQuickAdapter<Epginfo, BaseViewHolder> {
             if (value.index == this.selectedEpgIndex && value.currentEpgDate.equals(shiyiDate)) {
                 wqddg_AudioWaveView.setVisibility(View.VISIBLE);
                 // takagen99: Added Theme Color
-//                textview.setTextColor(mContext.getResources().getColor(R.color.color_theme));
-//                timeview.setTextColor(mContext.getResources().getColor(R.color.color_theme));
-                textview.setTextColor((mContext instanceof BaseActivity ? ((BaseActivity) mContext).getThemeColor() : 0));
-                timeview.setTextColor((mContext instanceof BaseActivity ? ((BaseActivity) mContext).getThemeColor() : 0));
+                textview.setTextColor(themeColor);
+                timeview.setTextColor(themeColor);
                 textview.setFreezesText(true);
                 timeview.setFreezesText(true);
-                shiyi.setText(mContext.getString(R.string.epg_playback_now));
-                if (now.compareTo(value.startdateTime) >= 0 && now.compareTo(value.enddateTime) <= 0) {
-                    shiyi.setText(mContext.getString(R.string.epg_live_now));
+                shiyi.setText(strPlaybackNow);
+                if (isLive) {
+                    shiyi.setText(strLiveNow);
                 }
                 wqddg_AudioWaveView.setVisibility(View.VISIBLE);
             } else {

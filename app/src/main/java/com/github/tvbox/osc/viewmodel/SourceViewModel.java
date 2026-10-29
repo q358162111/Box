@@ -135,7 +135,16 @@ public class SourceViewModel extends ViewModel {
         gson=new Gson();
     }
 
-    public static final ExecutorService spThreadPool = Executors.newSingleThreadExecutor();
+    // 修复：原为默认线程工厂的 non-daemon 单线程且永不 shutdown，会一直常驻栈内存并
+    // 阻止进程干净退出。改为具名 daemon 线程（AppExecutors 同款做法）。
+    public static final ExecutorService spThreadPool = Executors.newSingleThreadExecutor(new ThreadFactory() {
+        @Override
+        public Thread newThread(Runnable r) {
+            Thread t = new Thread(r, "spider-thread-pool");
+            t.setDaemon(true);
+            return t;
+        }
+    });
 
     // getFixUrl 专用线程池：getPlay 在 spThreadPool 内调用 getFixUrl，若 getFixUrl 也提交到
     // spThreadPool 会造成自死锁（单线程池内阻塞等待自己池里的任务，只能靠超时兜底）。
@@ -990,7 +999,9 @@ public class SourceViewModel extends ViewModel {
                     }
                 }
             } catch (Throwable th) {
-
+                // 修复：原为完全静默的空 catch。首页筛选条件丢失时用户只看到「没有分类」，
+                // 而日志里没有任何线索，无法定位是哪个源的 filters 字段格式异常。
+                LOG.e("sortJson 解析 filters 失败", th);
             }
             return data;
         } catch (Exception e) {

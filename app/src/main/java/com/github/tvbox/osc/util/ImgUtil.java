@@ -167,12 +167,19 @@ public class ImgUtil {
     }
 
     public static void load(String url, ImageView view, int roundingRadius, int newWidth, int newHeight) {
-        view.setScaleType(ImageView.ScaleType.CENTER);
+        // 仅在真正变化时才设置：setScaleType 会 invalidate + requestLayout，
+        // 每个 item 每次 bind 无条件设一次会在快速滚动时累加大量无谓的重新布局
+        if (view.getScaleType() != ImageView.ScaleType.CENTER) {
+            view.setScaleType(ImageView.ScaleType.CENTER);
+        }
         if (TextUtils.isEmpty(url)) {
             view.setImageResource(R.drawable.img_loading_placeholder);
         } else {
             if (roundingRadius == 0) roundingRadius = 1;
-            Glide.with(App.getInstance())
+            // 修复：原用 Glide.with(App.getInstance())，拿到的 RequestManager 与页面生命周期无关，
+            // 页面销毁/快速切台后在途请求不会被暂停或清理，TV 上反复进出列表会积压大量请求。
+            // 用 Glide.with(view) 绑定到宿主 Activity/Fragment 生命周期（未挂载时 Glide 自动回退）。
+            Glide.with(view)
                 .asBitmap()
                 .load(getUrl(url))
                 .error(R.drawable.img_loading_placeholder)
@@ -224,6 +231,19 @@ public class ImgUtil {
         }
     }
 
+    /**
+     * 取 url 中 marker 之后、下一个 '@' 之前的一段（等价于旧实现
+     * {@code url.split(marker)[1].split("@")[0]}），但不编译正则、不分配数组。
+     */
+    private static String extractSegment(String url, String marker) {
+        int idx = url.indexOf(marker);
+        if (idx < 0) return null;
+        int start = idx + marker.length();
+        int end = url.indexOf('@', start);
+        if (end < 0) end = url.length();
+        return end > start ? url.substring(start, end) : null;
+    }
+
     private static Object getUrl(String url) {
         // 修复：上游偶有 null 入参，原代码 url.startsWith("data:") 抛 NullPointerException
         if (TextUtils.isEmpty(url)) return null;
@@ -239,19 +259,24 @@ public class ImgUtil {
             url += "@Referer=https://api.douban.com/@User-Agent=" + ua;
         }
 
-        //检查链接里面是否有自定义header
+        // 检查链接里面是否有自定义header
+        // 修复：原用 String.split()，多字符分隔符每次调用都要编译正则并分配 String[]。
+        // getUrl() 在每个 item 每次 bind 都被调用，改为 indexOf + substring，零正则零数组分配。
         if (url.contains("@Headers=")) {
-            header = url.split("@Headers=")[1].split("@")[0];
-            try {
-                header = URLDecoder.decode(header, "UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
+            header = extractSegment(url, "@Headers=");
+            if (header != null) {
+                try {
+                    header = URLDecoder.decode(header, "UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
             }
         }
-        if (url.contains("@Cookie=")) cookie = url.split("@Cookie=")[1].split("@")[0];
-        if (url.contains("@User-Agent=")) ua = url.split("@User-Agent=")[1].split("@")[0];
-        if (url.contains("@Referer=")) referer = url.split("@Referer=")[1].split("@")[0];
-        url = url.split("@")[0];
+        if (url.contains("@Cookie=")) cookie = extractSegment(url, "@Cookie=");
+        if (url.contains("@User-Agent=")) ua = extractSegment(url, "@User-Agent=");
+        if (url.contains("@Referer=")) referer = extractSegment(url, "@Referer=");
+        int at = url.indexOf('@');
+        if (at >= 0) url = url.substring(0, at);
         if(TextUtils.isEmpty(url)) return null;
         /*   AuthInfo authInfo = new AuthInfo(url);
         url = authInfo.url; */
@@ -303,7 +328,10 @@ public class ImgUtil {
         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
             ImageView view = viewFrom(target);
             if (view != null) {
-                view.setScaleType(ImageView.ScaleType.FIT_XY);
+                // 同样避免无条件 setScaleType 触发的 requestLayout
+                if (view.getScaleType() != ImageView.ScaleType.FIT_XY) {
+                    view.setScaleType(ImageView.ScaleType.FIT_XY);
+                }
                 view.setImageResource(R.drawable.img_loading_placeholder);
             }
             return true;
@@ -312,7 +340,9 @@ public class ImgUtil {
         @Override
         public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
             ImageView view = viewFrom(target);
-            if (view != null) view.setScaleType(ImageView.ScaleType.FIT_XY);
+            if (view != null && view.getScaleType() != ImageView.ScaleType.FIT_XY) {
+                view.setScaleType(ImageView.ScaleType.FIT_XY);
+            }
             return false;
         }
     };

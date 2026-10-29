@@ -63,6 +63,11 @@ public class JarLoader {
     private final ConcurrentHashMap<String, String> siteJarKeys = new ConcurrentHashMap<>();
     // getSpider 的 check-then-act 竞态防护锁
     private final Object spiderLoadLock = new Object();
+    // 每个 jarKey 一把下载锁：不同 jar 的下载可并行，同一 jar 仍串行避免重复下载。
+    // 修复：此前只有一把全局 spiderLoadLock，而 loadJarInternal 内部是同步网络下载，
+    // 导致多源首次加载时所有 jar 下载被完全串行化，叠加 SourceViewModel 的 15s/20s 超时
+    // 会表现为「多源首页集体加载失败」。
+    private final ConcurrentHashMap<String, Object> jarLoadLocks = new ConcurrentHashMap<>();
     private volatile String recentJarKey = "";
     // 首页预热专用：原实现在 spiderLoadLock 内同步发起完整网络请求，多源并发加载时全部串行阻塞
     private static final ExecutorService warmUpExecutor = Executors.newFixedThreadPool(2, new ThreadFactory() {
@@ -85,23 +90,29 @@ public class JarLoader {
     }
 
     public void clear() {
-        // 切换配置是高频操作：只清 Map 会导致每个 jar 源泄漏，必须逐个 destroy
-        // spiders 是 synchronizedMap，迭代期间必须持有其自身锁，否则并发 put 会触发 ConcurrentModificationException
-        synchronized (spiders) {
-            for (Spider spider : spiders.values()) {
-                try {
-                    spider.cancelByTag();
-                    spider.destroy();
-                } catch (Throwable ignored) {
+        // 修复：必须与 createSpider 的发布（spiders.put）互斥。
+        // 此前 clear() 不持有 spiderLoadLock，切配置时正在 createSpider 的线程仍会在
+        // clear 之后把新 spider 塞回 map —— 该实例永远不会被 destroy，DexClassLoader 泄漏。
+        synchronized (spiderLoadLock) {
+            // 切换配置是高频操作：只清 Map 会导致每个 jar 源泄漏，必须逐个 destroy
+            // spiders 是 synchronizedMap，迭代期间必须持有其自身锁，否则并发 put 会触发 ConcurrentModificationException
+            synchronized (spiders) {
+                for (Spider spider : spiders.values()) {
+                    try {
+                        spider.cancelByTag();
+                        spider.destroy();
+                    } catch (Throwable ignored) {
+                    }
                 }
+                spiders.clear();
             }
-            spiders.clear();
+            proxyMethods.clear();
+            synchronized (classLoaders) {
+                classLoaders.clear();
+            }
+            siteJarKeys.clear();
+            jarLoadLocks.clear();
         }
-        proxyMethods.clear();
-        synchronized (classLoaders) {
-            classLoaders.clear();
-        }
-        siteJarKeys.clear();
     }
 
     private boolean loadClassLoader(String jar, String key) {
@@ -207,12 +218,31 @@ public class JarLoader {
             Log.i("JarLoader", "echo-getSpider spider缓存: " + key);
             return cached;
         }
+        // 先在 per-jar 锁内完成可能耗时数秒的 jar 下载/校验；
+        // 同一 jar 的并发请求在此串行（只下载一次），不同 jar 互不阻塞。
+        String jarKey = resolveJarKey(jar);
+        if (jarKey != null && !"main".equals(jarKey)) {
+            Object jarLock = jarLoadLocks.computeIfAbsent(jarKey, k -> new Object());
+            synchronized (jarLock) {
+                if (!classLoaders.containsKey(jarKey)) {
+                    String[] urls = jar.split(";md5;");
+                    loadJarInternal(urls[0], urls.length > 1 ? urls[1].trim() : "", jarKey);
+                }
+            }
+        }
         // check-then-put 竞态防护：多源并发首次加载同一 key 时只创建一个实例
         synchronized (spiderLoadLock) {
             Spider doubleChecked = spiders.get(key);
             if (doubleChecked != null) return doubleChecked;
             return createSpider(key, cls, ext, jar);
         }
+    }
+
+    /** 由 jar 字段推导 jarKey（纯字符串运算，不涉及网络）。 */
+    private String resolveJarKey(String jar) {
+        if (jar == null || jar.isEmpty()) return "main";
+        String[] urls = jar.split(";md5;");
+        return MD5.string2MD5(urls[0]);
     }
 
     private Spider createSpider(String key, String cls, String ext, String jar) {
@@ -222,17 +252,8 @@ public class JarLoader {
             Log.w("JarLoader", "echo-getSpider 非法的 clsKey: " + clsKey);
             return new SpiderNull();
         }
-        String jarUrl = "";
-        String jarMd5 = "";
-        String jarKey;
-        if (jar.isEmpty()) {
-            jarKey = "main";
-        } else {
-            String[] urls = jar.split(";md5;");
-            jarUrl = urls[0];
-            jarKey = MD5.string2MD5(jarUrl);
-            jarMd5 = urls.length > 1 ? urls[1].trim() : "";
-        }
+        // 与 getSpider 的 resolveJarKey 保持同一推导规则（下载已在 per-jar 锁内完成）
+        String jarKey = resolveJarKey(jar);
         recentJarKey = jarKey;
         // 判空必须早于 put：ConcurrentHashMap 不允许 null 值，否则这里先抛 NPE 使下方防守成为死代码
         if (jarKey == null) {
@@ -241,7 +262,18 @@ public class JarLoader {
         }
         // 记录 siteKey -> jarKey 路由，proxyInvoke 用它精确定位该源的 proxy 方法
         siteJarKeys.put(key, jarKey);
-        DexClassLoader classLoader = jarKey.equals("main")? classLoaders.get("main"):loadJarInternal(jarUrl, jarMd5, jarKey);
+        DexClassLoader classLoader;
+        if (jarKey.equals("main")) {
+            classLoader = classLoaders.get("main");
+        } else if (classLoaders.containsKey(jarKey)) {
+            // getSpider 已在 per-jar 锁内完成下载/校验，此处直接取缓存
+            classLoader = classLoaders.get(jarKey);
+        } else {
+            // 预加载阶段已尝试且失败。这里不能调用 loadJarInternal 重试 ——
+            // 其内部是同步网络下载，会把所有并发请求重新串到全局锁上，并造成重复下载。
+            Log.w("JarLoader", "echo-getSpider jar 加载失败，跳过重试: " + jarKey);
+            return new SpiderNull();
+        }
         if (classLoader == null) return new SpiderNull();
         try {
             Log.i("JarLoader", "echo-getSpider 加载spider: " + key);

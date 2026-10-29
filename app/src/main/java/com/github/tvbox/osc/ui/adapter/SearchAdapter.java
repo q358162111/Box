@@ -35,7 +35,11 @@ public class SearchAdapter extends BaseQuickAdapter<Movie.Video, BaseViewHolder>
         String sourceName = source != null ? source.getName() : "";
         // lite
         if (showLite) {
-            helper.setText(R.id.tvName, String.format("%s  %s %s %s", sourceName, item.name, item.type == null ? "" : item.type, item.note == null ? "" : item.note));
+            // 用拼接替代 String.format：后者每次 bind 都要解析格式串并创建 Formatter，
+            // 在滚动路径上是纯浪费
+            helper.setText(R.id.tvName, sourceName + "  " + item.name
+                    + (item.type == null ? "" : " " + item.type)
+                    + (item.note == null ? "" : " " + item.note));
         } else {// with preview\
             helper.setText(R.id.tvName, item.name);
             helper.setText(R.id.tvSite, sourceName);
@@ -44,13 +48,12 @@ public class SearchAdapter extends BaseQuickAdapter<Movie.Video, BaseViewHolder>
                 helper.setText(R.id.tvNote, item.note);
             }
             FrameLayout flRootView = helper.getView(R.id.fl_root_view);
-            // 动态设置item宽度
-            if (searchWidth == -1) {
-                searchWidth = Hawk.get(HawkConfig.SEARCH_RESULT_WIDTH, -1);
-                if (searchWidth != -1) {
-                    setItemWidth(flRootView);
-                }
-            } else {
+            // 动态设置 item 宽度。
+            // 修复：原实现在 searchWidth==-1（用户从未自定义宽度的默认情况）时，
+            // 每个 item 每次 bind 都走一次 Hawk.get —— 而 Hawk.get 是一次磁盘读 + 解密 +
+            // 反序列化，列表滚动时等于每帧几十次主线程 IO。宽度已在构造函数中读取，
+            // 设置变更会重建 adapter，无需在绑定路径上重复读。
+            if (searchWidth != -1) {
                 setItemWidth(flRootView);
             }
             ImageView ivThumb = helper.getView(R.id.ivThumb);

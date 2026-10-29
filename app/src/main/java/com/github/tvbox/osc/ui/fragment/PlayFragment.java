@@ -1332,10 +1332,16 @@ public class PlayFragment extends BaseLazyFragment {
      */
     void safeParseExecute(Runnable task) {
         ExecutorService pool = parseThreadPool;
-        if (pool == null || pool.isShutdown()) return;
+        // 修复：原实现静默 return / 静默吞掉 RejectedExecutionException，任务被完全丢弃且
+        // 无任何线索，表现为 UI 一直停在「解析中」直到 20s 超时。至少留下可排查的日志。
+        if (pool == null || pool.isShutdown()) {
+            LOG.i("safeParseExecute 丢弃任务：解析线程池已关闭");
+            return;
+        }
         try {
             pool.execute(task);
-        } catch (RejectedExecutionException ignored) {
+        } catch (RejectedExecutionException e) {
+            LOG.e("safeParseExecute 任务被拒绝执行", e);
         }
     }
 
@@ -1644,13 +1650,18 @@ public class PlayFragment extends BaseLazyFragment {
     private XWalkWebClient mX5WebClient;
     private WebView mSysWebView;
     private SysWebClient mSysWebClient;
-    private final Map<String, Boolean> loadedUrls = new HashMap<>();
+    // 修复：原为 HashMap。shouldInterceptRequest / shouldInterceptLoadRequest 由 WebView 的
+    // 多线程拦截线程池并发回调，多线程同时 containsKey+put 会造成丢数据、扩容成环死循环。
+    private final Map<String, Boolean> loadedUrls = new java.util.concurrent.ConcurrentHashMap<>();
     // WebView IO 线程 add 与主线程 poll 并发访问，使用线程安全容器
     private java.util.concurrent.ConcurrentLinkedQueue<String> loadFoundVideoUrls = new java.util.concurrent.ConcurrentLinkedQueue<>();
     private java.util.concurrent.ConcurrentHashMap<String, HashMap<String, String>> loadFoundVideoUrlsHeader = new java.util.concurrent.ConcurrentHashMap<>();
     private final AtomicInteger loadFoundCount = new AtomicInteger(0);
 
     void loadWebView(String url) {
+        // 修复：loadedUrls 此前从不清理，一集视频嗅探数百个 URL 会无界增长；
+        // 每次开启新的嗅探前重置，同时也避免上一轮的广告判定结果污染本轮。
+        loadedUrls.clear();
         if (mSysWebView == null && mXwalkWebView == null) {
             boolean useSystemWebView = Hawk.get(HawkConfig.PARSE_WEBVIEW, true);
             if (!useSystemWebView) {

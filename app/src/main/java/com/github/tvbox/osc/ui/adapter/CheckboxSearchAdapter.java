@@ -54,10 +54,10 @@ public class CheckboxSearchAdapter extends ListAdapter<SourceBean, CheckboxSearc
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        int pos = holder.getAdapterPosition();
-        SourceBean sourceBean = data.get(pos);
+        if (position < 0 || position >= data.size()) return;
+        SourceBean sourceBean = data.get(position);
         holder.oneSearchSource.setOnCheckedChangeListener(null);
-        holder.oneSearchSource.setText(sourceBean.getName());        
+        holder.oneSearchSource.setText(sourceBean.getName());
         if (mCheckedSources != null) {
             holder.oneSearchSource.setChecked(mCheckedSources.containsKey(sourceBean.getKey()));
         }
@@ -71,7 +71,13 @@ public class CheckboxSearchAdapter extends ListAdapter<SourceBean, CheckboxSearc
                     mCheckedSources.remove(sourceBean.getKey());
                 }
                 SearchHelper.putCheckedSource(sourceBean.getKey(), isChecked);
-                notifyItemChanged(pos);
+                // 修复：原实现捕获绑定时的 pos，数据变化后该下标失效会刷错行；
+                // 且原先用 getAdapterPosition() 可能为 NO_POSITION(-1)，notifyItemChanged(-1) 是无效刷新。
+                // 改为回调触发时实时查询当前绑定位置，并校验合法性。
+                int pos = holder.getBindingAdapterPosition();
+                if (pos != RecyclerView.NO_POSITION && pos >= 0 && pos < data.size()) {
+                    notifyItemChanged(pos);
+                }
             }
         });
     }

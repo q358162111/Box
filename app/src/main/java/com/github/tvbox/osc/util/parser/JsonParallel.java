@@ -15,6 +15,9 @@ import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import okhttp3.Call;
 import okhttp3.Headers;
@@ -29,9 +32,26 @@ public class JsonParallel {
 
     private static final String PARSE_TAG = "ParseTag";
     // 复用单例，避免每次解析都创建新的连接池
-    private static final OkHttpClient client = new OkHttpClient();
-    // 复用线程池，避免每次解析都创建/销毁
-    private static final ExecutorService executorService = Executors.newFixedThreadPool(5);
+    // 修复：原未显式设超时，仅依赖 OkHttp 默认 10s；解析源常是慢接口，
+    // 而 completionService.take() 是无超时阻塞，5 个线程被占满后后续 parse() 会一直挂住。
+    // 显式收紧到 10s 并让调用方行为可预期。
+    private static final OkHttpClient client = new OkHttpClient.Builder()
+            .connectTimeout(10, TimeUnit.SECONDS)
+            .readTimeout(10, TimeUnit.SECONDS)
+            .writeTimeout(10, TimeUnit.SECONDS)
+            .build();
+    // 复用线程池，避免每次解析都创建/销毁。
+    // 修复：原默认线程工厂创建 non-daemon 线程且该池永不 shutdown，会阻止进程干净退出。
+    private static final ExecutorService executorService = Executors.newFixedThreadPool(5, new ThreadFactory() {
+        private final AtomicInteger seq = new AtomicInteger(1);
+
+        @Override
+        public Thread newThread(Runnable r) {
+            Thread t = new Thread(r, "json-parallel-" + seq.getAndIncrement());
+            t.setDaemon(true);
+            return t;
+        }
+    });
     // 保护共享的 futures 列表
     private static final Object LOCK = new Object();
     // 所有进行中的任务，供 cancelTasks 终止
@@ -98,7 +118,14 @@ public class JsonParallel {
 
                 try {
                     for (int i = 0; i < localFutures.size(); ++i) {
-                        Future<JSONObject> completed = completionService.take();
+                        // 修复：take() 是无超时阻塞。5 个线程被慢解析源占满、或所有任务
+                        // 都卡在网络 IO 上时，调用线程会永久挂在这里（cancelTasks 只在
+                        // WebView 嗅探成功时被调用，json 路径没有兜底）。
+                        // 改为带超时的 poll：超时即放弃本轮，交由外层 20s 解析超时处理。
+                        Future<JSONObject> completed = completionService.poll(15, TimeUnit.SECONDS);
+                        if (completed == null) {
+                            break;
+                        }
                         try {
                             pTaskResult = completed.get();
                             if (pTaskResult != null) {

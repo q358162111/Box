@@ -105,13 +105,25 @@ public class DriveFolderFile {
         this.children = children;
     }
 
-    public String getFormattedLastModified() {
-        if(this.lastModifiedDate != null) {
-            Date date = new Date(this.lastModifiedDate);
-            Format fmt = new SimpleDateFormat("MM/dd/yyyy hh:mm aa");
-            return fmt.format(date);
+    // 修复：原实现每次调用都 new 一个 SimpleDateFormat —— 构造要初始化 Calendar、NumberFormat
+    // 并加载本地化资源，而 DriveAdapter 在 onBind 里逐项调用，文件列表几百项滚动时开销明显。
+    // SimpleDateFormat 非线程安全，用 ThreadLocal 隔离；lastModifiedDate 构造后不再变化，
+    // 结果缓存到实例字段，重复绑定只是一次字段读。
+    private static final ThreadLocal<SimpleDateFormat> DATE_FORMAT = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("MM/dd/yyyy hh:mm aa", Locale.US);
         }
-        return "";
+    };
+
+    private transient String formattedLastModified;
+
+    public String getFormattedLastModified() {
+        if (this.lastModifiedDate == null) return "";
+        if (formattedLastModified == null) {
+            formattedLastModified = DATE_FORMAT.get().format(new Date(this.lastModifiedDate));
+        }
+        return formattedLastModified;
     }
 
     public JsonObject getConfig() {

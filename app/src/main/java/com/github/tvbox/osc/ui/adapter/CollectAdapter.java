@@ -18,6 +18,8 @@ import com.github.tvbox.osc.util.ImgUtil;
 
 import java.util.ArrayList;
 
+import me.jessyan.autosize.utils.AutoSizeUtils;
+
 public class CollectAdapter extends BaseQuickAdapter<VodCollect, BaseViewHolder> {
     public CollectAdapter() {
         super(R.layout.item_grid, new ArrayList<>());
@@ -45,7 +47,11 @@ public class CollectAdapter extends BaseQuickAdapter<VodCollect, BaseViewHolder>
         //由于部分电视机使用glide报错
         if (!TextUtils.isEmpty(item.pic)) {
             // takagen99 : Use Glide instead
-            ImgUtil.load(item.pic, ivThumb, 14);
+            // 修复：原调用未传目标尺寸，Glide 不做下采样，海报原图（常 1000x1500 以上）
+            // 会按原始分辨率解码进内存。补上 override，与其它列表 adapter 保持一致。
+            ImgUtil.load(item.pic, ivThumb, 14,
+                    AutoSizeUtils.mm2px(mContext, ImgUtil.defaultWidth),
+                    AutoSizeUtils.mm2px(mContext, ImgUtil.defaultHeight));
         } else {
             ivThumb.setImageResource(R.drawable.img_loading_placeholder);
         }

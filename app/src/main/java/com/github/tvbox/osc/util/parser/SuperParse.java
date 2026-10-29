@@ -14,9 +14,20 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SuperParse {
-    public static volatile HashMap<String, ArrayList<String>> flagWebJx = new HashMap<>();
+    /**
+     * 修复：原为 volatile HashMap —— volatile 只保证引用可见性，不保证内部结构安全。
+     * 写方是 PlayFragment 的解析线程，读方是 NanoHTTPD 的 HTTP 服务线程，并发 put 触发
+     * 扩容 rehash 时会链表成环，表现为 CPU 100%/ANR。改用 ConcurrentHashMap。
+     */
+    public static final ConcurrentHashMap<String, ArrayList<String>> flagWebJx = new ConcurrentHashMap<>();
+
+    /** 切换解析配置时调用，避免每个 flag 一条记录导致内存无界增长。 */
+    public static void clearFlagWebJx() {
+        flagWebJx.clear();
+    }
     /**
      * 修复：原 static configs/jsonJx/webJx 在多线程并发 parse() 时相互覆盖，导致解析错乱/丢解析器。
      * 双检锁 + volatile 保证可见性与安全发布。
@@ -113,11 +124,13 @@ public class SuperParse {
             // 把局部结果一次性发布为静态字段（替代直接修改静态字段）
             jsonJx = localJsonJx;
             webJx = localWebJx;
-            if (!webJx.isEmpty()) {
-                flagWebJx.put(flag, webJx);
+            // 修复：原实现在发布后立刻回读静态字段 webJx，并发 parse 时会读到别的线程写入的
+            // 列表（拿错解析器）。这里统一使用本次构建的局部变量 localWebJx，语义与发布一致。
+            if (!localWebJx.isEmpty()) {
+                flagWebJx.put(flag, localWebJx);
             }
 
-            if (!webJx.isEmpty()) {
+            if (!localWebJx.isEmpty()) {
                 JSONObject webResult = new JSONObject();
                 webResult.put("url", "proxy://go=SuperParse&flag=" + flag + "&url=" + Base64.encodeToString(url.getBytes(), Base64.DEFAULT | Base64.URL_SAFE | Base64.NO_WRAP));
                 webResult.put("parse", 1);
@@ -205,8 +218,9 @@ public class SuperParse {
                     "</html>";
 
             StringBuilder jxs = new StringBuilder();
-            if (flagWebJx.containsKey(flag)) {
-                ArrayList<String> jxUrls = flagWebJx.get(flag);
+            // 单次 get 取快照，避免 containsKey+get 之间被并发移除导致 NPE
+            ArrayList<String> jxUrls = flagWebJx.get(flag);
+            if (jxUrls != null) {
                 for (int i = 0; i < jxUrls.size(); i++) {
                     jxs.append("\"");
                     // 防御：jx URL 中若含 "</script>" 或 ""</iframe>" 等子串可能跳出 JS 字符串字面量导致 XSS，
